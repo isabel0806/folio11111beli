@@ -16,9 +16,11 @@ import {
   generateWhatsAppMessage, getCostCategoryLabel
 } from '@/lib/utils'
 import type { MilestoneStatus, PaymentMilestone } from '@/lib/types'
+import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/cn'
 
 export default function FinanzasPage() {
+  const { toast } = useToast()
   const [tab, setTab] = useState('cobrar')
   const [filter, setFilter] = useState('todos')
   const [period, setPeriod] = useState('mes')
@@ -53,6 +55,7 @@ export default function FinanzasPage() {
   const handleMarkPaid = () => {
     if (!confirmPaid) return
     setMilestones(prev => prev.map(m => m.id === confirmPaid.id ? { ...m, status: 'cobrado' as MilestoneStatus, paid_at: new Date().toISOString() } : m))
+    toast(`✓ "${confirmPaid.name}" marcado como cobrado`)
     setConfirmPaid(null)
   }
 
@@ -241,7 +244,7 @@ export default function FinanzasPage() {
         footer={
           <>
             <Button variant="secondary" onClick={() => setWhatsappMsg(null)}>Cerrar</Button>
-            <Button variant="secondary" onClick={() => navigator.clipboard.writeText(whatsappMsg || '')}>Copiar</Button>
+            <Button variant="secondary" onClick={() => { navigator.clipboard.writeText(whatsappMsg || ''); toast('Mensaje copiado') }}>Copiar</Button>
             <Button variant="primary" onClick={() => { window.open(`https://wa.me/?text=${encodeURIComponent(whatsappMsg || '')}`, '_blank'); setWhatsappMsg(null) }}>
               <IconBrandWhatsapp size={14} /> Abrir WhatsApp
             </Button>

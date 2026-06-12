@@ -12,6 +12,9 @@ import {
 } from '@tabler/icons-react'
 import { formatDate } from '@/lib/utils'
 import type { ProjectFile } from '@/lib/types'
+import { PresupuestoModal } from '@/components/proyectos/PresupuestoModal'
+import { mockProjects } from '@/lib/mock-data'
+import { useToast } from '@/components/ui/Toast'
 
 const integrations = [
   { id: 'drive', label: 'Google Drive', icon: IconBrandGoogleDrive, color: '#4285F4' },
@@ -22,8 +25,11 @@ const integrations = [
 
 export default function ArchivosPage() {
   const { id } = useParams() as { id: string }
+  const { toast } = useToast()
+  const project = mockProjects.find(p => p.id === id)
   const [files, setFiles] = useState<ProjectFile[]>(mockFiles[id] || [])
   const [showUpload, setShowUpload] = useState(false)
+  const [showPresupuesto, setShowPresupuesto] = useState(false)
   const [uploadType, setUploadType] = useState<'presupuesto' | 'entrega' | 'general'>('general')
   const [form, setForm] = useState({ name: '', linked_milestone_id: '' })
   const milestones = mockMilestones[id] || []
@@ -51,7 +57,7 @@ export default function ArchivosPage() {
       <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-[#130D10]">Presupuestos</h2>
-          <Button size="sm" variant="secondary" onClick={() => { setUploadType('presupuesto'); setShowUpload(true) }}>
+          <Button size="sm" variant="primary" onClick={() => setShowPresupuesto(true)}>
             <IconPlus size={13} /> Nuevo presupuesto
           </Button>
         </div>
@@ -186,6 +192,22 @@ export default function ArchivosPage() {
           </div>
         </div>
       </Modal>
+
+      <PresupuestoModal
+        open={showPresupuesto}
+        onClose={() => setShowPresupuesto(false)}
+        projectName={project?.name || ''}
+        clientName={project?.client_name || ''}
+        currency={project?.currency || 'ARS'}
+        onSave={({ name }) => {
+          const newFile: ProjectFile = {
+            id: `f${Date.now()}`, project_id: id, name: `${name}.pdf`,
+            type: 'presupuesto', uploaded_at: new Date().toISOString(),
+          }
+          setFiles(prev => [...prev, newFile])
+          toast(`Presupuesto "${name}" guardado`)
+        }}
+      />
     </div>
   )
 }
