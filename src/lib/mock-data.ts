@@ -19,10 +19,10 @@ export const mockProjects: Project[] = [
     status: 'en_curso',
     currency: 'USD',
     pricing_mode: 'proyecto',
-    total_amount: 15000,
+    total_amount: 18000,
     cover_color: '#E8D5B7',
-    start_date: '2024-01-15',
-    created_at: '2024-01-15',
+    start_date: mo(-6),
+    created_at: mo(-6),
     progress: 65,
   },
   {
@@ -36,9 +36,9 @@ export const mockProjects: Project[] = [
     pricing_mode: 'proyecto',
     total_amount: 800000,
     cover_color: '#B7D5E8',
-    start_date: '2024-02-01',
-    created_at: '2024-02-01',
-    progress: 40,
+    start_date: mo(-5),
+    created_at: mo(-5),
+    progress: 85,
   },
   {
     id: 'p3',
@@ -51,14 +51,14 @@ export const mockProjects: Project[] = [
     pricing_mode: 'proyecto',
     total_amount: 5000,
     cover_color: '#D5E8B7',
-    start_date: '2024-03-10',
-    created_at: '2024-03-10',
+    start_date: mo(-7),
+    created_at: mo(-7),
     progress: 20,
   },
   {
     id: 'p4',
     studio_id: 's1',
-    name: 'Consultoria Estratégica Pyme',
+    name: 'Consultoría Estratégica Pyme',
     client_name: 'Consultora Norte',
     type: 'consultoria',
     status: 'completado',
@@ -66,8 +66,8 @@ export const mockProjects: Project[] = [
     pricing_mode: 'hora',
     hourly_rate: 15000,
     cover_color: '#E8B7D5',
-    start_date: '2023-10-01',
-    created_at: '2023-10-01',
+    start_date: mo(-8),
+    created_at: mo(-8),
     progress: 100,
   },
 ]
@@ -88,47 +88,65 @@ export const mockPhases: Record<string, ProjectPhase[]> = {
 
 export const mockTasks: Record<string, Task[]> = {
   p1: [
-    { id: 't1', project_id: 'p1', phase_id: 'ph1', title: 'Relevamiento del terreno', description: 'Medir y documentar el terreno en detalle', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-01-25', is_client_visible: true, created_at: '2024-01-15' },
-    { id: 't2', project_id: 'p1', phase_id: 'ph1', title: 'Planos preliminares', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-02-15', is_client_visible: true, created_at: '2024-01-20' },
-    { id: 't3', project_id: 'p1', phase_id: 'ph2', title: 'Memoria descriptiva', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-04-10', is_client_visible: false, created_at: '2024-03-01' },
-    { id: 't4', project_id: 'p1', phase_id: 'ph2', title: 'Planos de ejecución', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-04-25', is_client_visible: true, created_at: '2024-03-01' },
-    { id: 't5', project_id: 'p1', phase_id: 'ph3', title: 'Cómputo y presupuesto', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-06-01', is_client_visible: false, created_at: '2024-03-01' },
+    { id: 't1', project_id: 'p1', phase_id: 'ph1', title: 'Relevamiento del terreno', description: 'Medir y documentar el terreno en detalle', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-6, 20), is_client_visible: true, created_at: mo(-6) },
+    { id: 't2', project_id: 'p1', phase_id: 'ph1', title: 'Planos preliminares', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-4, 15), is_client_visible: true, created_at: mo(-6) },
+    { id: 't3', project_id: 'p1', phase_id: 'ph2', title: 'Memoria descriptiva', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 25), is_client_visible: false, created_at: mo(-2) },
+    { id: 't4', project_id: 'p1', phase_id: 'ph2', title: 'Planos de ejecución', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 10), is_client_visible: true, created_at: mo(-2) },
+    { id: 't5', project_id: 'p1', phase_id: 'ph3', title: 'Cómputo y presupuesto', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(2, 5), is_client_visible: false, created_at: mo(-1) },
   ],
   p2: [
-    { id: 't6', project_id: 'p2', phase_id: 'ph5', title: 'Brief del cliente', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-02-05', is_client_visible: false, created_at: '2024-02-01' },
-    { id: 't7', project_id: 'p2', phase_id: 'ph5', title: 'Análisis de competencia', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-02-14', is_client_visible: false, created_at: '2024-02-01' },
-    { id: 't8', project_id: 'p2', phase_id: 'ph6', title: 'Propuestas de logo', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-02-28', is_client_visible: true, created_at: '2024-02-16' },
-    { id: 't9', project_id: 'p2', phase_id: 'ph6', title: 'Manual de marca', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: '2024-03-10', is_client_visible: true, created_at: '2024-02-16' },
+    { id: 't6', project_id: 'p2', phase_id: 'ph5', title: 'Brief del cliente', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-5, 10), is_client_visible: false, created_at: mo(-5) },
+    { id: 't7', project_id: 'p2', phase_id: 'ph5', title: 'Análisis de competencia', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-4, 20), is_client_visible: false, created_at: mo(-5) },
+    { id: 't8', project_id: 'p2', phase_id: 'ph6', title: 'Propuestas de logo', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-3, 28), is_client_visible: true, created_at: mo(-4) },
+    { id: 't9', project_id: 'p2', phase_id: 'ph6', title: 'Manual de marca', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 20), is_client_visible: true, created_at: mo(-3) },
+    { id: 't10', project_id: 'p2', phase_id: 'ph7', title: 'Presentación final al cliente', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 5), is_client_visible: true, created_at: mo(-1) },
   ],
+}
+
+// Dates relative to today so the monthly chart always has data
+function mo(offset: number, day = 15) {
+  const d = new Date()
+  d.setMonth(d.getMonth() + offset, day)
+  return d.toISOString().split('T')[0]
 }
 
 export const mockMilestones: Record<string, PaymentMilestone[]> = {
   p1: [
-    { id: 'm1', project_id: 'p1', name: 'Anticipo', due_date: '2024-01-20', amount: 3000, status: 'cobrado', paid_at: '2024-01-20', arca_flagged: false },
-    { id: 'm2', project_id: 'p1', name: 'Entrega Anteproyecto', due_date: '2024-02-28', amount: 3000, status: 'cobrado', paid_at: '2024-03-02', arca_flagged: false },
-    { id: 'm3', project_id: 'p1', name: 'Aprobación Básico', due_date: '2024-04-30', amount: 4500, status: 'pendiente', arca_flagged: false },
-    { id: 'm4', project_id: 'p1', name: 'Entrega Ejecutivo', due_date: '2024-07-31', amount: 4500, status: 'futuro', arca_flagged: false },
+    { id: 'm1', project_id: 'p1', name: 'Anticipo', due_date: mo(-6, 10), amount: 3000, status: 'cobrado', paid_at: mo(-6, 10), arca_flagged: false },
+    { id: 'm2', project_id: 'p1', name: 'Entrega Anteproyecto', due_date: mo(-4, 28), amount: 3000, status: 'cobrado', paid_at: mo(-4, 28), arca_flagged: false },
+    { id: 'm3', project_id: 'p1', name: 'Aprobación Básico', due_date: mo(-2, 20), amount: 4500, status: 'cobrado', paid_at: mo(-2, 22), arca_flagged: false },
+    { id: 'm4', project_id: 'p1', name: 'Entrega Ejecutivo', due_date: mo(0, 20), amount: 4500, status: 'pendiente', arca_flagged: false },
+    { id: 'm10', project_id: 'p1', name: 'Saldo final', due_date: mo(2, 15), amount: 3000, status: 'futuro', arca_flagged: false },
   ],
   p2: [
-    { id: 'm5', project_id: 'p2', name: 'Anticipo 50%', due_date: '2024-02-05', amount: 400000, status: 'cobrado', paid_at: '2024-02-06', arca_flagged: false },
-    { id: 'm6', project_id: 'p2', name: 'Saldo', due_date: '2024-03-31', amount: 400000, status: 'pendiente', arca_flagged: false },
+    { id: 'm5', project_id: 'p2', name: 'Anticipo 50%', due_date: mo(-5, 5), amount: 400000, status: 'cobrado', paid_at: mo(-5, 6), arca_flagged: false },
+    { id: 'm11', project_id: 'p2', name: 'Avance 25%', due_date: mo(-3, 15), amount: 200000, status: 'cobrado', paid_at: mo(-3, 16), arca_flagged: false },
+    { id: 'm6', project_id: 'p2', name: 'Saldo 25%', due_date: mo(-1, 30), amount: 200000, status: 'vencido', arca_flagged: false },
   ],
   p3: [
-    { id: 'm7', project_id: 'p3', name: 'Reserva', due_date: '2024-03-15', amount: 1000, status: 'cobrado', paid_at: '2024-03-15', arca_flagged: false },
-    { id: 'm8', project_id: 'p3', name: 'Segundo pago', due_date: '2024-05-01', amount: 2000, status: 'vencido', arca_flagged: false },
-    { id: 'm9', project_id: 'p3', name: 'Saldo final', due_date: '2024-06-01', amount: 2000, status: 'futuro', arca_flagged: false },
+    { id: 'm7', project_id: 'p3', name: 'Reserva', due_date: mo(-7, 15), amount: 1000, status: 'cobrado', paid_at: mo(-7, 15), arca_flagged: false },
+    { id: 'm8', project_id: 'p3', name: 'Segundo pago', due_date: mo(-3, 1), amount: 2000, status: 'cobrado', paid_at: mo(-3, 3), arca_flagged: false },
+    { id: 'm9', project_id: 'p3', name: 'Saldo final', due_date: mo(1, 10), amount: 2000, status: 'pendiente', arca_flagged: false },
+  ],
+  p4: [
+    { id: 'm12', project_id: 'p4', name: 'Pago consultoría', due_date: mo(-6, 20), amount: 150000, status: 'cobrado', paid_at: mo(-6, 20), arca_flagged: false },
+    { id: 'm13', project_id: 'p4', name: 'Cierre proyecto', due_date: mo(-5, 15), amount: 150000, status: 'cobrado', paid_at: mo(-5, 17), arca_flagged: false },
   ],
 }
 
 export const mockCosts: Record<string, CostItem[]> = {
   p1: [
-    { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 15000, created_at: '2024-02-10' },
-    { id: 'c2', project_id: 'p1', description: 'Materiales maqueta', provider_name: 'Arteplas', category: 'gasto', amount: 8000, created_at: '2024-02-15' },
-    { id: 'c3', project_id: 'p1', description: 'Alquiler andamios', provider_name: 'AlquiAndamios SRL', category: 'maquinaria', amount: 45000, created_at: '2024-03-10' },
+    { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 15000, created_at: mo(-4, 10) },
+    { id: 'c2', project_id: 'p1', description: 'Materiales maqueta', provider_name: 'Arteplas', category: 'gasto', amount: 8000, created_at: mo(-4, 15) },
+    { id: 'c3', project_id: 'p1', description: 'Alquiler andamios', provider_name: 'AlquiAndamios SRL', category: 'maquinaria', amount: 45000, created_at: mo(-2, 10) },
+    { id: 'c6', project_id: 'p1', description: 'Visado municipal', provider_name: 'Gestoría Central', category: 'gasto', amount: 22000, created_at: mo(-1, 5) },
   ],
   p2: [
-    { id: 'c4', project_id: 'p2', description: 'Licencia Figma anual', category: 'gasto', amount: 25000, created_at: '2024-02-01' },
-    { id: 'c5', project_id: 'p2', description: 'Tipografías comerciales', category: 'gasto', amount: 12000, created_at: '2024-02-20' },
+    { id: 'c4', project_id: 'p2', description: 'Licencia Figma anual', category: 'gasto', amount: 25000, created_at: mo(-5, 1) },
+    { id: 'c5', project_id: 'p2', description: 'Tipografías comerciales', category: 'gasto', amount: 12000, created_at: mo(-3, 20) },
+  ],
+  p3: [
+    { id: 'c7', project_id: 'p3', description: 'Equipos audiovisuales', provider_name: 'AV Rental BA', category: 'maquinaria', amount: 80000, created_at: mo(-3, 8) },
   ],
 }
 
