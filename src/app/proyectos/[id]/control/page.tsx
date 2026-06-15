@@ -687,7 +687,7 @@ export default function ControlPage() {
         open={showPlantillas}
         onClose={() => setShowPlantillas(false)}
         projectName={project?.name || ''}
-        onApply={(name) => toast(`Plantilla "${name}" aplicada al cronograma`)}
+        onApply={(name) => toast(`Plantilla “${name}” aplicada al cronograma`)}
       />
     </div>
   )

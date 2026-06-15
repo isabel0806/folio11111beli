@@ -37,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="h-full flex">
         <ToastProvider>
           <Sidebar />
-          <main className="flex-1 ml-[248px] min-h-screen bg-[#FFFEF0] overflow-y-auto">
+          <main className="flex-1 ml-[248px] min-h-screen bg-[#FFFEF0] overflow-y-auto [font-variant-numeric:tabular-nums]">
             {children}
           </main>
         </ToastProvider>
