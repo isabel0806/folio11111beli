@@ -104,15 +104,16 @@ export const mockProjects: Project[] = [
 
 export const mockPhases: Record<string, ProjectPhase[]> = {
   p1: [
-    { id: 'ph1', project_id: 'p1', name: 'Anteproyecto', color: '#6366F1', order: 1, start_date: '2024-01-15', end_date: '2024-02-28' },
-    { id: 'ph2', project_id: 'p1', name: 'Básico', color: '#F59E0B', order: 2, start_date: '2024-03-01', end_date: '2024-04-30' },
-    { id: 'ph3', project_id: 'p1', name: 'Ejecutivo', color: '#10B981', order: 3, start_date: '2024-05-01', end_date: '2024-07-31' },
-    { id: 'ph4', project_id: 'p1', name: 'Obra', color: '#EF4444', order: 4, start_date: '2024-08-01', end_date: '2024-12-31' },
+    { id: 'ph1', project_id: 'p1', name: 'Anteproyecto', color: '#FF5738', order: 1, start_date: '2024-01-15', end_date: '2024-06-30' },
+    { id: 'ph2', project_id: 'p1', name: 'Proyecto básico', color: '#7FB0E8', order: 2, start_date: '2024-07-01', end_date: '2024-12-31' },
+    { id: 'ph3', project_id: 'p1', name: 'Proyecto ejecutivo', color: '#D5D25D', order: 3, start_date: '2025-01-01', end_date: '2025-09-30' },
+    { id: 'ph4', project_id: 'p1', name: 'Dirección de obra', color: '#00846F', order: 4, start_date: '2025-10-01', end_date: '2026-08-31' },
+    { id: 'ph5', project_id: 'p1', name: 'Entrega', color: '#F5D242', order: 5, start_date: '2026-09-01', end_date: '2026-12-15' },
   ],
   p2: [
-    { id: 'ph5', project_id: 'p2', name: 'Research', color: '#6366F1', order: 1, start_date: '2024-02-01', end_date: '2024-02-15' },
-    { id: 'ph6', project_id: 'p2', name: 'Diseño', color: '#F59E0B', order: 2, start_date: '2024-02-16', end_date: '2024-03-15' },
-    { id: 'ph7', project_id: 'p2', name: 'Entrega', color: '#10B981', order: 3, start_date: '2024-03-16', end_date: '2024-03-31' },
+    { id: 'ph6', project_id: 'p2', name: 'Research', color: '#FF5738', order: 1, start_date: '2024-02-01', end_date: '2024-02-15' },
+    { id: 'ph7', project_id: 'p2', name: 'Diseño', color: '#7FB0E8', order: 2, start_date: '2024-02-16', end_date: '2024-03-15' },
+    { id: 'ph8', project_id: 'p2', name: 'Entrega', color: '#00846F', order: 3, start_date: '2024-03-16', end_date: '2024-03-31' },
   ],
 }
 
@@ -125,14 +126,17 @@ export const mockTasks: Record<string, Task[]> = {
     { id: 't5', project_id: 'p1', phase_id: 'ph3', title: 'Cómputo y presupuesto', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(2, 5), is_client_visible: false, created_at: mo(-1) },
     { id: 't20', project_id: 'p1', phase_id: 'ph2', title: 'Memoria descriptiva', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
     { id: 't21', project_id: 'p1', phase_id: 'ph3', title: 'Revisar planilla de obra', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
+    { id: 't24', project_id: 'p1', phase_id: 'ph4', title: 'Replanteo y movimiento de suelos', status: 'completado', assigned_to: 'u1', assigned_name: 'Estudio Ramírez', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
+    { id: 't25', project_id: 'p1', phase_id: 'ph4', title: 'Terminaciones', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Constructora Sur', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
+    { id: 't26', project_id: 'p1', phase_id: 'ph5', title: 'Entrega final', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
   ],
   p2: [
-    { id: 't6', project_id: 'p2', phase_id: 'ph5', title: 'Brief del cliente', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-5, 10), is_client_visible: false, created_at: mo(-5) },
-    { id: 't7', project_id: 'p2', phase_id: 'ph5', title: 'Análisis de competencia', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-4, 20), is_client_visible: false, created_at: mo(-5) },
-    { id: 't8', project_id: 'p2', phase_id: 'ph6', title: 'Propuestas de logo', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-3, 28), is_client_visible: true, created_at: mo(-4) },
-    { id: 't9', project_id: 'p2', phase_id: 'ph6', title: 'Manual de marca', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 20), is_client_visible: true, created_at: mo(-3) },
-    { id: 't10', project_id: 'p2', phase_id: 'ph7', title: 'Presentación final al cliente', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 5), is_client_visible: true, created_at: mo(-1) },
-    { id: 't22', project_id: 'p2', phase_id: 'ph6', title: 'Enviar manual de marca v2', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
+    { id: 't6', project_id: 'p2', phase_id: 'ph6', title: 'Brief del cliente', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-5, 10), is_client_visible: false, created_at: mo(-5) },
+    { id: 't7', project_id: 'p2', phase_id: 'ph6', title: 'Análisis de competencia', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-4, 20), is_client_visible: false, created_at: mo(-5) },
+    { id: 't8', project_id: 'p2', phase_id: 'ph7', title: 'Propuestas de logo', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-3, 28), is_client_visible: true, created_at: mo(-4) },
+    { id: 't9', project_id: 'p2', phase_id: 'ph7', title: 'Manual de marca', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 20), is_client_visible: true, created_at: mo(-3) },
+    { id: 't10', project_id: 'p2', phase_id: 'ph8', title: 'Presentación final al cliente', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 5), is_client_visible: true, created_at: mo(-1) },
+    { id: 't22', project_id: 'p2', phase_id: 'ph7', title: 'Enviar manual de marca v2', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
   ],
   p5: [
     { id: 't23', project_id: 'p5', title: 'Coordinar visita de obra', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
