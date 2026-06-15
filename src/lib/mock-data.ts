@@ -304,17 +304,17 @@ export const mockProviders: Record<string, ProviderRow[]> = {
 
 export const mockCosts: Record<string, CostItem[]> = {
   p1: [
-    { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 15000, created_at: mo(-4, 10) },
-    { id: 'c2', project_id: 'p1', description: 'Materiales maqueta', provider_name: 'Arteplas', category: 'gasto', amount: 8000, created_at: mo(-4, 15) },
-    { id: 'c3', project_id: 'p1', description: 'Alquiler andamios', provider_name: 'AlquiAndamios SRL', category: 'maquinaria', amount: 45000, created_at: mo(-2, 10) },
-    { id: 'c6', project_id: 'p1', description: 'Visado municipal', provider_name: 'Gestoría Central', category: 'gasto', amount: 22000, created_at: mo(-1, 5) },
+    { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 350, created_at: mo(-4, 10) },
+    { id: 'c2', project_id: 'p1', description: 'Materiales maqueta', provider_name: 'Arteplas', category: 'gasto', amount: 280, created_at: mo(-4, 15) },
+    { id: 'c3', project_id: 'p1', description: 'Alquiler andamios', provider_name: 'AlquiAndamios SRL', category: 'maquinaria', amount: 1800, created_at: mo(-2, 10) },
+    { id: 'c6', project_id: 'p1', description: 'Visado municipal', provider_name: 'Gestoría Central', category: 'gasto', amount: 620, created_at: mo(-1, 5) },
   ],
   p2: [
     { id: 'c4', project_id: 'p2', description: 'Licencia Figma anual', category: 'gasto', amount: 25000, created_at: mo(-5, 1) },
     { id: 'c5', project_id: 'p2', description: 'Tipografías comerciales', category: 'gasto', amount: 12000, created_at: mo(-3, 20) },
   ],
   p3: [
-    { id: 'c7', project_id: 'p3', description: 'Equipos audiovisuales', provider_name: 'AV Rental BA', category: 'maquinaria', amount: 80000, created_at: mo(-3, 8) },
+    { id: 'c7', project_id: 'p3', description: 'Equipos audiovisuales', provider_name: 'AV Rental BA', category: 'maquinaria', amount: 1200, created_at: mo(-3, 8) },
   ],
 }
 

@@ -261,32 +261,38 @@ export default function FinanzasPage() {
         </div>
       )}
 
-      {/* Per-project breakdown */}
+      {/* Rentabilidad por proyecto (ROI) */}
       <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6 mb-7">
-        <h3 className="font-serif text-[19px] text-[#130D10] mb-4">Por proyecto</h3>
-        <div className="space-y-3">
+        <div className="flex items-end justify-between mb-4">
+          <h3 className="font-serif text-[19px] text-[#130D10]">Rentabilidad por proyecto</h3>
+          <span className="text-xs text-[#A8A29A]">Ingresos cobrados − costos · acumulado</span>
+        </div>
+        <div className="flex items-center px-3 pb-2.5 border-b border-[#ECE9DA]">
+          <span className="grow basis-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Proyecto</span>
+          <span className="w-32 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Ingresos</span>
+          <span className="w-32 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#B14E7C]">Costos</span>
+          <span className="w-32 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Margen</span>
+          <span className="w-16 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">%</span>
+        </div>
+        <div className="divide-y divide-[#F0EDE0]">
           {mockProjects.map(p => {
             const pMs = milestones.filter(m => m.project.id === p.id)
-            const pCobrado = pMs.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
-            const pPendiente = pMs.filter(m => m.status === 'pendiente' || m.status === 'vencido').reduce((a, m) => a + m.amount, 0)
-            const pTotal = pCobrado + pPendiente
-            if (pTotal === 0) return null
+            const pIngresos = pMs.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
+            const pCostos = (mockCosts[p.id] || []).reduce((a, c) => a + c.amount, 0)
+            if (pIngresos === 0 && pCostos === 0) return null
+            const margen = pIngresos - pCostos
+            const pct = pIngresos > 0 ? Math.round((margen / pIngresos) * 100) : null
             return (
-              <div key={p.id} className="flex items-center gap-4">
-                <Link href={`/proyectos/${p.id}/finanzas`} className="flex items-center gap-2 w-40 shrink-0 hover:text-[#FF5738] transition-colors">
-                  <div className="w-5 h-5 rounded-md shrink-0" style={{ backgroundColor: p.cover_color }} />
+              <Link key={p.id} href={`/proyectos/${p.id}/finanzas`} className="flex items-center px-3 py-3 hover:bg-white/60 transition-colors">
+                <span className="grow basis-0 flex items-center gap-2.5 min-w-0">
+                  <span className="w-4 h-4 rounded-md shrink-0" style={{ backgroundColor: p.cover_color }} />
                   <span className="text-sm text-[#130D10] truncate">{p.name}</span>
-                </Link>
-                <div className="flex-1">
-                  <div className="h-2 bg-[#ECE9DA] rounded-full overflow-hidden flex">
-                    <div className="h-full bg-[#00846F] transition-all" style={{ width: `${pTotal > 0 ? (pCobrado / pTotal) * 100 : 0}%` }} />
-                  </div>
-                </div>
-                <div className="text-right w-36 shrink-0">
-                  <span className="text-xs text-[#00846F] font-medium">{formatCurrency(pCobrado, p.currency)}</span>
-                  {pPendiente > 0 && <span className="text-xs text-[#A8A29A]"> / {formatCurrency(pPendiente, p.currency)}</span>}
-                </div>
-              </div>
+                </span>
+                <span className="w-32 shrink-0 text-right text-[13px] font-medium text-[#00846F]">{formatCurrency(pIngresos, p.currency)}</span>
+                <span className="w-32 shrink-0 text-right text-[13px] text-[#B14E7C]">{pCostos > 0 ? `– ${formatCurrency(pCostos, p.currency)}` : '—'}</span>
+                <span className={cn('w-32 shrink-0 text-right text-[14px] font-semibold', margen >= 0 ? 'text-[#130D10]' : 'text-[#C23A22]')}>{formatCurrency(margen, p.currency)}</span>
+                <span className={cn('w-16 shrink-0 text-right text-[12px] font-semibold', pct === null ? 'text-[#A8A29A]' : pct >= 0 ? 'text-[#00846F]' : 'text-[#C23A22]')}>{pct === null ? '—' : `${pct}%`}</span>
+              </Link>
             )
           })}
         </div>
