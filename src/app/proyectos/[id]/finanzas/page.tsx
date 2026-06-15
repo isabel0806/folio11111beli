@@ -16,6 +16,10 @@ import {
 } from '@/lib/utils'
 import type { PaymentMilestone, CostItem, Contact, MilestoneStatus, CostCategory } from '@/lib/types'
 import { useToast } from '@/components/ui/Toast'
+import { FacturarArcaModal, type Factura } from '@/components/finanzas/FacturarArcaModal'
+import { cn } from '@/lib/cn'
+
+interface TimeEntry { id: string; date: string; person: string; task: string; hours: number }
 
 export default function FinanzasProyectoPage() {
   const { toast } = useToast()
@@ -32,6 +36,17 @@ export default function FinanzasProyectoPage() {
   const [showProvider, setShowProvider] = useState(false)
   const [whatsappMsg, setWhatsappMsg] = useState<string | null>(null)
   const [confirmPaid, setConfirmPaid] = useState<PaymentMilestone | null>(null)
+  const [facturas, setFacturas] = useState<Record<string, Factura>>({})
+  const [facturando, setFacturando] = useState<PaymentMilestone | null>(null)
+
+  const [hourlyRate, setHourlyRate] = useState(project?.currency === 'USD' ? 45 : 18000)
+  const [hours, setHours] = useState<TimeEntry[]>([
+    { id: 'h1', date: '2026-06-02', person: 'Isabel García', task: 'Anteproyecto — desarrollo', hours: 12 },
+    { id: 'h2', date: '2026-06-06', person: 'Isabel García', task: 'Reunión y ajustes con el cliente', hours: 3 },
+    { id: 'h3', date: '2026-06-11', person: 'Estudio · dibujante', task: 'Planos de ejecución', hours: 8 },
+  ])
+  const [showHours, setShowHours] = useState(false)
+  const [hForm, setHForm] = useState({ date: '', person: 'Isabel García', task: '', hours: '' })
 
   const [mForm, setMForm] = useState({ name: '', due_date: '', amount: '' })
   const [cForm, setCForm] = useState({ description: '', provider_name: '', category: 'gasto', amount: '' })
@@ -41,10 +56,24 @@ export default function FinanzasProyectoPage() {
   const cobrado = milestones.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
   const pendiente = milestones.filter(m => m.status === 'pendiente' || m.status === 'vencido').reduce((a, m) => a + m.amount, 0)
 
+  const totalHours = hours.reduce((a, h) => a + h.hours, 0)
+  const totalHonorarios = totalHours * hourlyRate
+
+  const handleAddHours = () => {
+    if (!hForm.task || !hForm.hours) return
+    const h: TimeEntry = {
+      id: `h${Date.now()}`, date: hForm.date || new Date().toISOString().slice(0, 10),
+      person: hForm.person, task: hForm.task, hours: Number(hForm.hours),
+    }
+    setHours(prev => [...prev, h])
+    setShowHours(false)
+    setHForm({ date: '', person: 'Isabel García', task: '', hours: '' })
+  }
+
   const handleMarkPaid = () => {
     if (!confirmPaid) return
     setMilestones(prev => prev.map(m => m.id === confirmPaid.id ? { ...m, status: 'cobrado', paid_at: new Date().toISOString() } : m))
-    toast(`✓ "${confirmPaid.name}" marcado como cobrado`)
+    toast(`✓ “${confirmPaid.name}” marcado como cobrado`)
     setConfirmPaid(null)
   }
 
@@ -87,9 +116,14 @@ export default function FinanzasProyectoPage() {
   }
 
   const currency = project?.currency || 'ARS'
+  // Proveedores ya cargados (del proyecto + directorio) para sugerir al cargar un costo.
+  const providerNames = Array.from(new Set([
+    ...contacts.filter(c => c.category !== 'cliente').map(c => c.name),
+    ...mockContacts.filter(c => c.category === 'proveedor' || c.category === 'industrial').map(c => c.name),
+  ])).sort()
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
         <MetricCard label="Total proyecto" value={formatCurrency(totalProject, currency)} color="blue" icon={<IconCurrencyDollar size={16} stroke={1.5} />} />
@@ -98,29 +132,29 @@ export default function FinanzasProyectoPage() {
       </div>
 
       {/* Milestones */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Hitos de cobro</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Hitos de cobro</h2>
           <Button size="sm" variant="secondary" onClick={() => setShowMilestone(true)}>
             <IconPlus size={13} /> Agregar hito
           </Button>
         </div>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#E5E5E3]">
+            <tr className="border-b border-[#ECE8D6]">
               {['Hito', 'Vencimiento', 'Monto', 'Estado', 'Acciones'].map(h => (
-                <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#9B9B9B] pb-2 pr-4">{h}</th>
+                <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] pb-2.5 pr-4">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#F0F0EE]">
+          <tbody className="divide-y divide-[#F0EDE0]">
             {milestones.map(m => (
-              <tr key={m.id} className="hover:bg-[#F9F9F8]">
-                <td className="py-3 pr-4 text-sm text-[#130D10] font-medium">{m.name}</td>
-                <td className="py-3 pr-4 text-sm text-[#6B6B6B]">{formatDate(m.due_date)}</td>
-                <td className="py-3 pr-4 text-sm text-[#130D10]">{formatCurrency(m.amount, currency)}</td>
+              <tr key={m.id} className="hover:bg-white/60 transition-colors">
+                <td className="py-3 pr-4 text-[14px] text-[#130D10] font-medium">{m.name}</td>
+                <td className="py-3 pr-4 text-[13px] text-[#8A847B]">{formatDate(m.due_date)}</td>
+                <td className="py-3 pr-4 text-[14px] text-[#130D10] font-medium">{formatCurrency(m.amount, currency)}</td>
                 <td className="py-3 pr-4">
-                  <span className={`text-xs px-2 py-0.5 rounded-md ${getMilestoneStatusColor(m.status)}`}>
+                  <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${getMilestoneStatusColor(m.status)}`}>
                     {getMilestoneStatusLabel(m.status)}
                   </span>
                 </td>
@@ -133,26 +167,32 @@ export default function FinanzasProyectoPage() {
                           onClick={() => setWhatsappMsg(generateWhatsAppMessage(
                             project?.client_name || '', m.name, m.due_date, m.amount, currency, currentUser.cbu_alias || ''
                           ))}
-                          className="p-1.5 rounded-lg hover:bg-green-50 text-green-600 transition-colors"
+                          className="p-1.5 rounded-full hover:bg-[#E5F3EF] text-[#00846F] transition-colors"
                         >
                           <IconBrandWhatsapp size={15} stroke={1.5} />
                         </button>
                         <button
                           title="Marcar como cobrado"
                           onClick={() => setConfirmPaid(m)}
-                          className="p-1.5 rounded-lg hover:bg-green-50 text-[#6B6B6B] hover:text-green-600 transition-colors"
+                          className="p-1.5 rounded-full hover:bg-[#E5F3EF] text-[#8A847B] hover:text-[#00846F] transition-colors"
                         >
                           <IconCheck size={15} stroke={1.5} />
                         </button>
                       </>
                     )}
-                    <button
-                      title="Facturar por ARCA (próximamente)"
-                      disabled
-                      className="p-1.5 rounded-lg text-[#DADADA] cursor-not-allowed"
-                    >
-                      <IconReceipt size={15} stroke={1.5} />
-                    </button>
+                    {facturas[m.id] ? (
+                      <span title={`CAE ${facturas[m.id].cae}`} className="flex items-center gap-1 text-[11px] font-medium text-[#3F6FA3] bg-[#EAF2FC] px-2 py-1 rounded-full">
+                        <IconReceipt size={12} stroke={1.7} /> {facturas[m.id].tipo} {facturas[m.id].numero}
+                      </span>
+                    ) : (
+                      <button
+                        title="Facturar con ARCA"
+                        onClick={() => setFacturando(m)}
+                        className="p-1.5 rounded-full text-[#8A847B] hover:text-[#3F6FA3] hover:bg-[#EAF2FC] transition-colors"
+                      >
+                        <IconReceipt size={15} stroke={1.5} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -161,34 +201,103 @@ export default function FinanzasProyectoPage() {
         </table>
       </section>
 
-      {/* Costs */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      {/* Horas trabajadas */}
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Costos del proyecto</h2>
+          <div className="flex flex-col gap-0.5">
+            <h2 className="font-serif text-[19px] text-[#130D10]">Horas trabajadas</h2>
+            <p className="text-[12.5px] text-[#8A847B]">Registro de tiempo y honorarios por hora del proyecto</p>
+          </div>
+          <Button size="sm" variant="secondary" onClick={() => setShowHours(true)}>
+            <IconPlus size={13} /> Registrar horas
+          </Button>
+        </div>
+
+        {/* Rate + totals */}
+        <div className="flex items-stretch gap-4 mb-5">
+          <div className="flex flex-col gap-1 pr-4 border-r border-[#ECE9DA]">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Precio por hora</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[13px] text-[#8A847B]">{currency}</span>
+              <input
+                type="number" min={0} value={hourlyRate}
+                onChange={e => setHourlyRate(Number(e.target.value))}
+                className="w-24 font-serif text-[20px] text-[#130D10] bg-transparent outline-none border-b border-dashed border-[#D8D2C2] focus:border-[#F5D242]"
+              />
+              <span className="text-xs text-[#A8A29A]">/h</span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-1 pr-4 border-r border-[#ECE9DA]">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Horas totales</span>
+            <span className="font-serif text-[20px] text-[#130D10]">{totalHours} h</span>
+          </div>
+          <div className="flex flex-col justify-center gap-1 rounded-[14px] bg-[#FFEDE9] px-4 py-2.5 ml-auto">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#C23A22]">Honorarios por horas</span>
+            <span className="font-serif text-[20px] text-[#C23A22]">{formatCurrency(totalHonorarios, currency)}</span>
+          </div>
+        </div>
+
+        {hours.length === 0 ? (
+          <p className="text-[13px] text-[#A8A29A]">No hay horas registradas.</p>
+        ) : (
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#ECE8D6]">
+                {['Fecha', 'Quién', 'Tarea', 'Horas', 'Importe'].map((h, i) => (
+                  <th key={h} className={cn('text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] pb-2.5 pr-4', i >= 3 ? 'text-right' : 'text-left')}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[#F0EDE0]">
+              {hours.map(h => (
+                <tr key={h.id} className="hover:bg-white/60 transition-colors">
+                  <td className="py-3 pr-4 text-[13px] text-[#8A847B] whitespace-nowrap">{formatDate(h.date)}</td>
+                  <td className="py-3 pr-4 text-[13px] text-[#6B655C]">{h.person}</td>
+                  <td className="py-3 pr-4 text-[14px] text-[#130D10]">{h.task}</td>
+                  <td className="py-3 pr-4 text-[14px] text-[#130D10] font-medium text-right whitespace-nowrap">{h.hours} h</td>
+                  <td className="py-3 text-[14px] text-[#130D10] font-medium text-right whitespace-nowrap">{formatCurrency(h.hours * hourlyRate, currency)}</td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-[#ECE8D6]">
+                <td colSpan={3} className="pt-3 text-[13px] font-semibold text-[#130D10]">Total</td>
+                <td className="pt-3 pr-4 text-[14px] font-semibold text-[#130D10] text-right">{totalHours} h</td>
+                <td className="pt-3 text-right font-serif text-[17px] text-[#130D10]">{formatCurrency(totalHonorarios, currency)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        )}
+      </section>
+
+      {/* Costs */}
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-serif text-[19px] text-[#130D10]">Costos del proyecto</h2>
           <Button size="sm" variant="secondary" onClick={() => setShowCost(true)}>
             <IconPlus size={13} /> Agregar costo
           </Button>
         </div>
         {costs.length === 0 ? (
-          <p className="text-xs text-[#9B9B9B]">No hay costos cargados.</p>
+          <p className="text-[13px] text-[#A8A29A]">No hay costos cargados.</p>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#E5E5E3]">
+              <tr className="border-b border-[#ECE8D6]">
                 {['Descripción', 'Proveedor', 'Categoría', 'Monto'].map(h => (
-                  <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#9B9B9B] pb-2 pr-4">{h}</th>
+                  <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] pb-2.5 pr-4">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F0F0EE]">
+            <tbody className="divide-y divide-[#F0EDE0]">
               {costs.map(c => (
-                <tr key={c.id} className="hover:bg-[#F9F9F8]">
-                  <td className="py-3 pr-4 text-sm text-[#130D10]">{c.description}</td>
-                  <td className="py-3 pr-4 text-sm text-[#6B6B6B]">{c.provider_name || '—'}</td>
+                <tr key={c.id} className="hover:bg-white/60 transition-colors">
+                  <td className="py-3 pr-4 text-[14px] text-[#130D10]">{c.description}</td>
+                  <td className="py-3 pr-4 text-[13px] text-[#8A847B]">{c.provider_name || '—'}</td>
                   <td className="py-3 pr-4">
-                    <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">{getCostCategoryLabel(c.category)}</span>
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#F2EFE2] text-[#6B655C]">{getCostCategoryLabel(c.category)}</span>
                   </td>
-                  <td className="py-3 text-sm text-[#130D10]">{formatCurrency(c.amount, currency)}</td>
+                  <td className="py-3 text-[14px] text-[#130D10] font-medium">{formatCurrency(c.amount, currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -197,28 +306,28 @@ export default function FinanzasProyectoPage() {
       </section>
 
       {/* Providers */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Proveedores del proyecto</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Proveedores del proyecto</h2>
           <Button size="sm" variant="secondary" onClick={() => setShowProvider(true)}>
             <IconPlus size={13} /> Agregar proveedor
           </Button>
         </div>
         {contacts.length === 0 ? (
-          <p className="text-xs text-[#9B9B9B]">Sin proveedores asignados.</p>
+          <p className="text-[13px] text-[#A8A29A]">Sin proveedores asignados.</p>
         ) : (
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             {contacts.map(c => (
-              <div key={c.id} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-[#F9F9F8]">
-                <div className="w-8 h-8 rounded-full bg-[#F0F0EE] flex items-center justify-center text-xs font-bold text-[#130D10]">
+              <div key={c.id} className="flex items-center gap-3 py-2.5 px-3 rounded-[14px] bg-white border border-[#ECE8D6]">
+                <div className="w-9 h-9 rounded-full bg-[#ECE9DA] flex items-center justify-center text-xs font-bold text-[#130D10]">
                   {c.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#130D10]">{c.name}</p>
-                  <p className="text-[10px] text-[#9B9B9B]">{getContactCategoryLabel(c.category)}{c.phone && ` · ${c.phone}`}</p>
+                  <p className="text-[14px] font-medium text-[#130D10]">{c.name}</p>
+                  <p className="text-[11px] text-[#A8A29A]">{getContactCategoryLabel(c.category)}{c.phone && ` · ${c.phone}`}</p>
                 </div>
-                <span className="text-[10px] text-[#9B9B9B] border border-[#E5E5E3] px-2 py-0.5 rounded-md flex items-center gap-1">
-                  <IconBuildingStore size={10} /> Directorio
+                <span className="text-[10px] font-medium text-[#8A847B] border border-[#ECE8D6] px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <IconBuildingStore size={11} /> Directorio
                 </span>
               </div>
             ))}
@@ -241,7 +350,7 @@ export default function FinanzasProyectoPage() {
           </>
         }
       >
-        <div className="bg-[#F9F9F8] border border-[#E5E5E3] rounded-xl p-4">
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[14px] p-4">
           <p className="text-sm text-[#130D10] whitespace-pre-wrap">{whatsappMsg}</p>
         </div>
       </Modal>
@@ -259,7 +368,7 @@ export default function FinanzasProyectoPage() {
         }
       >
         {confirmPaid && (
-          <p className="text-sm text-[#6B6B6B]">
+          <p className="text-sm text-[#6B655C]">
             ¿Confirmás que cobras el hito <strong className="text-[#130D10]">"{confirmPaid.name}"</strong> por <strong className="text-[#130D10]">{formatCurrency(confirmPaid.amount, currency)}</strong>?
           </p>
         )}
@@ -282,7 +391,13 @@ export default function FinanzasProyectoPage() {
       >
         <div className="space-y-4">
           <Input label="Descripción *" value={cForm.description} onChange={e => setCForm(f => ({ ...f, description: e.target.value }))} placeholder="Ej: Impresión planos" />
-          <Input label="Proveedor" value={cForm.provider_name} onChange={e => setCForm(f => ({ ...f, provider_name: e.target.value }))} placeholder="Nombre del proveedor" />
+          <div>
+            <Input label="Proveedor" list="proveedores-existentes" value={cForm.provider_name} onChange={e => setCForm(f => ({ ...f, provider_name: e.target.value }))} placeholder="Elegí uno cargado o escribí uno nuevo" />
+            <datalist id="proveedores-existentes">
+              {providerNames.map(n => <option key={n} value={n} />)}
+            </datalist>
+            <p className="text-[11px] text-[#A8A29A] mt-1">Aparecen los proveedores ya cargados · o escribí uno nuevo y queda creado.</p>
+          </div>
           <Select label="Categoría" value={cForm.category} onChange={e => setCForm(f => ({ ...f, category: e.target.value }))}
             options={[{ value: 'proveedor', label: 'Proveedor' }, { value: 'gasto', label: 'Gasto' }, { value: 'maquinaria', label: 'Maquinaria' }]}
           />
@@ -307,6 +422,38 @@ export default function FinanzasProyectoPage() {
           <Input label="Dirección" value={pForm.address} onChange={e => setPForm(f => ({ ...f, address: e.target.value }))} placeholder="Av. Santa Fe 1234, CABA" />
         </div>
       </Modal>
+
+      {/* Registrar horas */}
+      <Modal open={showHours} onClose={() => setShowHours(false)} title="Registrar horas"
+        footer={<><Button variant="secondary" onClick={() => setShowHours(false)}>Cancelar</Button><Button variant="primary" onClick={handleAddHours}>Registrar</Button></>}
+      >
+        <div className="space-y-4">
+          <Input label="Fecha" type="date" value={hForm.date} onChange={e => setHForm(f => ({ ...f, date: e.target.value }))} />
+          <Input label="Quién" value={hForm.person} onChange={e => setHForm(f => ({ ...f, person: e.target.value }))} placeholder="Ej: Isabel García" />
+          <Input label="Tarea *" value={hForm.task} onChange={e => setHForm(f => ({ ...f, task: e.target.value }))} placeholder="Ej: Desarrollo de anteproyecto" />
+          <Input label="Horas *" type="number" value={hForm.hours} onChange={e => setHForm(f => ({ ...f, hours: e.target.value }))} placeholder="0" />
+          {hForm.hours && (
+            <p className="text-[13px] text-[#6B655C]">
+              {hForm.hours} h × {formatCurrency(hourlyRate, currency)} ={' '}
+              <strong className="text-[#130D10]">{formatCurrency(Number(hForm.hours) * hourlyRate, currency)}</strong>
+            </p>
+          )}
+        </div>
+      </Modal>
+
+      {/* ARCA invoicing */}
+      <FacturarArcaModal
+        target={facturando ? {
+          id: facturando.id, name: facturando.name,
+          projectName: project?.name || '', clientName: project?.client_name || '',
+          amount: facturando.amount, currency,
+        } : null}
+        onClose={() => setFacturando(null)}
+        onIssue={(milestoneId, factura) => {
+          setFacturas(prev => ({ ...prev, [milestoneId]: factura }))
+          toast(`Factura ${factura.tipo} ${factura.numero} emitida`)
+        }}
+      />
     </div>
   )
 }

@@ -70,19 +70,50 @@ export const mockProjects: Project[] = [
     created_at: mo(-8),
     progress: 100,
   },
+  {
+    id: 'p5',
+    studio_id: 's1',
+    name: 'Loft Belgrano',
+    client_name: 'Estudio Vidal',
+    type: 'arquitectura',
+    status: 'en_curso',
+    currency: 'USD',
+    pricing_mode: 'proyecto',
+    total_amount: 9500,
+    cover_color: '#B7D5E8',
+    start_date: mo(-2),
+    created_at: mo(-2),
+    progress: 45,
+  },
+  {
+    id: 'p6',
+    studio_id: 's1',
+    name: 'Reforma Quincho',
+    client_name: 'Casa Méndez',
+    type: 'arquitectura',
+    status: 'en_curso',
+    currency: 'ARS',
+    pricing_mode: 'proyecto',
+    total_amount: 1500000,
+    cover_color: '#E8B7D5',
+    start_date: mo(-1),
+    created_at: mo(-1),
+    progress: 30,
+  },
 ]
 
 export const mockPhases: Record<string, ProjectPhase[]> = {
   p1: [
-    { id: 'ph1', project_id: 'p1', name: 'Anteproyecto', color: '#6366F1', order: 1, start_date: '2024-01-15', end_date: '2024-02-28' },
-    { id: 'ph2', project_id: 'p1', name: 'Básico', color: '#F59E0B', order: 2, start_date: '2024-03-01', end_date: '2024-04-30' },
-    { id: 'ph3', project_id: 'p1', name: 'Ejecutivo', color: '#10B981', order: 3, start_date: '2024-05-01', end_date: '2024-07-31' },
-    { id: 'ph4', project_id: 'p1', name: 'Obra', color: '#EF4444', order: 4, start_date: '2024-08-01', end_date: '2024-12-31' },
+    { id: 'ph1', project_id: 'p1', name: 'Anteproyecto', color: '#FF5738', order: 1, start_date: '2024-01-15', end_date: '2024-06-30' },
+    { id: 'ph2', project_id: 'p1', name: 'Proyecto básico', color: '#7FB0E8', order: 2, start_date: '2024-07-01', end_date: '2024-12-31' },
+    { id: 'ph3', project_id: 'p1', name: 'Proyecto ejecutivo', color: '#D5D25D', order: 3, start_date: '2025-01-01', end_date: '2025-09-30' },
+    { id: 'ph4', project_id: 'p1', name: 'Dirección de obra', color: '#00846F', order: 4, start_date: '2025-10-01', end_date: '2026-08-31' },
+    { id: 'ph5', project_id: 'p1', name: 'Entrega', color: '#F5D242', order: 5, start_date: '2026-09-01', end_date: '2026-12-15' },
   ],
   p2: [
-    { id: 'ph5', project_id: 'p2', name: 'Research', color: '#6366F1', order: 1, start_date: '2024-02-01', end_date: '2024-02-15' },
-    { id: 'ph6', project_id: 'p2', name: 'Diseño', color: '#F59E0B', order: 2, start_date: '2024-02-16', end_date: '2024-03-15' },
-    { id: 'ph7', project_id: 'p2', name: 'Entrega', color: '#10B981', order: 3, start_date: '2024-03-16', end_date: '2024-03-31' },
+    { id: 'ph6', project_id: 'p2', name: 'Research', color: '#FF5738', order: 1, start_date: '2024-02-01', end_date: '2024-02-15' },
+    { id: 'ph7', project_id: 'p2', name: 'Diseño', color: '#7FB0E8', order: 2, start_date: '2024-02-16', end_date: '2024-03-15' },
+    { id: 'ph8', project_id: 'p2', name: 'Entrega', color: '#00846F', order: 3, start_date: '2024-03-16', end_date: '2024-03-31' },
   ],
 }
 
@@ -93,13 +124,22 @@ export const mockTasks: Record<string, Task[]> = {
     { id: 't3', project_id: 'p1', phase_id: 'ph2', title: 'Memoria descriptiva', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 25), is_client_visible: false, created_at: mo(-2) },
     { id: 't4', project_id: 'p1', phase_id: 'ph2', title: 'Planos de ejecución', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 10), is_client_visible: true, created_at: mo(-2) },
     { id: 't5', project_id: 'p1', phase_id: 'ph3', title: 'Cómputo y presupuesto', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(2, 5), is_client_visible: false, created_at: mo(-1) },
+    { id: 't20', project_id: 'p1', phase_id: 'ph2', title: 'Memoria descriptiva', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
+    { id: 't21', project_id: 'p1', phase_id: 'ph3', title: 'Revisar planilla de obra', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
+    { id: 't24', project_id: 'p1', phase_id: 'ph4', title: 'Replanteo y movimiento de suelos', status: 'completado', assigned_to: 'u1', assigned_name: 'Estudio Ramírez', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
+    { id: 't25', project_id: 'p1', phase_id: 'ph4', title: 'Terminaciones', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Constructora Sur', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
+    { id: 't26', project_id: 'p1', phase_id: 'ph5', title: 'Entrega final', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
   ],
   p2: [
-    { id: 't6', project_id: 'p2', phase_id: 'ph5', title: 'Brief del cliente', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-5, 10), is_client_visible: false, created_at: mo(-5) },
-    { id: 't7', project_id: 'p2', phase_id: 'ph5', title: 'Análisis de competencia', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-4, 20), is_client_visible: false, created_at: mo(-5) },
-    { id: 't8', project_id: 'p2', phase_id: 'ph6', title: 'Propuestas de logo', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-3, 28), is_client_visible: true, created_at: mo(-4) },
-    { id: 't9', project_id: 'p2', phase_id: 'ph6', title: 'Manual de marca', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 20), is_client_visible: true, created_at: mo(-3) },
-    { id: 't10', project_id: 'p2', phase_id: 'ph7', title: 'Presentación final al cliente', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 5), is_client_visible: true, created_at: mo(-1) },
+    { id: 't6', project_id: 'p2', phase_id: 'ph6', title: 'Brief del cliente', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-5, 10), is_client_visible: false, created_at: mo(-5) },
+    { id: 't7', project_id: 'p2', phase_id: 'ph6', title: 'Análisis de competencia', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-4, 20), is_client_visible: false, created_at: mo(-5) },
+    { id: 't8', project_id: 'p2', phase_id: 'ph7', title: 'Propuestas de logo', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-3, 28), is_client_visible: true, created_at: mo(-4) },
+    { id: 't9', project_id: 'p2', phase_id: 'ph7', title: 'Manual de marca', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 20), is_client_visible: true, created_at: mo(-3) },
+    { id: 't10', project_id: 'p2', phase_id: 'ph8', title: 'Presentación final al cliente', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 5), is_client_visible: true, created_at: mo(-1) },
+    { id: 't22', project_id: 'p2', phase_id: 'ph7', title: 'Enviar manual de marca v2', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
+  ],
+  p5: [
+    { id: 't23', project_id: 'p5', title: 'Coordinar visita de obra', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
   ],
 }
 
@@ -108,6 +148,11 @@ function mo(offset: number, day = 15) {
   const d = new Date()
   d.setMonth(d.getMonth() + offset, day)
   return d.toISOString().split('T')[0]
+}
+
+// Today, so "Tareas para hoy" always has data
+function today() {
+  return new Date().toISOString().split('T')[0]
 }
 
 export const mockMilestones: Record<string, PaymentMilestone[]> = {
@@ -132,21 +177,144 @@ export const mockMilestones: Record<string, PaymentMilestone[]> = {
     { id: 'm12', project_id: 'p4', name: 'Pago consultoría', due_date: mo(-6, 20), amount: 150000, status: 'cobrado', paid_at: mo(-6, 20), arca_flagged: false },
     { id: 'm13', project_id: 'p4', name: 'Cierre proyecto', due_date: mo(-5, 15), amount: 150000, status: 'cobrado', paid_at: mo(-5, 17), arca_flagged: false },
   ],
+  p5: [
+    { id: 'm20', project_id: 'p5', name: 'Anticipo', due_date: mo(-2, 10), amount: 3000, status: 'cobrado', paid_at: mo(-2, 10), arca_flagged: false },
+    { id: 'm21', project_id: 'p5', name: 'Entrega Anteproyecto', due_date: mo(0, 28), amount: 3500, status: 'pendiente', arca_flagged: false },
+    { id: 'm22', project_id: 'p5', name: 'Saldo final', due_date: mo(2, 10), amount: 3000, status: 'futuro', arca_flagged: false },
+  ],
+  p6: [
+    { id: 'm23', project_id: 'p6', name: 'Anticipo 40%', due_date: mo(-1, 5), amount: 600000, status: 'cobrado', paid_at: mo(-1, 5), arca_flagged: false },
+    { id: 'm24', project_id: 'p6', name: 'Avance de obra', due_date: mo(1, 8), amount: 450000, status: 'pendiente', arca_flagged: false },
+  ],
+}
+
+export interface Certification {
+  id: string
+  project_id: string
+  label: string
+  advance: string
+  amount: number
+  status: 'aprobada' | 'enviada' | 'pendiente'
+}
+
+export const mockCertifications: Record<string, Certification[]> = {
+  p1: [
+    { id: 'cert1', project_id: 'p1', label: 'Certificación 01 · jun', advance: 'Avance 35%', amount: 2100, status: 'aprobada' },
+    { id: 'cert2', project_id: 'p1', label: 'Certificación 02 · jul', advance: 'Avance 58%', amount: 2100, status: 'enviada' },
+    { id: 'cert3', project_id: 'p1', label: 'Certificación 03 · ago', advance: 'Estimada', amount: 2100, status: 'pendiente' },
+  ],
+  p6: [
+    { id: 'cert4', project_id: 'p6', label: 'Certificación 01 · may', advance: 'Avance 30%', amount: 450000, status: 'aprobada' },
+    { id: 'cert5', project_id: 'p6', label: 'Certificación 02 · jun', advance: 'Estimada', amount: 450000, status: 'pendiente' },
+  ],
+}
+
+export type BitacoraType = 'visita' | 'parte' | 'observacion'
+
+export interface BitacoraEntry {
+  id: string
+  project_id: string
+  day: string
+  month: string
+  author: string
+  initials: string
+  avatar_color: string
+  avatar_text: string
+  role: string
+  time: string
+  type: BitacoraType
+  text: string
+  tags: string[]
+  photos?: number
+  attachment?: { name: string; size: string }
+  requires_response?: boolean
+}
+
+export const mockBitacora: Record<string, BitacoraEntry[]> = {
+  p1: [
+    {
+      id: 'b1', project_id: 'p1', day: '12', month: 'JUN', author: 'Isabel García', initials: 'IG',
+      avatar_color: '#00846F', avatar_text: '#FFFEF0', role: 'Arquitecta', time: '09:40', type: 'visita',
+      text: 'Se hormigonó la losa del primer piso. El encofrado quedó nivelado y el curado comienza mañana. La cuadrilla retomó la mampostería del lateral este. Pendiente: revisar la cota del paño de escalera con el ingeniero estructural.',
+      tags: ['Estructura', 'Avance de obra'], photos: 7,
+    },
+    {
+      id: 'b2', project_id: 'p1', day: '05', month: 'JUN', author: 'Martín Sosa', initials: 'MS',
+      avatar_color: '#7FB0E8', avatar_text: '#FFFEF0', role: 'Maestro mayor de obra', time: '17:20', type: 'parte',
+      text: 'Ingresó el acopio de hierro y cemento para la etapa de estructura. Trabajaron 6 operarios en jornada completa. Se solicita confirmar la entrega de áridos para el lunes. Sin novedades de seguridad.',
+      tags: ['Logística', 'Materiales'], attachment: { name: 'Parte_obra_07.pdf', size: '240 KB' },
+    },
+    {
+      id: 'b3', project_id: 'p1', day: '28', month: 'MAY', author: 'Familia Rodríguez', initials: 'FR',
+      avatar_color: '#FFABCF', avatar_text: '#130D10', role: 'Cliente', time: '11:05', type: 'observacion',
+      text: 'Nos gustaría revisar la posición del ventanal del living antes de avanzar con la mampostería. ¿Podemos coordinar una visita la próxima semana para verlo en obra?',
+      tags: ['Pedido del cliente'], requires_response: true,
+    },
+  ],
+}
+
+export interface TeamMember {
+  id: string
+  project_id: string
+  name: string
+  initials: string
+  avatar_color: string
+  avatar_text: string
+  role: string
+  tag_label: string
+  tag_dot: string
+  tag_bg: string
+  tag_text: string
+  contact: string
+  contact_type: 'email' | 'phone'
+}
+
+export interface ProviderRow {
+  id: string
+  project_id: string
+  name: string
+  initial: string
+  icon_bg: string
+  icon_text: string
+  rubro: string
+  contact: string
+  status_label: string
+  status_dot: string
+  status_text: string
+}
+
+export const mockTeam: Record<string, TeamMember[]> = {
+  p1: [
+    { id: 'tm1', project_id: 'p1', name: 'Isabel García', initials: 'IG', avatar_color: '#00846F', avatar_text: '#FFFEF0', role: 'Arquitecta · Dirección', tag_label: 'Responsable', tag_dot: '#FF5738', tag_bg: 'bg-[#FFEDE9]', tag_text: 'text-[#C23A22]', contact: 'isabel@estudiogarcia.com', contact_type: 'email' },
+    { id: 'tm2', project_id: 'p1', name: 'Lucía Fernández', initials: 'LF', avatar_color: '#7FB0E8', avatar_text: '#FFFEF0', role: 'Arquitecta junior', tag_label: 'Documentación', tag_dot: '#7FB0E8', tag_bg: 'bg-[#EAF1FA]', tag_text: 'text-[#3F6FA3]', contact: 'lucia@estudiogarcia.com', contact_type: 'email' },
+    { id: 'tm3', project_id: 'p1', name: 'Martín Sosa', initials: 'MS', avatar_color: '#D5D25D', avatar_text: '#130D10', role: 'Maestro mayor de obra', tag_label: 'En obra', tag_dot: '#A8A52E', tag_bg: 'bg-[#F6F4D8]', tag_text: 'text-[#7E7B2E]', contact: '+54 11 5598 2210', contact_type: 'phone' },
+    { id: 'tm4', project_id: 'p1', name: 'Diego Pérez', initials: 'DP', avatar_color: '#FFABCF', avatar_text: '#130D10', role: 'Ingeniero estructural', tag_label: 'Consultor externo', tag_dot: '#A8A29A', tag_bg: 'bg-[#F4F1E3]', tag_text: 'text-[#6B655C]', contact: 'diego@estructuras.com', contact_type: 'email' },
+  ],
+}
+
+export const mockProviders: Record<string, ProviderRow[]> = {
+  p1: [
+    { id: 'pr1', project_id: 'p1', name: 'Aberturas del Sur', initial: 'A', icon_bg: 'bg-[#FFEDE9]', icon_text: 'text-[#C23A22]', rubro: 'Carpintería y aberturas', contact: '+54 11 4421 8890', status_label: 'Contratado', status_dot: '#00846F', status_text: 'text-[#00846F]' },
+    { id: 'pr2', project_id: 'p1', name: 'Hormigones Pilar SA', initial: 'H', icon_bg: 'bg-[#EAF1FA]', icon_text: 'text-[#3F6FA3]', rubro: 'Estructura y hormigón', contact: 'ventas@hormigones.com', status_label: 'Contratado', status_dot: '#00846F', status_text: 'text-[#00846F]' },
+    { id: 'pr3', project_id: 'p1', name: 'Electro Norte', initial: 'E', icon_bg: 'bg-[#F6F4D8]', icon_text: 'text-[#7E7B2E]', rubro: 'Instalación eléctrica', contact: '+54 11 3367 1102', status_label: 'Presupuestando', status_dot: '#F5D242', status_text: 'text-[#8A7220]' },
+    { id: 'pr4', project_id: 'p1', name: 'Sanitarios Belgrano', initial: 'S', icon_bg: 'bg-[#E4F1EC]', icon_text: 'text-[#00846F]', rubro: 'Plomería y sanitarios', contact: 'info@sanitariosb.com', status_label: 'Contratado', status_dot: '#00846F', status_text: 'text-[#00846F]' },
+    { id: 'pr5', project_id: 'p1', name: 'Vidrios Cristal', initial: 'V', icon_bg: 'bg-[#FDEAF1]', icon_text: 'text-[#B14E7C]', rubro: 'Vidriería y cerramientos', contact: '+54 11 2245 7781', status_label: 'A evaluar', status_dot: '#A8A29A', status_text: 'text-[#8A847B]' },
+  ],
 }
 
 export const mockCosts: Record<string, CostItem[]> = {
   p1: [
-    { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 15000, created_at: mo(-4, 10) },
-    { id: 'c2', project_id: 'p1', description: 'Materiales maqueta', provider_name: 'Arteplas', category: 'gasto', amount: 8000, created_at: mo(-4, 15) },
-    { id: 'c3', project_id: 'p1', description: 'Alquiler andamios', provider_name: 'AlquiAndamios SRL', category: 'maquinaria', amount: 45000, created_at: mo(-2, 10) },
-    { id: 'c6', project_id: 'p1', description: 'Visado municipal', provider_name: 'Gestoría Central', category: 'gasto', amount: 22000, created_at: mo(-1, 5) },
+    { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 350, created_at: mo(-4, 10) },
+    { id: 'c2', project_id: 'p1', description: 'Materiales maqueta', provider_name: 'Arteplas', category: 'gasto', amount: 280, created_at: mo(-4, 15) },
+    { id: 'c3', project_id: 'p1', description: 'Alquiler andamios', provider_name: 'AlquiAndamios SRL', category: 'maquinaria', amount: 1800, created_at: mo(-2, 10) },
+    { id: 'c6', project_id: 'p1', description: 'Visado municipal', provider_name: 'Gestoría Central', category: 'gasto', amount: 620, created_at: mo(-1, 5) },
   ],
   p2: [
     { id: 'c4', project_id: 'p2', description: 'Licencia Figma anual', category: 'gasto', amount: 25000, created_at: mo(-5, 1) },
     { id: 'c5', project_id: 'p2', description: 'Tipografías comerciales', category: 'gasto', amount: 12000, created_at: mo(-3, 20) },
   ],
   p3: [
-    { id: 'c7', project_id: 'p3', description: 'Equipos audiovisuales', provider_name: 'AV Rental BA', category: 'maquinaria', amount: 80000, created_at: mo(-3, 8) },
+    { id: 'c7', project_id: 'p3', description: 'Equipos audiovisuales', provider_name: 'AV Rental BA', category: 'maquinaria', amount: 1200, created_at: mo(-3, 8) },
   ],
 }
 
