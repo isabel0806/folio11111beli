@@ -29,6 +29,9 @@ export default function FinanzasPage() {
   const [search, setSearch] = useState('')
   const [whatsappMsg, setWhatsappMsg] = useState<string | null>(null)
   const [confirmPaid, setConfirmPaid] = useState<typeof enrichedMilestones[0] | null>(null)
+  const [selectedMonthKey, setSelectedMonthKey] = useState(
+    `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+  )
 
   const enrichedMilestones = Object.entries(mockMilestones).flatMap(([pid, ms]) => {
     const project = mockProjects.find(p => p.id === pid)!
@@ -51,7 +54,7 @@ export default function FinanzasPage() {
 
   // Monthly history — last 8 months + next 2
   const monthlyData = (() => {
-    const months: { key: string; label: string; cobrado: number; pendiente: number; costos: number; isFuture: boolean }[] = []
+    const months: { key: string; label: string; cobrado: number; pendiente: number; costos: number; neto: number; isFuture: boolean }[] = []
     const now = new Date()
     for (let i = -7; i <= 2; i++) {
       const d = new Date(now.getFullYear(), now.getMonth() + i, 1)
@@ -71,12 +74,38 @@ export default function FinanzasPage() {
         .filter(c => c.created_at.startsWith(key))
         .reduce((a, c) => a + c.amount, 0)
 
-      months.push({ key, label, cobrado: mCobrado, pendiente: mPendiente, costos: mCostos, isFuture })
+      months.push({ key, label, cobrado: mCobrado, pendiente: mPendiente, costos: mCostos, neto: mCobrado - mCostos, isFuture })
     }
     return months
   })()
 
   const maxMonthly = Math.max(...monthlyData.map(m => m.cobrado + m.pendiente + m.costos), 1)
+  const currentMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
+
+  // Monthly insights
+  const pastMonths = monthlyData.filter(m => !m.isFuture)
+  const realized = pastMonths.filter(m => m.cobrado > 0)
+  const avgCobrado = realized.length ? Math.round(realized.reduce((a, m) => a + m.cobrado, 0) / realized.length) : 0
+  const bestMonth = pastMonths.reduce((best, m) => (m.cobrado > best.cobrado ? m : best), pastMonths[0])
+  const selIdx = monthlyData.findIndex(m => m.key === selectedMonthKey)
+  const selMonth = monthlyData[selIdx] ?? monthlyData[monthlyData.length - 3]
+  const prevMonth = selIdx > 0 ? monthlyData[selIdx - 1] : null
+  // Per-selection delta — only meaningful for a closed (past, non-current) month
+  const selClosed = !selMonth.isFuture && selMonth.key !== currentMonthKey
+  const momDelta = prevMonth ? selMonth.cobrado - prevMonth.cobrado : 0
+  const momPct = selClosed && prevMonth && prevMonth.cobrado > 0 ? Math.round((momDelta / prevMonth.cobrado) * 100) : null
+
+  // Headline trend — last fully closed month vs the one before (stable, not tied to selection)
+  const closedMonths = monthlyData.filter(m => !m.isFuture && m.key !== currentMonthKey)
+  const lastClosed = closedMonths[closedMonths.length - 1]
+  const prevClosed = closedMonths[closedMonths.length - 2]
+  const trendDelta = lastClosed && prevClosed ? lastClosed.cobrado - prevClosed.cobrado : 0
+  const trendPct = lastClosed && prevClosed && prevClosed.cobrado > 0 ? Math.round((trendDelta / prevClosed.cobrado) * 100) : null
+
+  const fmtCompact = (n: number) =>
+    n >= 1_000_000 ? '$' + (n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1).replace('.', ',') + 'M'
+      : n >= 1_000 ? '$' + Math.round(n / 1000) + 'k'
+        : '$' + n
 
   // Filtered milestones
   const filtered = milestones
@@ -207,12 +236,12 @@ export default function FinanzasPage() {
         </div>
       </div>
 
-      {/* Monthly chart */}
+      {/* Monthly history */}
       <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6 mb-7">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-start justify-between mb-5">
           <div>
             <h3 className="font-serif text-[19px] text-[#130D10]">Historial mensual</h3>
-            <p className="text-xs text-[#A8A29A] mt-0.5">Últimos 8 meses + próximos 2</p>
+            <p className="text-xs text-[#A8A29A] mt-0.5">Últimos 8 meses + próximos 2 · tocá un mes para ver el detalle</p>
           </div>
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-xs text-[#6B655C]"><span className="w-2.5 h-2.5 rounded-full bg-[#00846F] inline-block" />Cobrado</span>
@@ -221,84 +250,136 @@ export default function FinanzasPage() {
           </div>
         </div>
 
-        {/* Bars */}
-        <div className="flex items-end gap-2 h-40">
-          {monthlyData.map(m => {
-            const isCurrentMonth = m.key === `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
-            const cobradoH = (m.cobrado / maxMonthly) * 100
-            const pendienteH = (m.pendiente / maxMonthly) * 100
-            const costosH = (m.costos / maxMonthly) * 100
-            const totalH = cobradoH + pendienteH
-            const hasData = m.cobrado > 0 || m.pendiente > 0 || m.costos > 0
-            return (
-              <div key={m.key} className="flex-1 flex flex-col items-center gap-1.5 group relative">
-                {/* Tooltip */}
-                {hasData && (
-                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#130D10] text-white text-[10px] rounded-[10px] px-2.5 py-2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
-                    <p className="font-semibold mb-1">{m.label.toUpperCase()}</p>
-                    {m.cobrado > 0 && <p className="text-[#7FD9C5]">✓ {formatCurrency(m.cobrado)}</p>}
-                    {m.pendiente > 0 && <p className="text-[#F5D242]">○ {formatCurrency(m.pendiente)}</p>}
-                    {m.costos > 0 && <p className="text-[#FFABCF]">↓ {formatCurrency(m.costos)}</p>}
-                  </div>
-                )}
+        {/* Insight strip */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Promedio cobrado / mes</p>
+            <p className="font-serif text-[20px] text-[#130D10] mt-0.5">{formatCurrency(avgCobrado)}</p>
+          </div>
+          <div className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Mejor mes</p>
+            <p className="font-serif text-[20px] text-[#130D10] mt-0.5 capitalize">
+              {bestMonth && bestMonth.cobrado > 0 ? <>{bestMonth.label} <span className="text-[13px] text-[#00846F]">· {formatCurrency(bestMonth.cobrado)}</span></> : '—'}
+            </p>
+          </div>
+          <div className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">
+              Variación último mes{lastClosed && prevClosed ? <span className="capitalize normal-case"> · {lastClosed.label} vs {prevClosed.label}</span> : ''}
+            </p>
+            <p className={cn('font-serif text-[20px] mt-0.5 flex items-center gap-1.5', trendDelta > 0 ? 'text-[#00846F]' : trendDelta < 0 ? 'text-[#C23A22]' : 'text-[#130D10]')}>
+              {!lastClosed || !prevClosed ? '—' : (
+                <>
+                  {trendDelta > 0 ? <IconTrendingUp size={17} stroke={2} /> : trendDelta < 0 ? <IconTrendingDown size={17} stroke={2} /> : null}
+                  {trendDelta >= 0 ? '+' : '−'}{formatCurrency(Math.abs(trendDelta))}
+                </>
+              )}
+            </p>
+          </div>
+        </div>
 
-                {/* Bar group */}
-                <div className="w-full flex items-end gap-0.5 flex-1">
-                  {/* Income bar (cobrado + pendiente stacked) */}
-                  <div className="flex-1 flex flex-col justify-end">
-                    <div
+        {/* Chart: y-axis + plot */}
+        <div className="flex gap-3">
+          <div className="flex flex-col justify-between h-48 py-1 text-right text-[9px] text-[#A8A29A] w-11 shrink-0">
+            {[1, 0.75, 0.5, 0.25, 0].map(f => <span key={f}>{fmtCompact(Math.round(maxMonthly * f))}</span>)}
+          </div>
+          <div className="flex-1">
+            <div className="relative h-48">
+              {/* Gridlines */}
+              {[0, 0.25, 0.5, 0.75, 1].map(f => (
+                <div key={f} className="absolute inset-x-0 h-px bg-[#ECE9DA]" style={{ top: `${f * 100}%` }} />
+              ))}
+              {/* Bars */}
+              <div className="absolute inset-0 flex items-end gap-2">
+                {monthlyData.map(m => {
+                  const isCurrentMonth = m.key === currentMonthKey
+                  const isSelected = m.key === selectedMonthKey
+                  const cobradoH = (m.cobrado / maxMonthly) * 100
+                  const pendienteH = (m.pendiente / maxMonthly) * 100
+                  const costosH = (m.costos / maxMonthly) * 100
+                  const totalH = cobradoH + pendienteH
+                  const hasData = m.cobrado > 0 || m.pendiente > 0 || m.costos > 0
+                  return (
+                    <button
+                      key={m.key}
+                      onClick={() => setSelectedMonthKey(m.key)}
                       className={cn(
-                        'w-full rounded-t-md overflow-hidden transition-all duration-500',
-                        m.isFuture ? 'opacity-50' : ''
+                        'flex-1 h-full flex items-end gap-0.5 rounded-t-md transition-colors',
+                        isSelected ? 'bg-[#F2EFE2]' : 'hover:bg-[#F4F1E3]'
                       )}
-                      style={{ height: `${Math.max(totalH, hasData ? 2 : 0)}%` }}
+                      aria-label={`Ver ${m.label}`}
                     >
-                      {/* Pendiente on top */}
-                      {m.pendiente > 0 && (
+                      {/* Income bar (cobrado + pendiente stacked) */}
+                      <div className="flex-1 flex flex-col justify-end h-full">
                         <div
-                          className="w-full bg-[#F5D242]"
-                          style={{ height: `${totalH > 0 ? (pendienteH / totalH) * 100 : 0}%` }}
-                        />
+                          className={cn('w-full rounded-t-md overflow-hidden transition-all duration-500', m.isFuture && 'opacity-45')}
+                          style={{ height: `${Math.max(totalH, hasData ? 2 : 0)}%` }}
+                        >
+                          {m.pendiente > 0 && <div className="w-full bg-[#F5D242]" style={{ height: `${totalH > 0 ? (pendienteH / totalH) * 100 : 0}%` }} />}
+                          {m.cobrado > 0 && <div className="w-full bg-[#00846F]" style={{ height: `${totalH > 0 ? (cobradoH / totalH) * 100 : 0}%` }} />}
+                        </div>
+                      </div>
+                      {/* Costos bar */}
+                      {m.costos > 0 && (
+                        <div className="w-1.5 rounded-t-sm bg-[#FFABCF] transition-all duration-500 self-end" style={{ height: `${Math.max(costosH, 2)}%` }} />
                       )}
-                      {/* Cobrado on bottom */}
-                      {m.cobrado > 0 && (
-                        <div
-                          className="w-full bg-[#00846F]"
-                          style={{ height: `${totalH > 0 ? (cobradoH / totalH) * 100 : 0}%` }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                  {/* Costos bar (separate, thinner) */}
-                  {m.costos > 0 && (
-                    <div
-                      className="w-1.5 rounded-t-sm bg-[#FFABCF] transition-all duration-500"
-                      style={{ height: `${Math.max(costosH, 2)}%` }}
-                    />
-                  )}
-                </div>
-
-                {/* Label */}
-                <span className={cn(
-                  'text-[10px] capitalize',
-                  isCurrentMonth ? 'font-bold text-[#130D10]' : 'text-[#A8A29A]'
-                )}>
-                  {m.label}
-                </span>
-                {isCurrentMonth && (
-                  <div className="w-1 h-1 rounded-full bg-[#FF5738]" />
-                )}
+                    </button>
+                  )
+                })}
               </div>
-            )
-          })}
+            </div>
+            {/* Month labels */}
+            <div className="flex gap-2 mt-2">
+              {monthlyData.map(m => {
+                const isCurrentMonth = m.key === currentMonthKey
+                const isSelected = m.key === selectedMonthKey
+                return (
+                  <button key={m.key} onClick={() => setSelectedMonthKey(m.key)} className="flex-1 flex flex-col items-center gap-0.5">
+                    <span className={cn('text-[10px] capitalize transition-colors', isSelected ? 'font-bold text-[#130D10]' : isCurrentMonth ? 'font-semibold text-[#6B655C]' : 'text-[#A8A29A]')}>
+                      {m.label}
+                    </span>
+                    {isCurrentMonth && <span className="w-1 h-1 rounded-full bg-[#FF5738]" />}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
         </div>
 
-        {/* Axis reference */}
-        <div className="flex justify-between mt-1 px-0.5">
-          <span className="text-[9px] text-[#A8A29A]">0</span>
-          <span className="text-[9px] text-[#A8A29A]">{formatCurrency(Math.round(maxMonthly / 2))}</span>
-          <span className="text-[9px] text-[#A8A29A]">{formatCurrency(maxMonthly)}</span>
-        </div>
+        {/* Selected month detail */}
+        {selMonth && (
+          <div className="mt-6 pt-5 border-t border-[#ECE9DA]">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-serif text-[16px] text-[#130D10] capitalize">
+                {selMonth.label}
+                {selMonth.key === currentMonthKey && <span className="ml-2 text-[11px] font-sans font-semibold text-[#FF5738]">· este mes</span>}
+                {selMonth.isFuture && <span className="ml-2 text-[11px] font-sans font-semibold text-[#A8A29A]">· proyectado</span>}
+              </h4>
+              {selClosed && prevMonth ? (
+                <span className={cn('flex items-center gap-1 text-xs font-semibold', momDelta > 0 ? 'text-[#00846F]' : momDelta < 0 ? 'text-[#C23A22]' : 'text-[#A8A29A]')}>
+                  {momDelta > 0 ? <IconTrendingUp size={13} /> : momDelta < 0 ? <IconTrendingDown size={13} /> : null}
+                  {momDelta >= 0 ? '+' : ''}{formatCurrency(momDelta)} vs mes anterior
+                </span>
+              ) : (
+                <span className="text-xs font-medium text-[#A8A29A]">{selMonth.isFuture ? 'Proyectado' : 'Mes en curso'}</span>
+              )}
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: 'Cobrado', value: selMonth.cobrado, color: 'text-[#00846F]', dot: 'bg-[#00846F]' },
+                { label: 'Por cobrar', value: selMonth.pendiente, color: 'text-[#7A6410]', dot: 'bg-[#F5D242]' },
+                { label: 'Costos', value: selMonth.costos, color: 'text-[#B14E7C]', dot: 'bg-[#FFABCF]' },
+                { label: 'Neto', value: selMonth.neto, color: selMonth.neto >= 0 ? 'text-[#130D10]' : 'text-[#C23A22]', dot: 'bg-[#130D10]' },
+              ].map(s => (
+                <div key={s.label} className="bg-white border border-[#ECE8D6] rounded-[12px] px-3.5 py-3">
+                  <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#A8A29A]">
+                    <span className={cn('w-2 h-2 rounded-full', s.dot)} />{s.label}
+                  </span>
+                  <p className={cn('font-serif text-[18px] mt-1', s.color)}>{formatCurrency(s.value)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Tab switcher */}
