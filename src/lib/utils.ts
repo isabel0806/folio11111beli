@@ -33,10 +33,10 @@ export function getMilestoneStatusLabel(status: MilestoneStatus): string {
 
 export function getMilestoneStatusColor(status: MilestoneStatus): string {
   const colors: Record<MilestoneStatus, string> = {
-    pendiente: 'bg-yellow-100 text-yellow-800',
-    cobrado: 'bg-green-100 text-green-800',
-    vencido: 'bg-red-100 text-red-800',
-    futuro: 'bg-gray-100 text-gray-600',
+    pendiente: 'bg-[#FBF3D6] text-[#7A6410]',
+    cobrado: 'bg-[#E5F3EF] text-[#00846F]',
+    vencido: 'bg-[#FFE6DF] text-[#C23A22]',
+    futuro: 'bg-[#F2EFE2] text-[#6B655C]',
   }
   return colors[status]
 }
@@ -53,10 +53,10 @@ export function getProjectStatusLabel(status: ProjectStatus): string {
 
 export function getProjectStatusColor(status: ProjectStatus): string {
   const colors: Record<ProjectStatus, string> = {
-    en_curso: 'bg-blue-100 text-blue-800',
-    en_pausa: 'bg-orange-100 text-orange-800',
-    completado: 'bg-green-100 text-green-800',
-    borrador: 'bg-gray-100 text-gray-600',
+    en_curso: 'bg-[#EAF2FB] text-[#3F6FA3]',
+    en_pausa: 'bg-[#FBF3D6] text-[#7A6410]',
+    completado: 'bg-[#E5F3EF] text-[#00846F]',
+    borrador: 'bg-[#F2EFE2] text-[#6B655C]',
   }
   return colors[status]
 }

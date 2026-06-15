@@ -20,7 +20,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full px-3 py-2 text-sm border border-[#E5E5E3] rounded-lg bg-white text-[#130D10] placeholder:text-[#9B9B9B]',
+            'w-full px-3 py-2 text-sm border border-[#ECE8D6] rounded-lg bg-white text-[#130D10] placeholder:text-[#A8A29A]',
             'focus:outline-none focus:ring-1 focus:ring-[#F5D242] focus:border-[#F5D242]',
             error && 'border-red-300',
             className
@@ -54,7 +54,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full px-3 py-2 text-sm border border-[#E5E5E3] rounded-lg bg-white text-[#130D10]',
+            'w-full px-3 py-2 text-sm border border-[#ECE8D6] rounded-lg bg-white text-[#130D10]',
             'focus:outline-none focus:ring-1 focus:ring-[#F5D242] focus:border-[#F5D242]',
             error && 'border-red-300',
             className
@@ -91,7 +91,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full px-3 py-2 text-sm border border-[#E5E5E3] rounded-lg bg-white text-[#130D10] placeholder:text-[#9B9B9B] resize-none',
+            'w-full px-3 py-2 text-sm border border-[#ECE8D6] rounded-lg bg-white text-[#130D10] placeholder:text-[#A8A29A] resize-none',
             'focus:outline-none focus:ring-1 focus:ring-[#F5D242] focus:border-[#F5D242]',
             error && 'border-red-300',
             className

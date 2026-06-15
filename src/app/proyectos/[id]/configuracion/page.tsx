@@ -23,13 +23,13 @@ export default function ConfiguracionPage() {
   if (!project) return null
 
   const roleLabels: Record<MemberRole, string> = { admin: 'Admin', editor: 'Editor', viewer: 'Viewer' }
-  const roleColors: Record<MemberRole, string> = { admin: 'bg-[#FFF9D6] text-[#C9A800]', editor: 'bg-blue-50 text-blue-700', viewer: 'bg-gray-100 text-gray-600' }
+  const roleColors: Record<MemberRole, string> = { admin: 'bg-[#FBF3D6] text-[#7A6410]', editor: 'bg-[#EAF2FB] text-[#3F6FA3]', viewer: 'bg-[#F2EFE2] text-[#6B655C]' }
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="flex flex-col gap-6 max-w-2xl">
       {/* Project info */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
-        <h2 className="text-sm font-semibold text-[#130D10] mb-4">Información del proyecto</h2>
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
+        <h2 className="font-serif text-[19px] text-[#130D10] mb-4">Información del proyecto</h2>
         <div className="space-y-4">
           <Input label="Nombre del proyecto" defaultValue={project.name} />
           <Select
@@ -70,24 +70,24 @@ export default function ConfiguracionPage() {
       </section>
 
       {/* Team */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Equipo del proyecto</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Equipo del proyecto</h2>
           <Button size="sm" variant="secondary" onClick={() => setShowInvite(true)}>
             <IconPlus size={13} /> Invitar colaborador
           </Button>
         </div>
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {members.map(m => (
-            <div key={m.id} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-[#F9F9F8]">
+            <div key={m.id} className="flex items-center gap-3 py-2.5 px-3 rounded-[14px] bg-white border border-[#ECE8D6]">
               <Avatar name={m.name} size="sm" />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[#130D10]">{m.name}</p>
-                <p className="text-[10px] text-[#9B9B9B]">{m.email}</p>
+                <p className="text-[11px] text-[#A8A29A]">{m.email}</p>
               </div>
-              <span className={`text-xs px-2 py-0.5 rounded-md ${roleColors[m.role]}`}>{roleLabels[m.role]}</span>
+              <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${roleColors[m.role]}`}>{roleLabels[m.role]}</span>
               {m.role !== 'admin' && (
-                <button className="p-1.5 text-[#9B9B9B] hover:text-red-600 transition-colors">
+                <button className="p-1.5 text-[#A8A29A] hover:text-[#C23A22] transition-colors">
                   <IconTrash size={13} />
                 </button>
               )}
@@ -97,21 +97,21 @@ export default function ConfiguracionPage() {
       </section>
 
       {/* Client portal */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-sm font-semibold text-[#130D10]">Portal del cliente</h2>
-            <p className="text-xs text-[#6B6B6B] mt-0.5">El cliente puede ver el avance del proyecto en modo solo lectura</p>
+            <h2 className="font-serif text-[19px] text-[#130D10]">Portal del cliente</h2>
+            <p className="text-xs text-[#8A847B] mt-1">El cliente puede ver el avance del proyecto en modo solo lectura</p>
           </div>
-          <button onClick={() => setClientPortalActive(v => !v)} className="text-[#6B6B6B]">
+          <button onClick={() => setClientPortalActive(v => !v)} className="text-[#C4BFB4]">
             {clientPortalActive
-              ? <IconToggleRight size={28} className="text-[#F5D242]" />
+              ? <IconToggleRight size={28} className="text-[#00846F]" />
               : <IconToggleLeft size={28} />
             }
           </button>
         </div>
         {clientPortalActive && (
-          <div className="space-y-4 pt-2 border-t border-[#E5E5E3]">
+          <div className="space-y-4 pt-4 border-t border-[#ECE8D6]">
             <Input
               label="Email del cliente"
               type="email"
@@ -123,7 +123,7 @@ export default function ConfiguracionPage() {
               <Button variant="primary" size="sm">
                 <IconMail size={13} /> Enviar invitación
               </Button>
-              <span className="text-xs text-[#9B9B9B]">Último acceso: nunca</span>
+              <span className="text-xs text-[#A8A29A]">Último acceso: nunca</span>
             </div>
           </div>
         )}

@@ -89,7 +89,7 @@ export default function FinanzasProyectoPage() {
   const currency = project?.currency || 'ARS'
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
         <MetricCard label="Total proyecto" value={formatCurrency(totalProject, currency)} color="blue" icon={<IconCurrencyDollar size={16} stroke={1.5} />} />
@@ -98,29 +98,29 @@ export default function FinanzasProyectoPage() {
       </div>
 
       {/* Milestones */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Hitos de cobro</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Hitos de cobro</h2>
           <Button size="sm" variant="secondary" onClick={() => setShowMilestone(true)}>
             <IconPlus size={13} /> Agregar hito
           </Button>
         </div>
         <table className="w-full">
           <thead>
-            <tr className="border-b border-[#E5E5E3]">
+            <tr className="border-b border-[#ECE8D6]">
               {['Hito', 'Vencimiento', 'Monto', 'Estado', 'Acciones'].map(h => (
-                <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#9B9B9B] pb-2 pr-4">{h}</th>
+                <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] pb-2.5 pr-4">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#F0F0EE]">
+          <tbody className="divide-y divide-[#F0EDE0]">
             {milestones.map(m => (
-              <tr key={m.id} className="hover:bg-[#F9F9F8]">
-                <td className="py-3 pr-4 text-sm text-[#130D10] font-medium">{m.name}</td>
-                <td className="py-3 pr-4 text-sm text-[#6B6B6B]">{formatDate(m.due_date)}</td>
-                <td className="py-3 pr-4 text-sm text-[#130D10]">{formatCurrency(m.amount, currency)}</td>
+              <tr key={m.id} className="hover:bg-white/60 transition-colors">
+                <td className="py-3 pr-4 text-[14px] text-[#130D10] font-medium">{m.name}</td>
+                <td className="py-3 pr-4 text-[13px] text-[#8A847B]">{formatDate(m.due_date)}</td>
+                <td className="py-3 pr-4 text-[14px] text-[#130D10] font-medium">{formatCurrency(m.amount, currency)}</td>
                 <td className="py-3 pr-4">
-                  <span className={`text-xs px-2 py-0.5 rounded-md ${getMilestoneStatusColor(m.status)}`}>
+                  <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${getMilestoneStatusColor(m.status)}`}>
                     {getMilestoneStatusLabel(m.status)}
                   </span>
                 </td>
@@ -133,14 +133,14 @@ export default function FinanzasProyectoPage() {
                           onClick={() => setWhatsappMsg(generateWhatsAppMessage(
                             project?.client_name || '', m.name, m.due_date, m.amount, currency, currentUser.cbu_alias || ''
                           ))}
-                          className="p-1.5 rounded-lg hover:bg-green-50 text-green-600 transition-colors"
+                          className="p-1.5 rounded-full hover:bg-[#E5F3EF] text-[#00846F] transition-colors"
                         >
                           <IconBrandWhatsapp size={15} stroke={1.5} />
                         </button>
                         <button
                           title="Marcar como cobrado"
                           onClick={() => setConfirmPaid(m)}
-                          className="p-1.5 rounded-lg hover:bg-green-50 text-[#6B6B6B] hover:text-green-600 transition-colors"
+                          className="p-1.5 rounded-full hover:bg-[#E5F3EF] text-[#8A847B] hover:text-[#00846F] transition-colors"
                         >
                           <IconCheck size={15} stroke={1.5} />
                         </button>
@@ -149,7 +149,7 @@ export default function FinanzasProyectoPage() {
                     <button
                       title="Facturar por ARCA (próximamente)"
                       disabled
-                      className="p-1.5 rounded-lg text-[#DADADA] cursor-not-allowed"
+                      className="p-1.5 rounded-full text-[#D8D2C2] cursor-not-allowed"
                     >
                       <IconReceipt size={15} stroke={1.5} />
                     </button>
@@ -162,33 +162,33 @@ export default function FinanzasProyectoPage() {
       </section>
 
       {/* Costs */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Costos del proyecto</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Costos del proyecto</h2>
           <Button size="sm" variant="secondary" onClick={() => setShowCost(true)}>
             <IconPlus size={13} /> Agregar costo
           </Button>
         </div>
         {costs.length === 0 ? (
-          <p className="text-xs text-[#9B9B9B]">No hay costos cargados.</p>
+          <p className="text-[13px] text-[#A8A29A]">No hay costos cargados.</p>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#E5E5E3]">
+              <tr className="border-b border-[#ECE8D6]">
                 {['Descripción', 'Proveedor', 'Categoría', 'Monto'].map(h => (
-                  <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#9B9B9B] pb-2 pr-4">{h}</th>
+                  <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] pb-2.5 pr-4">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F0F0EE]">
+            <tbody className="divide-y divide-[#F0EDE0]">
               {costs.map(c => (
-                <tr key={c.id} className="hover:bg-[#F9F9F8]">
-                  <td className="py-3 pr-4 text-sm text-[#130D10]">{c.description}</td>
-                  <td className="py-3 pr-4 text-sm text-[#6B6B6B]">{c.provider_name || '—'}</td>
+                <tr key={c.id} className="hover:bg-white/60 transition-colors">
+                  <td className="py-3 pr-4 text-[14px] text-[#130D10]">{c.description}</td>
+                  <td className="py-3 pr-4 text-[13px] text-[#8A847B]">{c.provider_name || '—'}</td>
                   <td className="py-3 pr-4">
-                    <span className="text-xs px-2 py-0.5 rounded-md bg-gray-100 text-gray-600">{getCostCategoryLabel(c.category)}</span>
+                    <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-[#F2EFE2] text-[#6B655C]">{getCostCategoryLabel(c.category)}</span>
                   </td>
-                  <td className="py-3 text-sm text-[#130D10]">{formatCurrency(c.amount, currency)}</td>
+                  <td className="py-3 text-[14px] text-[#130D10] font-medium">{formatCurrency(c.amount, currency)}</td>
                 </tr>
               ))}
             </tbody>
@@ -197,28 +197,28 @@ export default function FinanzasProyectoPage() {
       </section>
 
       {/* Providers */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Proveedores del proyecto</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Proveedores del proyecto</h2>
           <Button size="sm" variant="secondary" onClick={() => setShowProvider(true)}>
             <IconPlus size={13} /> Agregar proveedor
           </Button>
         </div>
         {contacts.length === 0 ? (
-          <p className="text-xs text-[#9B9B9B]">Sin proveedores asignados.</p>
+          <p className="text-[13px] text-[#A8A29A]">Sin proveedores asignados.</p>
         ) : (
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             {contacts.map(c => (
-              <div key={c.id} className="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-[#F9F9F8]">
-                <div className="w-8 h-8 rounded-full bg-[#F0F0EE] flex items-center justify-center text-xs font-bold text-[#130D10]">
+              <div key={c.id} className="flex items-center gap-3 py-2.5 px-3 rounded-[14px] bg-white border border-[#ECE8D6]">
+                <div className="w-9 h-9 rounded-full bg-[#ECE9DA] flex items-center justify-center text-xs font-bold text-[#130D10]">
                   {c.name[0]}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#130D10]">{c.name}</p>
-                  <p className="text-[10px] text-[#9B9B9B]">{getContactCategoryLabel(c.category)}{c.phone && ` · ${c.phone}`}</p>
+                  <p className="text-[14px] font-medium text-[#130D10]">{c.name}</p>
+                  <p className="text-[11px] text-[#A8A29A]">{getContactCategoryLabel(c.category)}{c.phone && ` · ${c.phone}`}</p>
                 </div>
-                <span className="text-[10px] text-[#9B9B9B] border border-[#E5E5E3] px-2 py-0.5 rounded-md flex items-center gap-1">
-                  <IconBuildingStore size={10} /> Directorio
+                <span className="text-[10px] font-medium text-[#8A847B] border border-[#ECE8D6] px-2.5 py-1 rounded-full flex items-center gap-1">
+                  <IconBuildingStore size={11} /> Directorio
                 </span>
               </div>
             ))}
@@ -241,7 +241,7 @@ export default function FinanzasProyectoPage() {
           </>
         }
       >
-        <div className="bg-[#F9F9F8] border border-[#E5E5E3] rounded-xl p-4">
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[14px] p-4">
           <p className="text-sm text-[#130D10] whitespace-pre-wrap">{whatsappMsg}</p>
         </div>
       </Modal>
@@ -259,7 +259,7 @@ export default function FinanzasProyectoPage() {
         }
       >
         {confirmPaid && (
-          <p className="text-sm text-[#6B6B6B]">
+          <p className="text-sm text-[#6B655C]">
             ¿Confirmás que cobras el hito <strong className="text-[#130D10]">"{confirmPaid.name}"</strong> por <strong className="text-[#130D10]">{formatCurrency(confirmPaid.amount, currency)}</strong>?
           </p>
         )}

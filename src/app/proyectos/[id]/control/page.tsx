@@ -55,7 +55,7 @@ export default function ControlPage() {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           {/* View toggle */}
-          <div className="flex items-center p-1 bg-white border border-[#E5E5E3] rounded-lg gap-0.5">
+          <div className="flex items-center p-1 bg-white border border-[#ECE8D6] rounded-full gap-0.5">
             {[
               { k: 'kanban', icon: IconLayoutKanban, label: 'Kanban' },
               { k: 'lista', icon: IconList, label: 'Lista' },
@@ -65,8 +65,8 @@ export default function ControlPage() {
                 key={k}
                 onClick={() => setView(k as typeof view)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-colors',
-                  view === k ? 'bg-[#F5D242] text-[#130D10] font-medium' : 'text-[#6B6B6B] hover:text-[#130D10]'
+                  'flex items-center gap-1.5 px-3.5 py-1.5 text-xs rounded-full transition-colors',
+                  view === k ? 'bg-[#F5D242] text-[#130D10] font-semibold' : 'text-[#8A847B] hover:text-[#130D10]'
                 )}
               >
                 <Icon size={13} stroke={1.5} /> {label}
@@ -78,8 +78,8 @@ export default function ControlPage() {
           <button
             onClick={() => setClientView(v => !v)}
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border transition-colors',
-              clientView ? 'bg-[#FFF9D6] border-[#F5D242] text-[#130D10]' : 'border-[#E5E5E3] text-[#6B6B6B] hover:text-[#130D10]'
+              'flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-full border transition-colors',
+              clientView ? 'bg-[#FBF3D6] border-[#F5D242] text-[#130D10]' : 'bg-white border-[#ECE8D6] text-[#8A847B] hover:text-[#130D10]'
             )}
           >
             <IconEye size={13} stroke={1.5} /> Vista cliente
@@ -91,8 +91,8 @@ export default function ControlPage() {
       </div>
 
       {clientView && (
-        <div className="mb-4 px-4 py-2.5 bg-[#FFF9D6] border border-[#F5D242] rounded-lg text-xs text-[#130D10]">
-          👁 Modo vista cliente — solo se muestran tareas marcadas como visibles para el cliente
+        <div className="mb-4 flex items-center gap-2 px-4 py-2.5 bg-[#FBF3D6] border border-[#F5D242] rounded-[14px] text-xs text-[#7A6410]">
+          <IconEye size={14} stroke={1.6} /> Modo vista cliente — solo se muestran tareas marcadas como visibles para el cliente
         </div>
       )}
 
@@ -101,27 +101,27 @@ export default function ControlPage() {
           {statusCols.map(col => {
             const colTasks = visibleTasks.filter(t => t.status === col.status)
             return (
-              <div key={col.status} className="bg-white border border-[#E5E5E3] rounded-xl p-4">
+              <div key={col.status} className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[18px] p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9B9B9B]">{col.label}</h3>
-                  <span className="text-xs bg-[#F0F0EE] text-[#6B6B6B] px-2 py-0.5 rounded-full">{colTasks.length}</span>
+                  <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A]">{col.label}</h3>
+                  <span className="text-xs font-semibold bg-[#ECE9DA] text-[#6B655C] px-2 py-0.5 rounded-full">{colTasks.length}</span>
                 </div>
-                <div className="space-y-2">
+                <div className="flex flex-col gap-2">
                   {colTasks.map(task => {
                     const phase = getPhase(task.phase_id)
                     return (
                       <div
                         key={task.id}
                         onClick={() => setSelectedTask(task)}
-                        className="bg-[#F9F9F8] border border-[#E5E5E3] rounded-lg p-3 cursor-pointer hover:shadow-sm transition-shadow"
+                        className="bg-white border border-[#ECE8D6] rounded-[14px] p-3 cursor-pointer hover:shadow-[0_2px_8px_rgba(19,13,16,0.06)] transition-shadow"
                       >
                         {phase && (
-                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md mb-1.5 inline-block" style={{ backgroundColor: phase.color + '20', color: phase.color }}>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full mb-1.5 inline-block" style={{ backgroundColor: phase.color + '24', color: phase.color }}>
                             {phase.name}
                           </span>
                         )}
                         <p className="text-sm text-[#130D10] font-medium mb-2">{task.title}</p>
-                        <div className="flex items-center gap-2 text-[10px] text-[#9B9B9B]">
+                        <div className="flex items-center gap-2 text-[10px] text-[#A8A29A]">
                           {task.due_date && (
                             <span className="flex items-center gap-1">
                               <IconCalendar size={10} stroke={1.5} /> {formatDate(task.due_date)}
@@ -138,7 +138,7 @@ export default function ControlPage() {
                   })}
                   <button
                     onClick={() => { setForm(f => ({ ...f, status: col.status })); setShowNew(true) }}
-                    className="w-full py-2 text-xs text-[#9B9B9B] hover:text-[#6B6B6B] border border-dashed border-[#E5E5E3] rounded-lg hover:border-[#C0C0BD] transition-colors"
+                    className="w-full py-2 text-xs font-medium text-[#A8A29A] hover:text-[#6B655C] border border-dashed border-[#D8D2C2] rounded-[12px] hover:border-[#C4BFB4] transition-colors"
                   >
                     + Agregar tarea
                   </button>
@@ -150,42 +150,42 @@ export default function ControlPage() {
       )}
 
       {view === 'lista' && (
-        <div className="bg-white border border-[#E5E5E3] rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#ECE8D6] rounded-[18px] overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-[#E5E5E3] bg-[#F9F9F8]">
-                <th className="text-left text-xs font-semibold text-[#9B9B9B] px-4 py-3 uppercase tracking-wide">Tarea</th>
-                <th className="text-left text-xs font-semibold text-[#9B9B9B] px-4 py-3 uppercase tracking-wide">Fase</th>
-                <th className="text-left text-xs font-semibold text-[#9B9B9B] px-4 py-3 uppercase tracking-wide">Asignado</th>
-                <th className="text-left text-xs font-semibold text-[#9B9B9B] px-4 py-3 uppercase tracking-wide">Vencimiento</th>
-                <th className="text-left text-xs font-semibold text-[#9B9B9B] px-4 py-3 uppercase tracking-wide">Estado</th>
+              <tr className="border-b border-[#ECE8D6] bg-[#FBFAF3]">
+                <th className="text-left text-[11px] font-semibold text-[#A8A29A] px-4 py-3 uppercase tracking-[0.1em]">Tarea</th>
+                <th className="text-left text-[11px] font-semibold text-[#A8A29A] px-4 py-3 uppercase tracking-[0.1em]">Fase</th>
+                <th className="text-left text-[11px] font-semibold text-[#A8A29A] px-4 py-3 uppercase tracking-[0.1em]">Asignado</th>
+                <th className="text-left text-[11px] font-semibold text-[#A8A29A] px-4 py-3 uppercase tracking-[0.1em]">Vencimiento</th>
+                <th className="text-left text-[11px] font-semibold text-[#A8A29A] px-4 py-3 uppercase tracking-[0.1em]">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F0F0EE]">
+            <tbody className="divide-y divide-[#F0EDE0]">
               {visibleTasks.map(task => {
                 const phase = getPhase(task.phase_id)
                 const statusColors: Record<TaskStatus, string> = {
-                  todo: 'bg-gray-100 text-gray-600',
-                  en_progreso: 'bg-blue-100 text-blue-700',
-                  completado: 'bg-green-100 text-green-700',
+                  todo: 'bg-[#F2EFE2] text-[#6B655C]',
+                  en_progreso: 'bg-[#EAF2FB] text-[#3F6FA3]',
+                  completado: 'bg-[#E5F3EF] text-[#00846F]',
                 }
                 const statusLabels: Record<TaskStatus, string> = {
                   todo: 'Por hacer', en_progreso: 'En progreso', completado: 'Completado'
                 }
                 return (
-                  <tr key={task.id} className="hover:bg-[#F9F9F8] cursor-pointer" onClick={() => setSelectedTask(task)}>
+                  <tr key={task.id} className="hover:bg-[#FBFAF3] cursor-pointer transition-colors" onClick={() => setSelectedTask(task)}>
                     <td className="px-4 py-3 text-sm text-[#130D10] font-medium">{task.title}</td>
                     <td className="px-4 py-3">
                       {phase && (
-                        <span className="text-xs px-2 py-0.5 rounded-md" style={{ backgroundColor: phase.color + '20', color: phase.color }}>
+                        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: phase.color + '24', color: phase.color }}>
                           {phase.name}
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-xs text-[#6B6B6B]">{task.assigned_name || '—'}</td>
-                    <td className="px-4 py-3 text-xs text-[#6B6B6B]">{task.due_date ? formatDate(task.due_date) : '—'}</td>
+                    <td className="px-4 py-3 text-xs text-[#8A847B]">{task.assigned_name || '—'}</td>
+                    <td className="px-4 py-3 text-xs text-[#8A847B]">{task.due_date ? formatDate(task.due_date) : '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-md ${statusColors[task.status]}`}>{statusLabels[task.status]}</span>
+                      <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${statusColors[task.status]}`}>{statusLabels[task.status]}</span>
                     </td>
                   </tr>
                 )
@@ -196,12 +196,12 @@ export default function ControlPage() {
       )}
 
       {view === 'gantt' && (
-        <div className="bg-white border border-[#E5E5E3] rounded-xl p-5">
-          <p className="text-xs text-[#9B9B9B] mb-4">Cronograma por fases</p>
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[18px] p-6">
+          <p className="text-[12px] text-[#A8A29A] mb-4">Cronograma por fases</p>
           {phases.length === 0 ? (
-            <p className="text-sm text-[#9B9B9B]">No hay fases definidas para este proyecto.</p>
+            <p className="text-sm text-[#A8A29A]">No hay fases definidas para este proyecto.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               {phases.map(phase => {
                 if (!phase.start_date || !phase.end_date) return null
                 const start = new Date(phase.start_date)
@@ -216,17 +216,17 @@ export default function ControlPage() {
                   <div key={phase.id}>
                     <div className="flex items-center gap-3 mb-1">
                       <span className="text-xs font-medium text-[#130D10] w-28 shrink-0">{phase.name}</span>
-                      <div className="flex-1 h-7 bg-[#F9F9F8] rounded-lg relative overflow-hidden border border-[#E5E5E3]">
+                      <div className="flex-1 h-7 bg-white rounded-[10px] relative overflow-hidden border border-[#ECE8D6]">
                         <div
-                          className="absolute top-1 h-5 rounded-md flex items-center px-2"
+                          className="absolute top-1 h-5 rounded-[8px] flex items-center px-2"
                           style={{ left: `${left}%`, width: `${width}%`, backgroundColor: phase.color + '40', borderLeft: `3px solid ${phase.color}` }}
                         >
-                          <span className="text-[10px] font-medium truncate" style={{ color: phase.color }}>
+                          <span className="text-[10px] font-semibold truncate" style={{ color: phase.color }}>
                             {formatDate(phase.start_date!)} → {formatDate(phase.end_date!)}
                           </span>
                         </div>
                       </div>
-                      <span className="text-[10px] text-[#9B9B9B] w-16 text-right">{phaseTasks.length} tareas</span>
+                      <span className="text-[10px] text-[#A8A29A] w-16 text-right">{phaseTasks.length} tareas</span>
                     </div>
                   </div>
                 )
@@ -300,24 +300,24 @@ export default function ControlPage() {
           }
         >
           <div className="space-y-3">
-            {selectedTask.description && <p className="text-sm text-[#6B6B6B]">{selectedTask.description}</p>}
+            {selectedTask.description && <p className="text-sm text-[#6B655C]">{selectedTask.description}</p>}
             <div className="grid grid-cols-2 gap-3 text-xs">
               {selectedTask.due_date && (
                 <div>
-                  <span className="text-[#9B9B9B] block mb-0.5">Vencimiento</span>
+                  <span className="text-[#A8A29A] block mb-0.5">Vencimiento</span>
                   <span className="text-[#130D10]">{formatDate(selectedTask.due_date)}</span>
                 </div>
               )}
               {selectedTask.assigned_name && (
                 <div>
-                  <span className="text-[#9B9B9B] block mb-0.5">Asignado a</span>
+                  <span className="text-[#A8A29A] block mb-0.5">Asignado a</span>
                   <span className="text-[#130D10]">{selectedTask.assigned_name}</span>
                 </div>
               )}
             </div>
             <div className="flex items-center gap-2 pt-2">
-              <span className={`text-xs px-2 py-0.5 rounded-md ${selectedTask.is_client_visible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-                {selectedTask.is_client_visible ? '👁 Visible para cliente' : '🔒 Solo interno'}
+              <span className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full ${selectedTask.is_client_visible ? 'bg-[#E5F3EF] text-[#00846F]' : 'bg-[#F2EFE2] text-[#6B655C]'}`}>
+                {selectedTask.is_client_visible ? <><IconEye size={12} stroke={1.7} /> Visible para cliente</> : 'Solo interno'}
               </span>
             </div>
           </div>
