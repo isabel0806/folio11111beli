@@ -16,6 +16,7 @@ import {
 } from '@/lib/utils'
 import type { PaymentMilestone, CostItem, Contact, MilestoneStatus, CostCategory } from '@/lib/types'
 import { useToast } from '@/components/ui/Toast'
+import { FacturarArcaModal, type Factura } from '@/components/finanzas/FacturarArcaModal'
 
 export default function FinanzasProyectoPage() {
   const { toast } = useToast()
@@ -32,6 +33,8 @@ export default function FinanzasProyectoPage() {
   const [showProvider, setShowProvider] = useState(false)
   const [whatsappMsg, setWhatsappMsg] = useState<string | null>(null)
   const [confirmPaid, setConfirmPaid] = useState<PaymentMilestone | null>(null)
+  const [facturas, setFacturas] = useState<Record<string, Factura>>({})
+  const [facturando, setFacturando] = useState<PaymentMilestone | null>(null)
 
   const [mForm, setMForm] = useState({ name: '', due_date: '', amount: '' })
   const [cForm, setCForm] = useState({ description: '', provider_name: '', category: 'gasto', amount: '' })
@@ -146,13 +149,19 @@ export default function FinanzasProyectoPage() {
                         </button>
                       </>
                     )}
-                    <button
-                      title="Facturar por ARCA (próximamente)"
-                      disabled
-                      className="p-1.5 rounded-full text-[#D8D2C2] cursor-not-allowed"
-                    >
-                      <IconReceipt size={15} stroke={1.5} />
-                    </button>
+                    {facturas[m.id] ? (
+                      <span title={`CAE ${facturas[m.id].cae}`} className="flex items-center gap-1 text-[11px] font-medium text-[#3F6FA3] bg-[#EAF2FC] px-2 py-1 rounded-full">
+                        <IconReceipt size={12} stroke={1.7} /> {facturas[m.id].tipo} {facturas[m.id].numero}
+                      </span>
+                    ) : (
+                      <button
+                        title="Facturar con ARCA"
+                        onClick={() => setFacturando(m)}
+                        className="p-1.5 rounded-full text-[#8A847B] hover:text-[#3F6FA3] hover:bg-[#EAF2FC] transition-colors"
+                      >
+                        <IconReceipt size={15} stroke={1.5} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -307,6 +316,20 @@ export default function FinanzasProyectoPage() {
           <Input label="Dirección" value={pForm.address} onChange={e => setPForm(f => ({ ...f, address: e.target.value }))} placeholder="Av. Santa Fe 1234, CABA" />
         </div>
       </Modal>
+
+      {/* ARCA invoicing */}
+      <FacturarArcaModal
+        target={facturando ? {
+          id: facturando.id, name: facturando.name,
+          projectName: project?.name || '', clientName: project?.client_name || '',
+          amount: facturando.amount, currency,
+        } : null}
+        onClose={() => setFacturando(null)}
+        onIssue={(milestoneId, factura) => {
+          setFacturas(prev => ({ ...prev, [milestoneId]: factura }))
+          toast(`Factura ${factura.tipo} ${factura.numero} emitida`)
+        }}
+      />
     </div>
   )
 }

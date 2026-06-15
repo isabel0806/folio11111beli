@@ -35,6 +35,7 @@ export default function FinanzasPage() {
   )
   const [facturas, setFacturas] = useState<Record<string, Factura>>({})
   const [facturando, setFacturando] = useState<typeof enrichedMilestones[0] | null>(null)
+  const [priceSearch, setPriceSearch] = useState('')
 
   const enrichedMilestones = Object.entries(mockMilestones).flatMap(([pid, ms]) => {
     const project = mockProjects.find(p => p.id === pid)!
@@ -127,6 +128,20 @@ export default function FinanzasPage() {
     !search || c.description.toLowerCase().includes(search.toLowerCase()) ||
     (c.provider_name || '').toLowerCase().includes(search.toLowerCase())
   )
+
+  // Price history — benchmark a concept against costs across all projects
+  const priceMatches = priceSearch.trim()
+    ? allCosts
+        .filter(c => c.description.toLowerCase().includes(priceSearch.trim().toLowerCase()))
+        .sort((a, b) => a.amount - b.amount)
+    : []
+  const priceStats = priceMatches.length
+    ? {
+        avg: Math.round(priceMatches.reduce((a, c) => a + c.amount, 0) / priceMatches.length),
+        min: priceMatches[0].amount,
+        max: priceMatches[priceMatches.length - 1].amount,
+      }
+    : null
 
   // Tab counts
   const tabCounts = {
@@ -542,15 +557,56 @@ export default function FinanzasPage() {
             </div>
           )}
 
-          {/* Historial de precios placeholder */}
-          <div className="mt-4 bg-[#FBFAF3] border border-dashed border-[#ECE8D6] rounded-[20px] p-6">
-            <div className="flex items-center justify-between">
+          {/* Historial de precios */}
+          <div className="mt-4 bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
+            <div className="flex items-start justify-between gap-4 mb-4">
               <div>
                 <h3 className="font-serif text-[19px] text-[#130D10] mb-0.5">Historial de precios</h3>
-                <p className="text-xs text-[#A8A29A]">¿Cuánto costó algo similar antes? Próximamente podrás buscar en proyectos pasados para benchmarkear tus presupuestos.</p>
+                <p className="text-xs text-[#A8A29A]">¿Cuánto costó algo similar antes? Buscá en los costos de todos tus proyectos para benchmarkear el próximo presupuesto.</p>
               </div>
-              <span className="shrink-0 text-xs bg-[#F2EFE2] text-[#A8A29A] px-2.5 py-1 rounded-full">Próximamente</span>
+              <div className="relative shrink-0">
+                <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8A29A]" />
+                <input
+                  className="pl-9 pr-3 py-2 text-sm border border-[#ECE8D6] rounded-full bg-white w-56 focus:outline-none focus:ring-1 focus:ring-[#F5D242]"
+                  placeholder="Ej: contrapiso, pintura…"
+                  value={priceSearch}
+                  onChange={e => setPriceSearch(e.target.value)}
+                />
+              </div>
             </div>
+
+            {!priceSearch.trim() ? (
+              <p className="text-[13px] text-[#A8A29A] py-2">Escribí un concepto para ver qué pagaste en proyectos anteriores.</p>
+            ) : priceMatches.length === 0 ? (
+              <p className="text-[13px] text-[#A8A29A] py-2">Sin coincidencias para "{priceSearch}".</p>
+            ) : (
+              <>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {[
+                    { label: 'Mínimo', value: priceStats!.min, color: 'text-[#00846F]' },
+                    { label: 'Promedio', value: priceStats!.avg, color: 'text-[#130D10]' },
+                    { label: 'Máximo', value: priceStats!.max, color: 'text-[#C23A22]' },
+                  ].map(s => (
+                    <div key={s.label} className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">{s.label}</p>
+                      <p className={cn('font-serif text-[19px] mt-0.5', s.color)}>{formatCurrency(s.value)}</p>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#A8A29A] mb-2">{priceMatches.length} coincidencia{priceMatches.length === 1 ? '' : 's'}</p>
+                <div className="flex flex-col gap-1.5">
+                  {priceMatches.map(c => (
+                    <div key={c.id} className="flex items-center gap-4 bg-white border border-[#ECE8D6] rounded-[12px] px-4 py-2.5">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-medium text-[#130D10] truncate">{c.description}</p>
+                        <p className="text-[11px] text-[#A8A29A]">{c.project_name}{c.provider_name && ` · ${c.provider_name}`}</p>
+                      </div>
+                      <span className="font-serif text-[15px] text-[#130D10] shrink-0">{formatCurrency(c.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
