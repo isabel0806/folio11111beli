@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
+  --background: #FFFEF0;
   --foreground: #130D10;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), "Libre Baskerville", Georgia, serif;
+  --font-poppins: var(--font-poppins), ui-sans-serif, sans-serif;
 }
 
 * {
@@ -10,9 +16,9 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #130D10;
-  background: #FFFFFF;
+  background: #FFFEF0;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -24,6 +30,6 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E5E5E3;
+  background: #ECE8D6;
   border-radius: 2px;
 }

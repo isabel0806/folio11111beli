@@ -1,23 +1,34 @@
 'use client'
 import {
   IconAlertTriangle, IconClock, IconCheck, IconChevronRight,
-  IconCalendar, IconBrandWhatsapp, IconArrowRight, IconBolt,
-  IconFolderOpen, IconCurrencyDollar
+  IconBrandWhatsapp, IconArrowRight, IconBell, IconPlus,
+  IconCurrencyDollar, IconHome2, IconBuildingStore, IconBuildingSkyscraper,
 } from '@tabler/icons-react'
-import { mockProjects, mockMilestones, mockTasks, mockCalendarEvents, currentUser } from '@/lib/mock-data'
+import { mockProjects, mockMilestones, mockTasks, currentUser } from '@/lib/mock-data'
 import {
-  formatCurrency, formatDate, getGreeting, getProjectStatusColor,
-  getProjectStatusLabel, getMilestoneStatusColor, getDaysUntil, generateWhatsAppMessage
+  formatCurrency, formatDate, getGreeting, getDaysUntil, generateWhatsAppMessage
 } from '@/lib/utils'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
+import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/cn'
 
-const typeIcons: Record<string, string> = {
-  arquitectura: '🏛', diseño_grafico: '🎨', event_planning: '🎪', consultoria: '💼', otro: '📁',
+// Editorial accent palette, one per active project (blue · pink · olive · green)
+const tints = [
+  { soft: '#EAF2FB', solid: '#7FB0E8', text: '#3F6FA3' },
+  { soft: '#FDECF3', solid: '#FFABCF', text: '#B14E7C' },
+  { soft: '#F6F5E2', solid: '#D5D25D', text: '#7E7B2E' },
+  { soft: '#E5F3EF', solid: '#00846F', text: '#00846F' },
+]
+
+const typeIcon: Record<string, typeof IconHome2> = {
+  arquitectura: IconHome2,
+  diseño_grafico: IconBuildingStore,
+  event_planning: IconBuildingSkyscraper,
+  consultoria: IconBuildingSkyscraper,
+  otro: IconBuildingSkyscraper,
 }
 
 export default function InicioPage() {
@@ -40,264 +51,269 @@ export default function InicioPage() {
   const [checkedTasks, setCheckedTasks] = useState<Set<string>>(new Set())
   const [whatsappMsg, setWhatsappMsg] = useState<string | null>(null)
 
-  const pendingTotal = allMilestones
-    .filter(m => m.status === 'pendiente' || m.status === 'vencido')
-    .reduce((a, m) => a + m.amount, 0)
+  const pendingMs = allMilestones.filter(m => m.status === 'pendiente' || m.status === 'vencido')
+  const pendingTotal = pendingMs.reduce((a, m) => a + m.amount, 0)
 
-  const hasAlerts = overdue.length > 0 || dueSoon.length > 0
+  const firstOverdue = overdue[0]
+  const firstSoon = dueSoon[0]
+  const attentionCount = (firstOverdue ? 1 : 0) + (firstSoon ? 1 : 0)
 
   return (
-    <div className="p-8 max-w-5xl">
-      {/* Greeting */}
-      <div className="mb-8">
-        <p className="text-sm text-[#9B9B9B] capitalize mb-1">{today}</p>
-        <h1 className="text-2xl font-bold text-[#130D10]">
-          {getGreeting()}, {currentUser.name.split(' ')[0]}
-        </h1>
+    <div className="px-12 py-10 max-w-[1200px]">
+      {/* ───── Topbar ───── */}
+      <div className="flex items-start justify-between mb-7">
+        <div>
+          <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-[#A8A29A] mb-2">{today}</p>
+          <h1 className="font-serif text-[44px] leading-[1.05] text-[#130D10] flex items-center gap-3">
+            {getGreeting()}, {currentUser.name.split(' ')[0]}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#FF5738" aria-hidden>
+              <path d="M12 2c.3 3.8 2.2 5.7 6 6-3.8.3-5.7 2.2-6 6-.3-3.8-2.2-5.7-6-6 3.8-.3 5.7-2.2 6-6z" />
+            </svg>
+          </h1>
+          <p className="text-[15px] text-[#6B655C] mt-2">
+            Hoy tenés{' '}
+            <span className="font-semibold text-[#C23A22]">{overdue.length} pago{overdue.length !== 1 ? 's' : ''} vencido{overdue.length !== 1 ? 's' : ''}</span>{' '}
+            y <span className="font-semibold text-[#130D10]">{todayTasks.length} tareas pendientes</span>.
+          </p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <button className="w-11 h-11 rounded-full border border-[#ECE8D6] bg-white flex items-center justify-center hover:bg-[#FBFAF3] transition-colors">
+            <IconBell size={18} className="text-[#5C564E]" stroke={1.6} />
+          </button>
+          <Link href="/proyectos">
+            <button className="flex items-center gap-2 bg-[#130D10] text-white text-sm font-semibold pl-4 pr-5 py-3 rounded-full hover:bg-[#2A2227] transition-colors">
+              <IconPlus size={16} stroke={2.2} /> Nuevo proyecto
+            </button>
+          </Link>
+        </div>
       </div>
 
-      {/* ALERTS — lo urgente primero */}
-      {hasAlerts && (
-        <div className="mb-7 space-y-2">
-          {overdue.map(m => (
-            <div key={m.id} className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-              <div className="p-1.5 bg-red-100 rounded-lg shrink-0">
-                <IconAlertTriangle size={14} className="text-red-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-red-900">
-                  Pago vencido — <span className="font-bold">{m.name}</span>
-                </p>
-                <p className="text-xs text-red-600">
-                  {m.project?.name} · Venció el {formatDate(m.due_date)} · {formatCurrency(m.amount, m.project?.currency)}
-                </p>
-              </div>
-              <button
-                onClick={() => setWhatsappMsg(generateWhatsAppMessage(
-                  m.project?.client_name || '', m.name, m.due_date,
-                  m.amount, m.project?.currency || 'ARS', currentUser.cbu_alias || ''
-                ))}
-                className="flex items-center gap-1.5 text-xs font-medium text-white bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded-lg transition-colors shrink-0"
-              >
-                <IconBrandWhatsapp size={13} /> Cobrar
-              </button>
-            </div>
-          ))}
-          {dueSoon.map(m => {
-            const days = getDaysUntil(m.due_date)
-            return (
-              <div key={m.id} className="flex items-center gap-3 bg-[#FFFBEB] border border-[#F5D242]/40 rounded-xl px-4 py-3">
-                <div className="p-1.5 bg-[#FFF9D6] rounded-lg shrink-0">
-                  <IconClock size={14} className="text-[#C9A800]" />
+      {/* ───── Requiere tu atención ───── */}
+      {attentionCount > 0 && (
+        <section className="mb-9">
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-[12px] font-semibold uppercase tracking-[0.1em] text-[#8A847B]">Requiere tu atención</h2>
+            <span className="w-5 h-5 rounded-full bg-[#FF5738] text-white text-[11px] font-bold flex items-center justify-center">{attentionCount}</span>
+          </div>
+          <div className="flex gap-5">
+            {firstOverdue && (
+              <div className="flex-1 rounded-[22px] bg-[#FF5738] p-5 flex flex-col gap-3.5">
+                <div className="flex items-center gap-1.5 self-start bg-white/20 rounded-full pl-2.5 pr-3 py-1">
+                  <IconAlertTriangle size={13} className="text-white" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-white">Pago vencido</span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[#130D10]">
-                    {days === 0 ? 'Vence hoy' : `Vence en ${days} día${days > 1 ? 's' : ''}`} — <span className="font-bold">{m.name}</span>
-                  </p>
-                  <p className="text-xs text-[#9B9B9B]">
-                    {m.project?.name} · {formatDate(m.due_date)} · {formatCurrency(m.amount, m.project?.currency)}
-                  </p>
+                <div>
+                  <p className="text-[19px] font-semibold text-white leading-tight">{firstOverdue.project?.name}</p>
+                  <p className="text-[13px] text-white/80 mt-0.5">{firstOverdue.name} · Venció el {formatDate(firstOverdue.due_date)}</p>
                 </div>
+                <p className="font-serif text-[40px] leading-none text-white">{formatCurrency(firstOverdue.amount, firstOverdue.project?.currency)}</p>
                 <button
                   onClick={() => setWhatsappMsg(generateWhatsAppMessage(
-                    m.project?.client_name || '', m.name, m.due_date,
-                    m.amount, m.project?.currency || 'ARS', currentUser.cbu_alias || ''
+                    firstOverdue.project?.client_name || '', firstOverdue.name, firstOverdue.due_date,
+                    firstOverdue.amount, firstOverdue.project?.currency || 'ARS', currentUser.cbu_alias || ''
                   ))}
-                  className="flex items-center gap-1.5 text-xs font-medium text-[#130D10] bg-[#F5D242] hover:bg-[#f0ca30] px-3 py-1.5 rounded-lg transition-colors shrink-0"
+                  className="flex items-center gap-2 self-start bg-white text-[#130D10] text-[13px] font-semibold pl-3.5 pr-4 py-2.5 rounded-full hover:bg-white/90 transition-colors mt-1"
                 >
-                  <IconBolt size={13} /> Recordar
+                  <IconBrandWhatsapp size={15} className="text-[#00846F]" /> Enviar recordatorio
                 </button>
               </div>
-            )
-          })}
-        </div>
+            )}
+            {firstSoon && (() => {
+              const days = getDaysUntil(firstSoon.due_date)
+              return (
+                <div className="flex-1 rounded-[22px] bg-[#F5D242] p-5 flex flex-col gap-3.5">
+                  <div className="flex items-center gap-1.5 self-start bg-[#130D10]/10 rounded-full pl-2.5 pr-3 py-1">
+                    <IconClock size={13} className="text-[#7A6410]" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#7A6410]">
+                      {days === 0 ? 'Vence hoy' : `Vence en ${days} día${days > 1 ? 's' : ''}`}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-[19px] font-semibold text-[#130D10] leading-tight">{firstSoon.project?.name}</p>
+                    <p className="text-[13px] text-[#7A6410] mt-0.5">{firstSoon.name} · {formatDate(firstSoon.due_date)}</p>
+                  </div>
+                  <p className="font-serif text-[40px] leading-none text-[#130D10]">{formatCurrency(firstSoon.amount, firstSoon.project?.currency)}</p>
+                  <button
+                    onClick={() => setWhatsappMsg(generateWhatsAppMessage(
+                      firstSoon.project?.client_name || '', firstSoon.name, firstSoon.due_date,
+                      firstSoon.amount, firstSoon.project?.currency || 'ARS', currentUser.cbu_alias || ''
+                    ))}
+                    className="flex items-center gap-2 self-start bg-[#130D10] text-white text-[13px] font-semibold pl-3.5 pr-4 py-2.5 rounded-full hover:bg-[#2A2227] transition-colors mt-1"
+                  >
+                    <IconBrandWhatsapp size={15} /> Enviar recordatorio
+                  </button>
+                </div>
+              )
+            })()}
+          </div>
+        </section>
       )}
 
-      <div className="grid grid-cols-3 gap-6">
-        {/* Left: Projects */}
-        <div className="col-span-2 space-y-5">
-          {/* Active projects */}
+      {/* ───── Grid ───── */}
+      <div className="grid grid-cols-[1fr_360px] gap-7">
+        {/* Left column */}
+        <div className="space-y-8">
+          {/* Proyectos activos */}
           <section>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[#130D10] flex items-center gap-2">
-                <IconFolderOpen size={15} className="text-[#9B9B9B]" stroke={1.5} />
-                Proyectos activos
-              </h2>
-              <Link href="/proyectos" className="text-xs text-[#9B9B9B] hover:text-[#130D10] flex items-center gap-1 transition-colors">
-                Ver todos <IconArrowRight size={11} />
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-serif text-[26px] text-[#130D10]">Proyectos activos</h2>
+              <Link href="/proyectos" className="text-[13px] text-[#8A847B] hover:text-[#130D10] flex items-center gap-1.5 transition-colors">
+                Ver todos <IconArrowRight size={13} />
               </Link>
             </div>
-            <div className="space-y-2">
-              {activeProjects.map(p => {
+            <div className="space-y-2.5">
+              {activeProjects.map((p, i) => {
+                const tint = tints[i % tints.length]
+                const Icon = typeIcon[p.type] || IconBuildingSkyscraper
                 const ms = mockMilestones[p.id] || []
-                const cobrado = ms.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
-                const total = p.total_amount || 0
-                const cobradoPct = total > 0 ? (cobrado / total) * 100 : 0
                 const nextMs = ms.find(m => m.status === 'pendiente')
-                const overdueMs = ms.filter(m => m.status === 'vencido').length
+                const overdueMs = ms.some(m => m.status === 'vencido')
                 const daysToNext = nextMs ? getDaysUntil(nextMs.due_date) : null
-
+                const segments = 6
+                const filled = Math.round(((p.progress ?? 0) / 100) * segments)
                 return (
                   <Link key={p.id} href={`/proyectos/${p.id}`}>
-                    <div className="flex items-center gap-4 bg-white border border-[#E5E5E3] rounded-xl px-4 py-3.5 hover:border-[#F5D242]/60 hover:shadow-sm transition-all group">
-                      {/* Cover dot */}
-                      <div
-                        className="w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0"
-                        style={{ backgroundColor: p.cover_color, opacity: 0.9 }}
-                      >
-                        {typeIcons[p.type]}
+                    <div
+                      className="flex items-center gap-4 rounded-[18px] px-4 py-3.5 transition-all hover:brightness-[0.98]"
+                      style={{ backgroundColor: tint.soft }}
+                    >
+                      <div className="w-11 h-11 rounded-[13px] flex items-center justify-center shrink-0" style={{ backgroundColor: tint.solid }}>
+                        <Icon size={21} className="text-white" stroke={1.8} />
                       </div>
-
-                      {/* Info */}
+                      <div className="w-[150px] shrink-0">
+                        <p className="text-[15px] font-semibold text-[#130D10] truncate">{p.name}</p>
+                        <p className="text-[12px] text-[#8A847B] truncate">{p.client_name}</p>
+                      </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-semibold text-[#130D10] truncate">{p.name}</span>
-                          {overdueMs > 0 && (
-                            <span className="text-[10px] text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full shrink-0 flex items-center gap-0.5">
-                              <IconAlertTriangle size={9} /> {overdueMs} vencido
-                            </span>
-                          )}
+                        <p className="text-[12px] text-[#6B655C] mb-1.5 truncate">
+                          Etapa: <span className="font-medium text-[#130D10]">{nextMs?.name ?? 'En cierre'}</span>
+                        </p>
+                        <div className="flex gap-1">
+                          {Array.from({ length: segments }).map((_, s) => (
+                            <span
+                              key={s}
+                              className="h-1.5 flex-1 rounded-full"
+                              style={{ backgroundColor: s < filled ? '#00846F' : 'rgba(19,13,16,0.10)' }}
+                            />
+                          ))}
                         </div>
-                        <p className="text-xs text-[#9B9B9B]">{p.client_name}</p>
                       </div>
-
-                      {/* Progress */}
-                      <div className="w-32 shrink-0">
-                        {total > 0 ? (
-                          <>
-                            <div className="flex justify-between text-[10px] text-[#9B9B9B] mb-1">
-                              <span>{formatCurrency(cobrado, p.currency)}</span>
-                              <span>{Math.round(cobradoPct)}%</span>
-                            </div>
-                            <div className="h-1.5 bg-[#F0F0EE] rounded-full overflow-hidden">
-                              <div className="h-full bg-green-400 rounded-full" style={{ width: `${cobradoPct}%` }} />
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex justify-between text-[10px] text-[#9B9B9B] mb-1">
-                              <span>Avance</span>
-                              <span>{p.progress}%</span>
-                            </div>
-                            <div className="h-1.5 bg-[#F0F0EE] rounded-full overflow-hidden">
-                              <div className="h-full bg-[#F5D242] rounded-full" style={{ width: `${p.progress}%` }} />
-                            </div>
-                          </>
-                        )}
+                      <div className="w-[110px] text-right shrink-0">
+                        <span
+                          className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                          style={
+                            overdueMs
+                              ? { backgroundColor: '#FFE3DC', color: '#C23A22' }
+                              : daysToNext !== null && daysToNext <= 7
+                              ? { backgroundColor: '#FBEFC0', color: '#7A6410' }
+                              : { backgroundColor: 'rgba(19,13,16,0.06)', color: '#6B655C' }
+                          }
+                        >
+                          {overdueMs ? 'Vencido' : daysToNext !== null ? `Vence en ${daysToNext}d` : 'En pausa'}
+                        </span>
+                        <p className="text-[12px] text-[#6B655C] mt-1.5">{formatCurrency(p.total_amount ?? 0, p.currency)}</p>
                       </div>
-
-                      {/* Next milestone */}
-                      <div className="w-28 text-right shrink-0">
-                        {daysToNext !== null && (
-                          <div className={cn(
-                            'text-[10px] px-2 py-1 rounded-lg',
-                            daysToNext < 0 ? 'bg-red-50 text-red-600' :
-                            daysToNext <= 7 ? 'bg-[#FFF9D6] text-[#C9A800]' :
-                            'text-[#9B9B9B]'
-                          )}>
-                            {daysToNext < 0 ? `Vencido` :
-                             daysToNext === 0 ? 'Vence hoy' :
-                             `${daysToNext}d`}
-                            <div className="font-medium truncate">{formatCurrency(nextMs!.amount, p.currency)}</div>
-                          </div>
-                        )}
-                      </div>
-
-                      <IconChevronRight size={13} className="text-[#D5D5D3] group-hover:text-[#9B9B9B] shrink-0 transition-colors" />
+                      <IconChevronRight size={15} className="text-[#C4BFB4] shrink-0" />
                     </div>
                   </Link>
                 )
               })}
-              {activeProjects.length === 0 && (
-                <div className="bg-white border border-dashed border-[#E5E5E3] rounded-xl px-4 py-8 text-center">
-                  <p className="text-sm text-[#9B9B9B]">No hay proyectos activos</p>
-                  <Link href="/proyectos">
-                    <Button variant="primary" size="sm" className="mt-3"><IconFolderOpen size={13} /> Crear proyecto</Button>
-                  </Link>
-                </div>
-              )}
             </div>
           </section>
 
-          {/* Tasks today */}
+          {/* Tareas para hoy */}
           {todayTasks.length > 0 && (
             <section>
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-sm font-semibold text-[#130D10]">Tareas para hoy</h2>
-                <span className="text-xs text-[#9B9B9B]">{todayTasks.length - checkedTasks.size} pendientes</span>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-serif text-[26px] text-[#130D10]">Tareas para hoy</h2>
+                <span className="text-[13px] text-[#8A847B]">{todayTasks.length - checkedTasks.size} pendientes</span>
               </div>
-              <div className="bg-white border border-[#E5E5E3] rounded-xl divide-y divide-[#F0F0EE]">
-                {todayTasks.map(task => (
-                  <div key={task.id} className="flex items-center gap-3 px-4 py-3">
-                    <button
-                      onClick={() => setCheckedTasks(prev => {
-                        const n = new Set(prev)
-                        n.has(task.id) ? n.delete(task.id) : n.add(task.id)
-                        return n
-                      })}
-                      className={cn(
-                        'w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all',
-                        checkedTasks.has(task.id) ? 'bg-[#F5D242] border-[#F5D242]' : 'border-[#E5E5E3] hover:border-[#F5D242]'
-                      )}
-                    >
-                      {checkedTasks.has(task.id) && <IconCheck size={11} className="text-[#130D10]" />}
-                    </button>
-                    <div className={cn('flex-1 min-w-0', checkedTasks.has(task.id) && 'opacity-40 line-through')}>
-                      <p className="text-sm text-[#130D10]">{task.title}</p>
-                      <p className="text-[10px] text-[#9B9B9B]">
-                        {mockProjects.find(p => p.id === task.project_id)?.name}
-                      </p>
+              <div className="bg-white border border-[#ECE8D6] rounded-[18px] divide-y divide-[#F2EFE2]">
+                {todayTasks.map(task => {
+                  const checked = checkedTasks.has(task.id)
+                  return (
+                    <div key={task.id} className="flex items-center gap-3.5 px-5 py-4">
+                      <button
+                        onClick={() => setCheckedTasks(prev => {
+                          const n = new Set(prev)
+                          if (n.has(task.id)) n.delete(task.id); else n.add(task.id)
+                          return n
+                        })}
+                        className={cn(
+                          'w-[22px] h-[22px] rounded-md border-2 shrink-0 flex items-center justify-center transition-all',
+                          checked ? 'bg-[#00846F] border-[#00846F]' : 'border-[#D8D3C6] hover:border-[#00846F]'
+                        )}
+                      >
+                        {checked && <IconCheck size={13} className="text-white" stroke={3} />}
+                      </button>
+                      <div className={cn('flex-1 min-w-0', checked && 'opacity-45')}>
+                        <p className={cn('text-[14px] text-[#130D10]', checked && 'line-through')}>{task.title}</p>
+                        <p className="text-[12px] text-[#8A847B]">{mockProjects.find(p => p.id === task.project_id)?.name}</p>
+                      </div>
+                      <span
+                        className="text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0"
+                        style={checked
+                          ? { backgroundColor: '#E5F3EF', color: '#00846F' }
+                          : { backgroundColor: '#FBEFC0', color: '#7A6410' }}
+                      >
+                        {checked ? 'Hecho' : 'En progreso'}
+                      </span>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </section>
           )}
         </div>
 
-        {/* Right: summary */}
-        <div className="space-y-4">
-          {/* Financial snapshot */}
-          <div className="bg-white border border-[#E5E5E3] rounded-xl p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B] mb-3">Por cobrar</p>
-            <p className="text-2xl font-bold text-[#130D10] mb-1">{formatCurrency(pendingTotal)}</p>
-            <p className="text-xs text-[#9B9B9B] mb-4">en {allMilestones.filter(m => m.status === 'pendiente' || m.status === 'vencido').length} hitos</p>
-            <Link href="/finanzas">
-              <Button variant="primary" size="sm" className="w-full justify-center">
-                <IconCurrencyDollar size={13} /> Ver finanzas
-              </Button>
+        {/* Right column */}
+        <div className="space-y-5">
+          {/* Por cobrar — dark card */}
+          <div className="rounded-[22px] bg-[#130D10] px-6 pt-6 pb-6 overflow-hidden relative">
+            <div className="absolute -right-8 -top-6 w-28 h-28 rounded-full bg-[#F5D242]/20" />
+            <div className="absolute right-10 bottom-6 w-16 h-16 rounded-full bg-[#FF5738]/20" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7FB0E8] mb-2 relative">Por cobrar</p>
+            <p className="font-serif text-[42px] leading-none text-white mb-1.5 relative">{formatCurrency(pendingTotal)}</p>
+            <p className="text-[13px] text-[#A8A29A] mb-5 relative">en {pendingMs.length} hitos pendientes</p>
+            <Link href="/finanzas" className="relative block">
+              <button className="w-full flex items-center justify-center gap-2 bg-[#F5D242] text-[#130D10] text-sm font-semibold py-3 rounded-full hover:bg-[#f0ca30] transition-colors">
+                <IconCurrencyDollar size={16} /> Ver finanzas
+              </button>
             </Link>
           </div>
 
-          {/* Calendar preview */}
-          <div className="bg-white border border-[#E5E5E3] rounded-xl p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#9B9B9B]">Próximos eventos</p>
-              <Link href="/agenda" className="text-[10px] text-[#9B9B9B] hover:text-[#130D10]">Ver agenda</Link>
+          {/* Próximos eventos */}
+          <div className="bg-white border border-[#ECE8D6] rounded-[20px] p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8A847B]">Próximos eventos</p>
+              <Link href="/agenda" className="text-[11px] text-[#A8A29A] hover:text-[#130D10]">Ver agenda</Link>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-3.5">
               {allMilestones
                 .filter(m => m.status === 'pendiente')
                 .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
-                .slice(0, 4)
+                .slice(0, 3)
                 .map(m => {
                   const days = getDaysUntil(m.due_date)
+                  const d = new Date(m.due_date)
+                  const urgent = days <= 0
+                  const soon = days > 0 && days <= 7
                   return (
-                    <div key={m.id} className="flex items-start gap-2.5">
-                      <div className={cn(
-                        'w-7 h-7 rounded-lg flex flex-col items-center justify-center shrink-0',
-                        days <= 0 ? 'bg-red-100' : days <= 7 ? 'bg-[#FFF9D6]' : 'bg-[#F0F0EE]'
-                      )}>
-                        <span className={cn('text-[8px] font-bold leading-none', days <= 0 ? 'text-red-600' : days <= 7 ? 'text-[#C9A800]' : 'text-[#9B9B9B]')}>
-                          {new Date(m.due_date).toLocaleDateString('es-AR', { month: 'short' }).toUpperCase()}
+                    <div key={m.id} className="flex items-center gap-3">
+                      <div
+                        className="w-10 h-10 rounded-[11px] flex flex-col items-center justify-center shrink-0"
+                        style={{ backgroundColor: urgent ? '#FFE3DC' : soon ? '#FBEFC0' : '#F2EFE2' }}
+                      >
+                        <span className="text-[8px] font-bold uppercase leading-none" style={{ color: urgent ? '#C23A22' : soon ? '#7A6410' : '#8A847B' }}>
+                          {d.toLocaleDateString('es-AR', { month: 'short' }).replace('.', '').toUpperCase()}
                         </span>
-                        <span className={cn('text-xs font-black leading-none', days <= 0 ? 'text-red-600' : days <= 7 ? 'text-[#C9A800]' : 'text-[#130D10]')}>
-                          {new Date(m.due_date).getDate()}
+                        <span className="font-serif text-[16px] leading-none mt-0.5" style={{ color: urgent ? '#C23A22' : '#130D10' }}>
+                          {d.getDate()}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-[#130D10] truncate">{m.name}</p>
-                        <p className="text-[10px] text-[#9B9B9B]">{m.project?.name} · {formatCurrency(m.amount, m.project?.currency)}</p>
+                        <p className="text-[13px] font-semibold text-[#130D10] truncate">{m.name}</p>
+                        <p className="text-[11px] text-[#8A847B] truncate">{m.project?.name} · {formatCurrency(m.amount, m.project?.currency)}</p>
                       </div>
                     </div>
                   )
@@ -305,26 +321,17 @@ export default function InicioPage() {
             </div>
           </div>
 
-          {/* Quick stats */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* Stats 2×2 */}
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Activos', value: activeProjects.length, icon: '📂' },
-              { label: 'Tareas hoy', value: todayTasks.length, icon: '✅' },
-              { label: 'Vencidos', value: overdue.length, icon: '⚠️', alert: overdue.length > 0 },
-              { label: 'Por vencer', value: dueSoon.length, icon: '⏰', warn: dueSoon.length > 0 },
+              { label: 'Proyectos activos', value: activeProjects.length, bg: '#EAF2FB', text: '#3F6FA3' },
+              { label: 'Tareas para hoy', value: todayTasks.length, bg: '#F6F5E2', text: '#7E7B2E' },
+              { label: 'Pago vencido', value: overdue.length, bg: '#FF5738', text: '#FFFFFF' },
+              { label: 'Por vencer', value: dueSoon.length, bg: '#FFABCF', text: '#7A2E50' },
             ].map(s => (
-              <div
-                key={s.label}
-                className={cn(
-                  'bg-white border rounded-xl p-3 text-center',
-                  s.alert ? 'border-red-200 bg-red-50' : s.warn ? 'border-[#F5D242]/40 bg-[#FFFBEB]' : 'border-[#E5E5E3]'
-                )}
-              >
-                <p className="text-base mb-0.5">{s.icon}</p>
-                <p className={cn('text-lg font-bold', s.alert ? 'text-red-600' : s.warn ? 'text-[#C9A800]' : 'text-[#130D10]')}>
-                  {s.value}
-                </p>
-                <p className="text-[10px] text-[#9B9B9B]">{s.label}</p>
+              <div key={s.label} className="rounded-[18px] p-4" style={{ backgroundColor: s.bg }}>
+                <p className="font-serif text-[34px] leading-none" style={{ color: s.text }}>{s.value}</p>
+                <p className="text-[12px] mt-2 font-medium" style={{ color: s.text, opacity: s.text === '#FFFFFF' ? 0.9 : 0.85 }}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -346,7 +353,7 @@ export default function InicioPage() {
           </>
         }
       >
-        <div className="bg-[#F9F9F8] border border-[#E5E5E3] rounded-xl p-4">
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-xl p-4">
           <p className="text-sm text-[#130D10] whitespace-pre-wrap">{whatsappMsg}</p>
         </div>
       </Modal>
