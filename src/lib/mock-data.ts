@@ -253,6 +253,55 @@ export const mockBitacora: Record<string, BitacoraEntry[]> = {
   ],
 }
 
+export interface TeamMember {
+  id: string
+  project_id: string
+  name: string
+  initials: string
+  avatar_color: string
+  avatar_text: string
+  role: string
+  tag_label: string
+  tag_dot: string
+  tag_bg: string
+  tag_text: string
+  contact: string
+  contact_type: 'email' | 'phone'
+}
+
+export interface ProviderRow {
+  id: string
+  project_id: string
+  name: string
+  initial: string
+  icon_bg: string
+  icon_text: string
+  rubro: string
+  contact: string
+  status_label: string
+  status_dot: string
+  status_text: string
+}
+
+export const mockTeam: Record<string, TeamMember[]> = {
+  p1: [
+    { id: 'tm1', project_id: 'p1', name: 'Isabel García', initials: 'IG', avatar_color: '#00846F', avatar_text: '#FFFEF0', role: 'Arquitecta · Dirección', tag_label: 'Responsable', tag_dot: '#FF5738', tag_bg: 'bg-[#FFEDE9]', tag_text: 'text-[#C23A22]', contact: 'isabel@estudiogarcia.com', contact_type: 'email' },
+    { id: 'tm2', project_id: 'p1', name: 'Lucía Fernández', initials: 'LF', avatar_color: '#7FB0E8', avatar_text: '#FFFEF0', role: 'Arquitecta junior', tag_label: 'Documentación', tag_dot: '#7FB0E8', tag_bg: 'bg-[#EAF1FA]', tag_text: 'text-[#3F6FA3]', contact: 'lucia@estudiogarcia.com', contact_type: 'email' },
+    { id: 'tm3', project_id: 'p1', name: 'Martín Sosa', initials: 'MS', avatar_color: '#D5D25D', avatar_text: '#130D10', role: 'Maestro mayor de obra', tag_label: 'En obra', tag_dot: '#A8A52E', tag_bg: 'bg-[#F6F4D8]', tag_text: 'text-[#7E7B2E]', contact: '+54 11 5598 2210', contact_type: 'phone' },
+    { id: 'tm4', project_id: 'p1', name: 'Diego Pérez', initials: 'DP', avatar_color: '#FFABCF', avatar_text: '#130D10', role: 'Ingeniero estructural', tag_label: 'Consultor externo', tag_dot: '#A8A29A', tag_bg: 'bg-[#F4F1E3]', tag_text: 'text-[#6B655C]', contact: 'diego@estructuras.com', contact_type: 'email' },
+  ],
+}
+
+export const mockProviders: Record<string, ProviderRow[]> = {
+  p1: [
+    { id: 'pr1', project_id: 'p1', name: 'Aberturas del Sur', initial: 'A', icon_bg: 'bg-[#FFEDE9]', icon_text: 'text-[#C23A22]', rubro: 'Carpintería y aberturas', contact: '+54 11 4421 8890', status_label: 'Contratado', status_dot: '#00846F', status_text: 'text-[#00846F]' },
+    { id: 'pr2', project_id: 'p1', name: 'Hormigones Pilar SA', initial: 'H', icon_bg: 'bg-[#EAF1FA]', icon_text: 'text-[#3F6FA3]', rubro: 'Estructura y hormigón', contact: 'ventas@hormigones.com', status_label: 'Contratado', status_dot: '#00846F', status_text: 'text-[#00846F]' },
+    { id: 'pr3', project_id: 'p1', name: 'Electro Norte', initial: 'E', icon_bg: 'bg-[#F6F4D8]', icon_text: 'text-[#7E7B2E]', rubro: 'Instalación eléctrica', contact: '+54 11 3367 1102', status_label: 'Presupuestando', status_dot: '#F5D242', status_text: 'text-[#8A7220]' },
+    { id: 'pr4', project_id: 'p1', name: 'Sanitarios Belgrano', initial: 'S', icon_bg: 'bg-[#E4F1EC]', icon_text: 'text-[#00846F]', rubro: 'Plomería y sanitarios', contact: 'info@sanitariosb.com', status_label: 'Contratado', status_dot: '#00846F', status_text: 'text-[#00846F]' },
+    { id: 'pr5', project_id: 'p1', name: 'Vidrios Cristal', initial: 'V', icon_bg: 'bg-[#FDEAF1]', icon_text: 'text-[#B14E7C]', rubro: 'Vidriería y cerramientos', contact: '+54 11 2245 7781', status_label: 'A evaluar', status_dot: '#A8A29A', status_text: 'text-[#8A847B]' },
+  ],
+}
+
 export const mockCosts: Record<string, CostItem[]> = {
   p1: [
     { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 15000, created_at: mo(-4, 10) },

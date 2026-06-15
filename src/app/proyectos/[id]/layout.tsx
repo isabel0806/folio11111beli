@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn'
 import {
   IconFolder, IconLayoutKanban, IconCurrencyDollar,
   IconSettings, IconArrowLeft, IconAlertCircle, IconCalendarTime,
-  IconPlus, IconBolt, IconReceipt2, IconNotebook,
+  IconPlus, IconBolt, IconReceipt2, IconNotebook, IconUsersGroup,
 } from '@tabler/icons-react'
 
 const tabs = [
@@ -51,6 +51,12 @@ const tabs = [
       if (pending > 0) return { count: pending, color: 'yellow' as const }
       return null
     },
+  },
+  {
+    href: 'equipo',
+    label: 'Equipo',
+    icon: IconUsersGroup,
+    getBadge: () => null as { count: number; color: 'red' | 'yellow' | 'blue' } | null,
   },
   {
     href: 'configuracion',
