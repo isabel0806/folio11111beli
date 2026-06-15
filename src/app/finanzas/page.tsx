@@ -18,6 +18,7 @@ import type { MilestoneStatus } from '@/lib/types'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/cn'
 import Link from 'next/link'
+import { FacturarArcaModal, type Factura } from '@/components/finanzas/FacturarArcaModal'
 
 type TabKey = 'cobrar' | 'costos'
 type FilterKey = 'todos' | 'pendiente' | 'cobrado' | 'vencido'
@@ -32,6 +33,8 @@ export default function FinanzasPage() {
   const [selectedMonthKey, setSelectedMonthKey] = useState(
     `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`
   )
+  const [facturas, setFacturas] = useState<Record<string, Factura>>({})
+  const [facturando, setFacturando] = useState<typeof enrichedMilestones[0] | null>(null)
 
   const enrichedMilestones = Object.entries(mockMilestones).flatMap(([pid, ms]) => {
     const project = mockProjects.find(p => p.id === pid)!
@@ -490,9 +493,19 @@ export default function FinanzasPage() {
                         <IconCheck size={13} /> Cobrado
                       </span>
                     )}
-                    <button disabled title="ARCA — Próximamente" className="p-1.5 rounded-full text-[#D8D2C2] cursor-not-allowed">
-                      <IconReceipt size={15} stroke={1.5} />
-                    </button>
+                    {facturas[m.id] ? (
+                      <span title={`CAE ${facturas[m.id].cae}`} className="flex items-center gap-1 text-xs font-medium text-[#3F6FA3] bg-[#EAF2FC] px-2.5 py-1.5 rounded-full">
+                        <IconReceipt size={13} stroke={1.7} /> {facturas[m.id].tipo} {facturas[m.id].numero}
+                      </span>
+                    ) : (
+                      <button
+                        title="Facturar con ARCA"
+                        onClick={() => setFacturando(m)}
+                        className="flex items-center gap-1.5 text-xs font-medium text-[#3F6FA3] bg-white border border-[#CFE0F3] hover:bg-[#EAF2FC] px-2.5 py-1.5 rounded-full transition-colors"
+                      >
+                        <IconReceipt size={13} stroke={1.7} /> Facturar
+                      </button>
+                    )}
                   </div>
                 </div>
               )
@@ -578,6 +591,20 @@ export default function FinanzasPage() {
           </div>
         )}
       </Modal>
+
+      {/* ARCA invoicing */}
+      <FacturarArcaModal
+        target={facturando ? {
+          id: facturando.id, name: facturando.name,
+          projectName: facturando.project.name, clientName: facturando.project.client_name,
+          amount: facturando.amount, currency: facturando.project.currency,
+        } : null}
+        onClose={() => setFacturando(null)}
+        onIssue={(milestoneId, factura) => {
+          setFacturas(prev => ({ ...prev, [milestoneId]: factura }))
+          toast(`Factura ${factura.tipo} ${factura.numero} emitida`)
+        }}
+      />
     </div>
   )
 }
