@@ -19,12 +19,15 @@ import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/cn'
 import Link from 'next/link'
 import { FacturarArcaModal, type Factura } from '@/components/finanzas/FacturarArcaModal'
+import { useRole } from '@/lib/use-role'
+import { AccessDenied } from '@/components/layout/AccessDenied'
 
 type TabKey = 'cobrar' | 'costos'
 type FilterKey = 'todos' | 'pendiente' | 'cobrado' | 'vencido'
 
 export default function FinanzasPage() {
   const { toast } = useToast()
+  const { can } = useRole()
   const [tab, setTab] = useState<TabKey>('cobrar')
   const [filter, setFilter] = useState<FilterKey>('todos')
   const [search, setSearch] = useState('')
@@ -150,6 +153,8 @@ export default function FinanzasPage() {
     cobrado: milestones.filter(m => m.status === 'cobrado').length,
     vencido: milestones.filter(m => m.status === 'vencido').length,
   }
+
+  if (!can('finanzasGlobal')) return <AccessDenied area="las finanzas del estudio" />
 
   return (
     <div className="p-8">

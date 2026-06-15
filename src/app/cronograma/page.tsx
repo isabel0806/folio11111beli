@@ -2,6 +2,8 @@
 import { useState } from 'react'
 import { IconFilter, IconFileDownload } from '@tabler/icons-react'
 import { cn } from '@/lib/cn'
+import { useRole } from '@/lib/use-role'
+import { AccessDenied } from '@/components/layout/AccessDenied'
 
 type GroupKey = 'obra' | 'proyecto' | 'iniciar'
 
@@ -96,11 +98,14 @@ const legendItems = [
 export default function CronogramaMaestroPage() {
   const [zoom, setZoom] = useState<typeof zoomLevels[number]>('Trimestre')
   const [rubro, setRubro] = useState<typeof rubroFilters[number]>('Todos los rubros')
+  const { can } = useRole()
 
   const { cols: columns, colWidth } = buildColumns(zoom)
   const gridlines = columns.slice(1).map((_, i) => ((i + 1) / columns.length) * 100)
 
   const totalProjects = groups.reduce((a, g) => a + g.rows.length, 0)
+
+  if (!can('cronogramaMaestro')) return <AccessDenied area="el cronograma maestro del estudio" />
 
   return (
     <div className="flex flex-col pt-10 px-11 pb-12 gap-6">

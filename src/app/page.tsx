@@ -14,6 +14,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/cn'
+import { useRole } from '@/lib/use-role'
 
 // Editorial accent palette, one per active project (blue · pink · olive · green)
 const tints = [
@@ -33,6 +34,7 @@ const typeIcon: Record<string, typeof IconHome2> = {
 
 export default function InicioPage() {
   const { toast } = useToast()
+  const { can } = useRole()
   const today = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })
   const todayStr = new Date().toISOString().split('T')[0]
 
@@ -270,19 +272,21 @@ export default function InicioPage() {
 
         {/* Right column */}
         <div className="space-y-5">
-          {/* Por cobrar — dark card */}
-          <div className="rounded-[22px] bg-[#130D10] px-6 pt-6 pb-6 overflow-hidden relative">
-            <div className="absolute -right-8 -top-6 w-28 h-28 rounded-full bg-[#F5D242]/20" />
-            <div className="absolute right-10 bottom-6 w-16 h-16 rounded-full bg-[#FF5738]/20" />
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7FB0E8] mb-2 relative">Por cobrar</p>
-            <p className="font-serif text-[42px] leading-none text-white mb-1.5 relative">{formatCurrency(pendingTotal)}</p>
-            <p className="text-[13px] text-[#A8A29A] mb-5 relative">en {pendingMs.length} hitos pendientes</p>
-            <Link href="/finanzas" className="relative block">
-              <button className="w-full flex items-center justify-center gap-2 bg-[#F5D242] text-[#130D10] text-sm font-semibold py-3 rounded-full hover:bg-[#f0ca30] transition-colors">
-                <IconCurrencyDollar size={16} /> Ver finanzas
-              </button>
-            </Link>
-          </div>
+          {/* Por cobrar — dark card (solo roles con finanzas) */}
+          {can('finanzasGlobal') && (
+            <div className="rounded-[22px] bg-[#130D10] px-6 pt-6 pb-6 overflow-hidden relative">
+              <div className="absolute -right-8 -top-6 w-28 h-28 rounded-full bg-[#F5D242]/20" />
+              <div className="absolute right-10 bottom-6 w-16 h-16 rounded-full bg-[#FF5738]/20" />
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#7FB0E8] mb-2 relative">Por cobrar</p>
+              <p className="font-serif text-[42px] leading-none text-white mb-1.5 relative">{formatCurrency(pendingTotal)}</p>
+              <p className="text-[13px] text-[#A8A29A] mb-5 relative">en {pendingMs.length} hitos pendientes</p>
+              <Link href="/finanzas" className="relative block">
+                <button className="w-full flex items-center justify-center gap-2 bg-[#F5D242] text-[#130D10] text-sm font-semibold py-3 rounded-full hover:bg-[#f0ca30] transition-colors">
+                  <IconCurrencyDollar size={16} /> Ver finanzas
+                </button>
+              </Link>
+            </div>
+          )}
 
           {/* Próximos eventos */}
           <div className="bg-white border border-[#ECE8D6] rounded-[20px] p-5">
