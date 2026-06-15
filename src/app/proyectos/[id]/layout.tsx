@@ -2,7 +2,8 @@
 import { useParams, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { mockProjects, mockMilestones, mockTasks } from '@/lib/mock-data'
-import { getProjectStatusLabel, getProjectTypeLabel, formatCurrency, formatDate } from '@/lib/utils'
+import { getProjectTypeLabel, formatCurrency, formatDate } from '@/lib/utils'
+import { ProjectStatusBadge } from '@/components/proyectos/ProjectStatusBadge'
 import { cn } from '@/lib/cn'
 import {
   IconFolder, IconLayoutKanban, IconCurrencyDollar,
@@ -165,9 +166,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
               <div className="flex items-center gap-3 mb-1">
                 <h1 className="font-serif text-[30px] leading-none text-[#130D10] truncate">{project.name}</h1>
                 <Sparkle className="text-[#FF5738] shrink-0" />
-                <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold shrink-0 bg-white border border-[#ECE8D6] text-[#5C564E]">
-                  {getProjectStatusLabel(project.status)}
-                </span>
+                <ProjectStatusBadge id={id} initialStatus={project.status} />
               </div>
               <p className="text-[13px] text-[#8A847B] mb-3.5">
                 {project.client_name}
