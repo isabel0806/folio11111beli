@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import {
   IconHome, IconFolderOpen, IconBuildingSkyscraper,
   IconCurrencyDollar, IconCalendar, IconSettings,
-  IconChevronRight
+  IconChevronRight, IconTimeline
 } from '@tabler/icons-react'
 import { currentUser } from '@/lib/mock-data'
 import { cn } from '@/lib/cn'
@@ -28,6 +28,7 @@ const nav = [
     items: [
       { href: '/finanzas', label: 'Finanzas', icon: IconCurrencyDollar },
       { href: '/agenda', label: 'Agenda', icon: IconCalendar },
+      { href: '/cronograma', label: 'Cronograma', icon: IconTimeline },
     ],
   },
 ]
