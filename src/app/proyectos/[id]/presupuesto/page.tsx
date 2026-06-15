@@ -8,6 +8,7 @@ import type { PaymentMilestone, ProjectFile } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { PresupuestoModal } from '@/components/proyectos/PresupuestoModal'
 import { useToast } from '@/components/ui/Toast'
+import { saveBudget } from '@/lib/budget-store'
 import Link from 'next/link'
 
 const stageDots = ['#FF5738', '#7FB0E8', '#D5D25D', '#00846F', '#F5D242']
@@ -198,12 +199,23 @@ export default function PresupuestoPage() {
         projectName={project?.name || ''}
         clientName={project?.client_name || ''}
         currency={currency}
-        onSave={({ name }) => {
+        onSave={({ name, items, notes }) => {
           const newFile: ProjectFile = {
             id: `f${Date.now()}`, project_id: id, name: `${name}.pdf`,
             type: 'presupuesto', uploaded_at: new Date().toISOString(),
           }
           setBudgets(prev => [...prev, newFile])
+          saveBudget(id, {
+            name,
+            notes,
+            savedAt: new Date().toISOString(),
+            items: items
+              .filter(i => i.description.trim())
+              .map(i => ({
+                detail: i.description, qty: i.quantity, unit: i.unit,
+                price: i.unit_price, iva: i.iva, honorarios: i.honorarios,
+              })),
+          })
           toast(`Presupuesto "${name}" guardado`)
         }}
       />

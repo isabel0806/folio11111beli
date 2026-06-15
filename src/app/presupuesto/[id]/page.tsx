@@ -1,17 +1,11 @@
 'use client'
-import { use } from 'react'
+import { use, useEffect, useState } from 'react'
 import { mockProjects } from '@/lib/mock-data'
+import { getBudget, type StoredBudgetItem } from '@/lib/budget-store'
 
-interface BudgetItem {
-  detail: string
-  qty: number
-  unit: string
-  price: number
-  iva: number
-  honorarios?: boolean
-}
+type BudgetItem = StoredBudgetItem
 
-const items: BudgetItem[] = [
+const exampleItems: BudgetItem[] = [
   { detail: 'Demolición y retiro de escombros', qty: 1, unit: 'Global', price: 400000, iva: 21 },
   { detail: 'Contrapiso y carpeta de nivelación', qty: 100, unit: 'm²', price: 10000, iva: 21 },
   { detail: 'Colocación de pisos', qty: 100, unit: 'm²', price: 15000, iva: 21 },
@@ -26,6 +20,14 @@ export default function PresupuestoPublicoPage({ params }: { params: Promise<{ i
   const project = mockProjects.find(p => p.id === id)
   const projectName = project?.name || 'Casa Palermo'
   const client = project?.client_name || 'Familia Rodríguez'
+
+  // Read the budget armed in the builder (stored client-side). Falls back to the
+  // example items when nothing has been saved for this project yet.
+  const [items, setItems] = useState<BudgetItem[]>(exampleItems)
+  useEffect(() => {
+    const stored = getBudget(id)
+    if (stored && stored.items.length) setItems(stored.items)
+  }, [id])
 
   const subtotal = items.reduce((a, it) => a + it.qty * it.price, 0)
   const ivaTotal = items.reduce((a, it) => a + it.qty * it.price * (it.iva / 100), 0)

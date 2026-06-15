@@ -15,6 +15,7 @@ import type { ProjectFile } from '@/lib/types'
 import { PresupuestoModal } from '@/components/proyectos/PresupuestoModal'
 import { mockProjects } from '@/lib/mock-data'
 import { useToast } from '@/components/ui/Toast'
+import { saveBudget } from '@/lib/budget-store'
 
 const integrations = [
   { id: 'drive', label: 'Google Drive', icon: IconBrandGoogleDrive, color: '#4285F4' },
@@ -199,12 +200,23 @@ export default function ArchivosPage() {
         projectName={project?.name || ''}
         clientName={project?.client_name || ''}
         currency={project?.currency || 'ARS'}
-        onSave={({ name }) => {
+        onSave={({ name, items, notes }) => {
           const newFile: ProjectFile = {
             id: `f${Date.now()}`, project_id: id, name: `${name}.pdf`,
             type: 'presupuesto', uploaded_at: new Date().toISOString(),
           }
           setFiles(prev => [...prev, newFile])
+          saveBudget(id, {
+            name,
+            notes,
+            savedAt: new Date().toISOString(),
+            items: items
+              .filter(i => i.description.trim())
+              .map(i => ({
+                detail: i.description, qty: i.quantity, unit: i.unit,
+                price: i.unit_price, iva: i.iva, honorarios: i.honorarios,
+              })),
+          })
           toast(`Presupuesto "${name}" guardado`)
         }}
       />
