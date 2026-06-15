@@ -4,14 +4,13 @@ import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input, Select } from '@/components/ui/Input'
 import {
-  IconPlus, IconLayoutGrid, IconList, IconDots,
-  IconCalendar, IconCurrencyDollar, IconAlertTriangle,
-  IconCheck, IconChevronRight, IconSearch
+  IconPlus, IconLayoutGrid, IconList, IconBell, IconSearch,
+  IconHome2, IconBuildingStore, IconBuildingSkyscraper, IconBriefcase,
+  IconFolder, IconCheck, IconChevronRight,
 } from '@tabler/icons-react'
 import { mockProjects, mockMilestones } from '@/lib/mock-data'
 import {
-  formatCurrency, formatDate, getProjectStatusColor,
-  getProjectStatusLabel, getProjectTypeLabel, getDaysUntil
+  formatCurrency, getProjectStatusLabel, getProjectTypeLabel, getDaysUntil
 } from '@/lib/utils'
 import type { Project, ProjectStatus } from '@/lib/types'
 import Link from 'next/link'
@@ -20,8 +19,22 @@ import { cn } from '@/lib/cn'
 type ViewMode = 'grid' | 'list'
 type FilterStatus = 'todos' | ProjectStatus
 
-const typeIcons: Record<string, string> = {
-  arquitectura: '🏛', diseño_grafico: '🎨', event_planning: '🎪', consultoria: '💼', otro: '📁',
+const coverColors = ['#7FB0E8', '#FFABCF', '#D5D25D', '#00846F', '#FF5738', '#F5D242']
+
+const typeIcon: Record<string, typeof IconHome2> = {
+  arquitectura: IconHome2,
+  diseño_grafico: IconBuildingStore,
+  event_planning: IconBuildingSkyscraper,
+  consultoria: IconBriefcase,
+  otro: IconFolder,
+}
+
+function Sparkle({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+      <path d="M12 2c.3 3.8 2.2 5.7 6 6-3.8.3-5.7 2.2-6 6-.3-3.8-2.2-5.7-6-6 3.8-.3 5.7-2.2 6-6z" />
+    </svg>
+  )
 }
 
 export default function ProyectosPage() {
@@ -58,7 +71,7 @@ export default function ProyectosPage() {
       hourly_rate: form.hourly_rate ? Number(form.hourly_rate) : undefined,
       start_date: form.start_date, created_at: new Date().toISOString(),
       progress: 0,
-      cover_color: ['#E8D5B7', '#B7D5E8', '#D5E8B7', '#E8B7D5', '#D5D5E8'][Math.floor(Math.random() * 5)],
+      cover_color: coverColors[Math.floor(Math.random() * coverColors.length)],
     }
     setProjects(prev => [newP, ...prev])
     setShowNew(false)
@@ -68,96 +81,88 @@ export default function ProyectosPage() {
   const activeCount = projects.filter(p => p.status === 'en_curso').length
 
   return (
-    <div className="p-8">
+    <div className="px-12 py-10 max-w-[1200px]">
       {/* Header */}
       <div className="flex items-start justify-between mb-7">
         <div>
-          <h1 className="text-xl font-bold text-[#130D10]">Proyectos</h1>
-          <p className="text-sm text-[#6B6B6B] mt-0.5">
-            {activeCount} activo{activeCount !== 1 ? 's' : ''} · {projects.length} en total
+          <h1 className="font-serif text-[44px] leading-[1.05] text-[#130D10] flex items-center gap-3">
+            Proyectos
+            <Sparkle className="w-5 h-5 text-[#FF5738]" />
+          </h1>
+          <p className="text-[15px] text-[#6B655C] mt-2">
+            Tenés <span className="font-semibold text-[#130D10]">{activeCount} activo{activeCount !== 1 ? 's' : ''}</span> · {projects.length} en total.
           </p>
         </div>
-        <Button variant="primary" onClick={() => setShowNew(true)}>
-          <IconPlus size={14} /> Nuevo proyecto
-        </Button>
+        <div className="flex items-center gap-3 shrink-0">
+          <button className="w-11 h-11 rounded-full border border-[#ECE8D6] bg-white flex items-center justify-center hover:bg-[#FBFAF3] transition-colors">
+            <IconBell size={18} className="text-[#5C564E]" stroke={1.6} />
+          </button>
+          <button onClick={() => setShowNew(true)} className="flex items-center gap-2 bg-[#130D10] text-white text-sm font-semibold pl-4 pr-5 py-3 rounded-full hover:bg-[#2A2227] transition-colors">
+            <IconPlus size={16} stroke={2.2} /> Nuevo proyecto
+          </button>
+        </div>
       </div>
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          {/* Filters */}
-          <div className="flex items-center gap-1 bg-white border border-[#E5E5E3] rounded-lg p-1">
-            {filters.map(f => {
-              const count = f.value === 'todos' ? projects.length : projects.filter(p => p.status === f.value).length
-              return (
-                <button
-                  key={f.value}
-                  onClick={() => setFilter(f.value)}
-                  className={cn(
-                    'px-3 py-1.5 text-sm rounded-md transition-colors',
-                    filter === f.value
-                      ? 'bg-[#130D10] text-white font-medium'
-                      : 'text-[#6B6B6B] hover:text-[#130D10]'
-                  )}
-                >
-                  {f.label}
-                  {count > 0 && (
-                    <span className={cn('ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full',
-                      filter === f.value ? 'bg-white/20 text-white' : 'bg-[#F0F0EE] text-[#9B9B9B]'
-                    )}>{count}</span>
-                  )}
-                </button>
-              )
-            })}
-          </div>
+      <div className="flex items-center justify-between gap-4 mb-7 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
+          {filters.map(f => {
+            const count = f.value === 'todos' ? projects.length : projects.filter(p => p.status === f.value).length
+            const active = filter === f.value
+            return (
+              <button
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={cn(
+                  'flex items-center gap-2 pl-4 pr-3.5 py-2 text-[13px] rounded-full border transition-colors',
+                  active
+                    ? 'bg-[#130D10] text-white border-[#130D10] font-semibold'
+                    : 'bg-white text-[#5C564E] border-[#ECE8D6] hover:border-[#D8D3C6] font-medium'
+                )}
+              >
+                {f.label}
+                <span className={cn('text-[11px] font-semibold', active ? 'text-white/60' : 'text-[#A8A29A]')}>{count}</span>
+              </button>
+            )
+          })}
+        </div>
 
+        <div className="flex items-center gap-2">
           {/* Search */}
           <div className="relative">
-            <IconSearch size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9B9B9B]" />
+            <IconSearch size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8A29A]" />
             <input
-              className="pl-8 pr-3 py-2 text-sm border border-[#E5E5E3] rounded-lg bg-white w-48 focus:outline-none focus:ring-1 focus:ring-[#F5D242] focus:border-[#F5D242]"
-              placeholder="Buscar..."
+              className="pl-10 pr-4 py-2.5 text-[13px] border border-[#ECE8D6] rounded-full bg-[#FBFAF3] w-56 placeholder:text-[#A8A29A] focus:outline-none focus:ring-1 focus:ring-[#FF5738] focus:border-[#FF5738]"
+              placeholder="Buscar proyecto..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-        </div>
-
-        {/* View toggle */}
-        <div className="flex items-center gap-1 bg-white border border-[#E5E5E3] rounded-lg p-1">
-          <button onClick={() => setView('grid')} className={cn('p-1.5 rounded-md transition-colors', view === 'grid' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#9B9B9B] hover:text-[#130D10]')}>
-            <IconLayoutGrid size={15} />
-          </button>
-          <button onClick={() => setView('list')} className={cn('p-1.5 rounded-md transition-colors', view === 'list' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#9B9B9B] hover:text-[#130D10]')}>
-            <IconList size={15} />
-          </button>
+          {/* View toggle */}
+          <div className="flex items-center gap-1 bg-white border border-[#ECE8D6] rounded-full p-1">
+            <button onClick={() => setView('grid')} className={cn('p-2 rounded-full transition-colors', view === 'grid' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#A8A29A] hover:text-[#130D10]')}>
+              <IconLayoutGrid size={16} />
+            </button>
+            <button onClick={() => setView('list')} className={cn('p-2 rounded-full transition-colors', view === 'list' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#A8A29A] hover:text-[#130D10]')}>
+              <IconList size={16} />
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Grid view */}
       {view === 'grid' && (
-        <div className="grid grid-cols-3 gap-4">
-          {filtered.map(p => <ProjectCard key={p.id} project={p} />)}
+        <div className="grid grid-cols-3 gap-5">
+          {filtered.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)}
           {filtered.length === 0 && <EmptyState onNew={() => setShowNew(true)} />}
         </div>
       )}
 
       {/* List view */}
       {view === 'list' && (
-        <div className="bg-white border border-[#E5E5E3] rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-[auto_1fr_140px_140px_120px_100px] gap-0">
-            {/* Header */}
-            <div className="contents">
-              {['', 'Proyecto', 'Cliente', 'Financiero', 'Avance', 'Estado'].map(h => (
-                <div key={h} className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-[#9B9B9B] border-b border-[#E5E5E3] bg-[#F9F9F8]">
-                  {h}
-                </div>
-              ))}
-            </div>
-            {/* Rows */}
-            {filtered.map(p => <ProjectListRow key={p.id} project={p} />)}
-          </div>
-          {filtered.length === 0 && <EmptyState onNew={() => setShowNew(true)} />}
+        <div className="bg-white border border-[#ECE8D6] rounded-2xl overflow-hidden">
+          {filtered.map((p, i) => <ProjectListRow key={p.id} project={p} index={i} />)}
+          {filtered.length === 0 && <div className="py-16"><EmptyState onNew={() => setShowNew(true)} /></div>}
         </div>
       )}
 
@@ -185,11 +190,11 @@ export default function ProyectosPage() {
           </div>
           <Select label="Tipo" value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))}
             options={[
-              { value: 'arquitectura', label: '🏛 Arquitectura' },
-              { value: 'diseño_grafico', label: '🎨 Diseño gráfico' },
-              { value: 'event_planning', label: '🎪 Event Planning' },
-              { value: 'consultoria', label: '💼 Consultoría' },
-              { value: 'otro', label: '📁 Otro' },
+              { value: 'arquitectura', label: 'Arquitectura' },
+              { value: 'diseño_grafico', label: 'Diseño gráfico' },
+              { value: 'event_planning', label: 'Event Planning' },
+              { value: 'consultoria', label: 'Consultoría' },
+              { value: 'otro', label: 'Otro' },
             ]}
           />
           <Select label="Moneda" value={form.currency} onChange={e => setForm(f => ({ ...f, currency: e.target.value }))}
@@ -215,79 +220,62 @@ export default function ProyectosPage() {
   )
 }
 
-function ProjectCard({ project }: { project: Project }) {
-  const milestones = mockMilestones[project.id] || []
-  const nextMilestone = milestones.find(m => m.status === 'pendiente')
-  const overdue = milestones.filter(m => m.status === 'vencido').length
-  const cobrado = milestones.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
-  const total = project.total_amount || 0
-  const cobradoPct = total > 0 ? (cobrado / total) * 100 : 0
+function StatusBadge({ project }: { project: Project }) {
+  const ms = mockMilestones[project.id] || []
+  const overdue = ms.some(m => m.status === 'vencido')
+  const next = ms.find(m => m.status === 'pendiente')
+  const days = next ? getDaysUntil(next.due_date) : null
 
-  const daysToNext = nextMilestone ? getDaysUntil(nextMilestone.due_date) : null
+  if (project.status === 'completado')
+    return <span className="flex items-center gap-1 bg-white text-[#00846F] text-[11px] font-semibold px-2.5 py-1 rounded-full"><IconCheck size={12} stroke={2.5} /> Completado</span>
+  if (overdue)
+    return <span className="bg-[#130D10] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">Vencido</span>
+  if (project.status === 'en_pausa')
+    return <span className="bg-white text-[#6B655C] text-[11px] font-semibold px-2.5 py-1 rounded-full">En pausa</span>
+  if (days !== null && days <= 7)
+    return <span className="bg-[#FF5738] text-white text-[11px] font-semibold px-2.5 py-1 rounded-full">{days <= 0 ? 'Vence hoy' : `Vence en ${days}d`}</span>
+  return <span className="bg-white text-[#6B655C] text-[11px] font-semibold px-2.5 py-1 rounded-full">{getProjectStatusLabel(project.status)}</span>
+}
+
+function ProjectCard({ project, index }: { project: Project; index: number }) {
+  const cover = coverColors[index % coverColors.length]
+  const Icon = typeIcon[project.type] || IconFolder
+  const ms = mockMilestones[project.id] || []
+  const next = ms.find(m => m.status === 'pendiente')
+  const cobrado = ms.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
+  const total = project.total_amount || 0
+  const cobradoPct = total > 0 ? Math.min(100, (cobrado / total) * 100) : (project.progress ?? 0)
+  const done = project.status === 'completado'
+  const etapa = done ? 'Entregado' : next?.name ?? 'En curso'
 
   return (
     <Link href={`/proyectos/${project.id}`}>
-      <div className="bg-white border border-[#E5E5E3] rounded-2xl overflow-hidden hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group">
+      <div className="bg-white border border-black/[0.06] rounded-[20px] overflow-hidden shadow-[0_1px_3px_rgba(19,13,16,0.05)] hover:shadow-[0_8px_24px_rgba(19,13,16,0.10)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
         {/* Cover */}
-        <div className="h-28 relative flex items-end p-4" style={{ backgroundColor: project.cover_color }}>
-          {/* Type emoji top left */}
-          <span className="absolute top-3 left-4 text-2xl opacity-60">{typeIcons[project.type]}</span>
-
-          {/* Overdue alert */}
-          {overdue > 0 && (
-            <span className="absolute top-3 right-3 flex items-center gap-1 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">
-              <IconAlertTriangle size={10} /> {overdue} vencido{overdue > 1 ? 's' : ''}
-            </span>
-          )}
-
-          {/* Status badge bottom right */}
-          <div className="ml-auto">
-            <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', getProjectStatusColor(project.status))}>
-              {getProjectStatusLabel(project.status)}
-            </span>
-          </div>
+        <div className="h-[120px] relative flex items-start justify-between p-4" style={{ backgroundColor: cover }}>
+          <span className="flex items-center gap-1.5 bg-white text-[#130D10] text-[11px] font-semibold pl-2 pr-2.5 py-1 rounded-full">
+            <Icon size={13} stroke={1.8} /> {getProjectTypeLabel(project.type)}
+          </span>
+          <StatusBadge project={project} />
+          <Sparkle className="absolute right-4 bottom-3 w-7 h-7 text-white/85" />
         </div>
 
         {/* Content */}
-        <div className="p-4">
-          <h3 className="text-sm font-bold text-[#130D10] mb-0.5 group-hover:text-[#130D10] truncate">{project.name}</h3>
-          <p className="text-xs text-[#9B9B9B] mb-3 truncate">{project.client_name}</p>
+        <div className="p-5">
+          <h3 className="font-serif text-[21px] leading-tight text-[#130D10] truncate">{project.name}</h3>
+          <p className="text-[13px] text-[#8A847B] mb-3.5 truncate">{project.client_name}</p>
 
-          {/* Financial bar */}
-          {total > 0 && (
-            <div className="mb-3">
-              <div className="flex justify-between text-[10px] text-[#9B9B9B] mb-1">
-                <span>{formatCurrency(cobrado, project.currency)} cobrado</span>
-                <span>{formatCurrency(total, project.currency)} total</span>
-              </div>
-              <div className="h-1.5 bg-[#F0F0EE] rounded-full overflow-hidden">
-                <div className="h-full bg-green-400 rounded-full transition-all" style={{ width: `${cobradoPct}%` }} />
-              </div>
-            </div>
-          )}
+          <div className="flex items-baseline justify-between mb-2.5">
+            <p className="font-serif text-[27px] leading-none text-[#130D10]">{formatCurrency(cobrado, project.currency)}</p>
+            <span className="text-[12px] text-[#A8A29A]">{done ? 'cobrado' : `de ${formatCurrency(total, project.currency).replace(/^\D+/, '')}`}</span>
+          </div>
+          <div className="h-2 bg-[#F0EDE0] rounded-full overflow-hidden mb-4">
+            <div className="h-full bg-[#00846F] rounded-full transition-all" style={{ width: `${cobradoPct}%` }} />
+          </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-2 border-t border-[#F0F0EE]">
-            <div className="flex items-center gap-1.5 text-[10px] text-[#9B9B9B]">
-              <div className="w-5 h-5 bg-[#F0F0EE] rounded-full flex items-center justify-center">
-                <span className="text-[8px] font-bold text-[#6B6B6B]">{project.progress}%</span>
-              </div>
-              completado
-            </div>
-
-            {nextMilestone && daysToNext !== null && (
-              <div className={cn(
-                'flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full',
-                daysToNext < 0 ? 'bg-red-50 text-red-600' :
-                daysToNext <= 7 ? 'bg-[#FFF9D6] text-[#C9A800]' :
-                'text-[#9B9B9B]'
-              )}>
-                <IconCalendar size={10} stroke={1.5} />
-                {daysToNext < 0 ? `Vencido hace ${Math.abs(daysToNext)}d` :
-                 daysToNext === 0 ? 'Vence hoy' :
-                 `${daysToNext}d para cobrar`}
-              </div>
-            )}
+          <div className="flex items-center justify-between pt-3.5 border-t border-[#F2EFE2]">
+            <p className="text-[12px] text-[#6B655C] truncate">Etapa: <span className="font-medium text-[#130D10]">{etapa}</span></p>
+            <p className="font-serif text-[18px] text-[#130D10] shrink-0">{project.progress ?? 0}%</p>
           </div>
         </div>
       </div>
@@ -295,68 +283,62 @@ function ProjectCard({ project }: { project: Project }) {
   )
 }
 
-function ProjectListRow({ project }: { project: Project }) {
-  const milestones = mockMilestones[project.id] || []
-  const cobrado = milestones.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
-  const pendiente = milestones.filter(m => m.status === 'pendiente' || m.status === 'vencido').reduce((a, m) => a + m.amount, 0)
-  const overdue = milestones.filter(m => m.status === 'vencido').length
+function ProjectListRow({ project, index }: { project: Project; index: number }) {
+  const cover = coverColors[index % coverColors.length]
+  const Icon = typeIcon[project.type] || IconFolder
+  const ms = mockMilestones[project.id] || []
+  const cobrado = ms.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
+  const total = project.total_amount || 0
+  const cobradoPct = total > 0 ? Math.min(100, (cobrado / total) * 100) : (project.progress ?? 0)
 
   return (
-    <Link href={`/proyectos/${project.id}`} className="contents">
-      <div className="flex items-center justify-center px-4 py-4 border-b border-[#F0F0EE] hover:bg-[#F9F9F8] transition-colors">
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm" style={{ backgroundColor: project.cover_color }}>
-          {typeIcons[project.type]}
+    <Link href={`/proyectos/${project.id}`}>
+      <div className="flex items-center gap-4 px-5 py-4 border-b border-[#F2EFE2] last:border-0 hover:bg-[#FBFAF3] transition-colors">
+        <div className="w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0" style={{ backgroundColor: cover }}>
+          <Icon size={19} className="text-white" stroke={1.8} />
         </div>
-      </div>
-      <div className="flex items-center px-0 py-4 border-b border-[#F0F0EE] hover:bg-[#F9F9F8] transition-colors">
-        <div>
-          <p className="text-sm font-semibold text-[#130D10]">{project.name}</p>
-          <p className="text-xs text-[#9B9B9B]">{getProjectTypeLabel(project.type)}</p>
+        <div className="w-[200px] shrink-0">
+          <p className="text-[14px] font-semibold text-[#130D10] truncate">{project.name}</p>
+          <p className="text-[12px] text-[#8A847B] truncate">{project.client_name}</p>
         </div>
-        {overdue > 0 && (
-          <span className="ml-2 flex items-center gap-0.5 text-[10px] text-red-600 bg-red-50 px-1.5 py-0.5 rounded-full">
-            <IconAlertTriangle size={9} /> {overdue}
-          </span>
-        )}
-      </div>
-      <div className="flex items-center px-4 py-4 border-b border-[#F0F0EE] hover:bg-[#F9F9F8] transition-colors">
-        <p className="text-sm text-[#6B6B6B] truncate">{project.client_name}</p>
-      </div>
-      <div className="flex items-center px-4 py-4 border-b border-[#F0F0EE] hover:bg-[#F9F9F8] transition-colors">
-        <div>
-          {cobrado > 0 && <p className="text-xs text-green-600 font-medium">{formatCurrency(cobrado, project.currency)} cobrado</p>}
-          {pendiente > 0 && <p className="text-xs text-[#C9A800]">{formatCurrency(pendiente, project.currency)} pendiente</p>}
-          {cobrado === 0 && pendiente === 0 && <p className="text-xs text-[#9B9B9B]">Sin hitos</p>}
-        </div>
-      </div>
-      <div className="flex items-center px-4 py-4 border-b border-[#F0F0EE] hover:bg-[#F9F9F8] transition-colors">
-        <div className="w-full">
-          <div className="flex justify-between text-[10px] text-[#9B9B9B] mb-1">
-            <span>{project.progress}%</span>
-          </div>
-          <div className="h-1.5 bg-[#F0F0EE] rounded-full overflow-hidden">
-            <div className="h-full bg-[#F5D242] rounded-full" style={{ width: `${project.progress}%` }} />
+        <div className="flex-1 min-w-0">
+          <div className="h-2 bg-[#F0EDE0] rounded-full overflow-hidden max-w-[220px]">
+            <div className="h-full bg-[#00846F] rounded-full" style={{ width: `${cobradoPct}%` }} />
           </div>
         </div>
-      </div>
-      <div className="flex items-center px-4 py-4 border-b border-[#F0F0EE] hover:bg-[#F9F9F8] transition-colors">
-        <span className={cn('text-xs px-2 py-0.5 rounded-full font-medium', getProjectStatusColor(project.status))}>
-          {getProjectStatusLabel(project.status)}
-        </span>
+        <p className="text-[13px] font-medium text-[#130D10] w-[120px] text-right shrink-0">{formatCurrency(total || cobrado, project.currency)}</p>
+        <div className="w-[110px] flex justify-end shrink-0"><StatusBadgeNeutral project={project} /></div>
+        <IconChevronRight size={16} className="text-[#C4BFB4] shrink-0" />
       </div>
     </Link>
   )
+}
+
+function StatusBadgeNeutral({ project }: { project: Project }) {
+  const ms = mockMilestones[project.id] || []
+  const overdue = ms.some(m => m.status === 'vencido')
+  if (project.status === 'completado')
+    return <span className="bg-[#E5F3EF] text-[#00846F] text-[11px] font-semibold px-2.5 py-1 rounded-full">Completado</span>
+  if (overdue)
+    return <span className="bg-[#FFE3DC] text-[#C23A22] text-[11px] font-semibold px-2.5 py-1 rounded-full">Vencido</span>
+  if (project.status === 'en_pausa')
+    return <span className="bg-[#F2EFE2] text-[#6B655C] text-[11px] font-semibold px-2.5 py-1 rounded-full">En pausa</span>
+  return <span className="bg-[#FBEFC0] text-[#7A6410] text-[11px] font-semibold px-2.5 py-1 rounded-full">En curso</span>
 }
 
 function EmptyState({ onNew }: { onNew: () => void }) {
   return (
     <div className="col-span-3 py-20 flex flex-col items-center gap-3 text-center">
-      <div className="w-14 h-14 bg-[#F0F0EE] rounded-2xl flex items-center justify-center text-2xl">📁</div>
-      <div>
-        <p className="text-sm font-medium text-[#130D10]">No hay proyectos</p>
-        <p className="text-xs text-[#9B9B9B] mt-0.5">Creá tu primer proyecto para empezar</p>
+      <div className="w-16 h-16 bg-[#F2EFE2] rounded-2xl flex items-center justify-center">
+        <IconFolder size={28} className="text-[#A8A29A]" stroke={1.5} />
       </div>
-      <Button variant="primary" onClick={onNew}><IconPlus size={13} /> Nuevo proyecto</Button>
+      <div>
+        <p className="text-[15px] font-semibold text-[#130D10]">No hay proyectos</p>
+        <p className="text-[13px] text-[#8A847B] mt-0.5">Creá tu primer proyecto para empezar</p>
+      </div>
+      <button onClick={onNew} className="flex items-center gap-2 bg-[#130D10] text-white text-sm font-semibold pl-4 pr-5 py-2.5 rounded-full hover:bg-[#2A2227] transition-colors mt-1">
+        <IconPlus size={15} stroke={2.2} /> Nuevo proyecto
+      </button>
     </div>
   )
 }
