@@ -67,11 +67,23 @@ const groups: MasterGroup[] = [
   },
 ]
 
-const quarters = ['Q1·25', 'Q2·25', 'Q3·25', 'Q4·25', 'Q1·26', 'Q2·26', 'Q3·26', 'Q4·26']
-const gridlines = [12.5, 25, 37.5, 50, 62.5, 87.5]
 const todayPct = 75
 
 const zoomLevels = ['Mes', 'Trimestre', 'Semestre', 'Año'] as const
+
+// Columns over the fixed 2025–2026 span; bars are % of the same span, so
+// changing granularity only re-labels the grid (and widens it for finer zooms).
+const MON = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+function buildColumns(zoom: typeof zoomLevels[number]): { cols: string[]; colWidth: number } {
+  if (zoom === 'Año') return { cols: ['2025', '2026'], colWidth: 240 }
+  if (zoom === 'Semestre') return { cols: ['H1·25', 'H2·25', 'H1·26', 'H2·26'], colWidth: 150 }
+  if (zoom === 'Mes') {
+    const cols: string[] = []
+    for (let y = 25; y <= 26; y++) for (let m = 0; m < 12; m++) cols.push(`${MON[m]} ${y}`)
+    return { cols, colWidth: 58 }
+  }
+  return { cols: ['Q1·25', 'Q2·25', 'Q3·25', 'Q4·25', 'Q1·26', 'Q2·26', 'Q3·26', 'Q4·26'], colWidth: 112 }
+}
 const rubroFilters = ['Todos los rubros', 'En obra', 'En proyecto'] as const
 
 const legendItems = [
@@ -84,6 +96,9 @@ const legendItems = [
 export default function CronogramaMaestroPage() {
   const [zoom, setZoom] = useState<typeof zoomLevels[number]>('Trimestre')
   const [rubro, setRubro] = useState<typeof rubroFilters[number]>('Todos los rubros')
+
+  const { cols: columns, colWidth } = buildColumns(zoom)
+  const gridlines = columns.slice(1).map((_, i) => ((i + 1) / columns.length) * 100)
 
   const totalProjects = groups.reduce((a, g) => a + g.rows.length, 0)
 
@@ -187,9 +202,9 @@ export default function CronogramaMaestroPage() {
         </div>
 
         {/* Grid */}
-        <div className="flex">
+        <div className="flex overflow-x-auto">
           {/* Left: project list */}
-          <div className="flex flex-col w-62 shrink-0">
+          <div className="flex flex-col w-62 shrink-0 sticky left-0 z-20 bg-white">
             <div className="flex items-center h-10 shrink-0">
               <span className="text-[11px] font-semibold tracking-[0.06em] text-[#A8A29A]">PROYECTO · CLIENTE</span>
             </div>
@@ -210,20 +225,20 @@ export default function CronogramaMaestroPage() {
           </div>
 
           {/* Right: timeline */}
-          <div className="flex flex-col grow basis-0 relative">
-            {/* Quarter header */}
+          <div className="flex flex-col grow basis-0 relative" style={{ minWidth: columns.length * colWidth }}>
+            {/* Column header */}
             <div className="flex h-10 relative shrink-0">
-              {quarters.map((q) => (
-                <div key={q} className="flex items-center w-[12.5%] pl-2">
-                  <span className="text-[11px] font-semibold text-[#A8A29A]">{q}</span>
+              {columns.map((q) => (
+                <div key={q} className="flex items-center pl-2 shrink-0" style={{ width: `${100 / columns.length}%` }}>
+                  <span className="text-[11px] font-semibold text-[#A8A29A] whitespace-nowrap">{q}</span>
                 </div>
               ))}
             </div>
 
             {/* Gridlines + today */}
             <div className="absolute inset-0">
-              {gridlines.map((g) => (
-                <div key={g} className="w-px absolute bg-[#F0EDE0] inset-y-0" style={{ left: `${g}%` }} />
+              {gridlines.map((g, i) => (
+                <div key={i} className="w-px absolute bg-[#F0EDE0] inset-y-0" style={{ left: `${g}%` }} />
               ))}
               <div className="w-0.5 absolute bg-[#FF5738] inset-y-0" style={{ left: `${todayPct}%` }} />
             </div>
