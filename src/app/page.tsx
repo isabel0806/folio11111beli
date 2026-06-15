@@ -77,13 +77,11 @@ export default function InicioPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button className="w-11 h-11 rounded-full border border-[#ECE8D6] bg-white flex items-center justify-center hover:bg-[#FBFAF3] transition-colors">
+          <button aria-label="Notificaciones" className="w-11 h-11 rounded-full border border-[#ECE8D6] bg-white flex items-center justify-center hover:bg-[#FBFAF3] transition-colors">
             <IconBell size={18} className="text-[#5C564E]" stroke={1.6} />
           </button>
-          <Link href="/proyectos">
-            <button className="flex items-center gap-2 bg-[#130D10] text-white text-sm font-semibold pl-4 pr-5 py-3 rounded-full hover:bg-[#2A2227] transition-colors">
-              <IconPlus size={16} stroke={2.2} /> Nuevo proyecto
-            </button>
+          <Link href="/proyectos" className="flex items-center gap-2 bg-[#130D10] text-white text-sm font-semibold pl-4 pr-5 py-3 rounded-full hover:bg-[#2A2227] transition-colors">
+            <IconPlus size={16} stroke={2.2} /> Nuevo proyecto
           </Link>
         </div>
       </div>
@@ -322,6 +320,9 @@ export default function InicioPage() {
                     </div>
                   )
                 })}
+              {allMilestones.filter(m => m.status === 'pendiente').length === 0 && (
+                <p className="text-[12px] text-[#A8A29A] py-2">Sin eventos próximos.</p>
+              )}
             </div>
           </div>
 

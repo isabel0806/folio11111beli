@@ -94,7 +94,7 @@ export default function ProyectosPage() {
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button className="w-11 h-11 rounded-full border border-[#ECE8D6] bg-white flex items-center justify-center hover:bg-[#FBFAF3] transition-colors">
+          <button aria-label="Notificaciones" className="w-11 h-11 rounded-full border border-[#ECE8D6] bg-white flex items-center justify-center hover:bg-[#FBFAF3] transition-colors">
             <IconBell size={18} className="text-[#5C564E]" stroke={1.6} />
           </button>
           <button onClick={() => setShowNew(true)} className="flex items-center gap-2 bg-[#130D10] text-white text-sm font-semibold pl-4 pr-5 py-3 rounded-full hover:bg-[#2A2227] transition-colors">
@@ -140,10 +140,10 @@ export default function ProyectosPage() {
           </div>
           {/* View toggle */}
           <div className="flex items-center gap-1 bg-white border border-[#ECE8D6] rounded-full p-1">
-            <button onClick={() => setView('grid')} className={cn('p-2 rounded-full transition-colors', view === 'grid' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#A8A29A] hover:text-[#130D10]')}>
+            <button aria-label="Vista en cuadrícula" onClick={() => setView('grid')} className={cn('p-2 rounded-full transition-colors', view === 'grid' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#A8A29A] hover:text-[#130D10]')}>
               <IconLayoutGrid size={16} />
             </button>
-            <button onClick={() => setView('list')} className={cn('p-2 rounded-full transition-colors', view === 'list' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#A8A29A] hover:text-[#130D10]')}>
+            <button aria-label="Vista en lista" onClick={() => setView('list')} className={cn('p-2 rounded-full transition-colors', view === 'list' ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#A8A29A] hover:text-[#130D10]')}>
               <IconList size={16} />
             </button>
           </div>

@@ -101,6 +101,7 @@ export default function PresupuestoPage() {
                 <Link
                   href={sharePath}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-[12px] font-semibold text-[#3F6FA3] hover:text-[#173B5C] transition-colors"
                 >
                   <IconExternalLink size={13} stroke={1.8} /> Vista cliente
