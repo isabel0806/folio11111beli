@@ -48,14 +48,40 @@ export default function ControlPage() {
   const phaseTimes = datedPhases.flatMap(p => [new Date(p.start_date!).getTime(), new Date(p.end_date!).getTime()])
   const rangeStart = phaseTimes.length ? Math.min(...phaseTimes) : Date.now()
   const rangeEnd = phaseTimes.length ? Math.max(...phaseTimes) : Date.now()
-  const qStart = (() => { const d = new Date(rangeStart); return new Date(d.getFullYear(), Math.floor(d.getMonth() / 3) * 3, 1) })()
-  const qEnd = (() => { const d = new Date(rangeEnd); return new Date(d.getFullYear(), Math.floor(d.getMonth() / 3) * 3 + 3, 0) })()
-  const tlStart = qStart.getTime()
-  const tlSpan = Math.max(1, qEnd.getTime() - tlStart)
-  const quarters: { label: string }[] = []
-  for (let c = new Date(qStart); c <= qEnd; c = new Date(c.getFullYear(), c.getMonth() + 3, 1)) {
-    quarters.push({ label: `Q${Math.floor(c.getMonth() / 3) + 1}·${String(c.getFullYear()).slice(2)}` })
-  }
+  // Columns + span adapt to the zoom level (Día / Semana / Mes / Trimestre)
+  const MON = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
+  const yy2 = (d: Date) => String(d.getFullYear()).slice(2)
+  const { columns, tlStart, tlSpan, colWidth } = (() => {
+    const s = new Date(rangeStart), e = new Date(rangeEnd)
+    const cols: { label: string }[] = []
+    let from: Date, to: Date, width: number
+    if (zoom === 'trimestre') {
+      from = new Date(s.getFullYear(), Math.floor(s.getMonth() / 3) * 3, 1)
+      to = new Date(e.getFullYear(), Math.floor(e.getMonth() / 3) * 3 + 3, 1)
+      for (let c = new Date(from); c < to; c = new Date(c.getFullYear(), c.getMonth() + 3, 1))
+        cols.push({ label: `Q${Math.floor(c.getMonth() / 3) + 1}·${yy2(c)}` })
+      width = 96
+    } else if (zoom === 'mes') {
+      from = new Date(s.getFullYear(), s.getMonth(), 1)
+      to = new Date(e.getFullYear(), e.getMonth() + 1, 1)
+      for (let c = new Date(from); c < to; c = new Date(c.getFullYear(), c.getMonth() + 1, 1))
+        cols.push({ label: `${MON[c.getMonth()]} ${yy2(c)}` })
+      width = 66
+    } else if (zoom === 'semana') {
+      from = new Date(s); from.setDate(from.getDate() - ((from.getDay() + 6) % 7)); from.setHours(0, 0, 0, 0)
+      to = new Date(e); to.setDate(to.getDate() + (7 - ((to.getDay() + 6) % 7)))
+      for (let c = new Date(from); c < to; c.setDate(c.getDate() + 7))
+        cols.push({ label: `${c.getDate()}/${c.getMonth() + 1}` })
+      width = 42
+    } else {
+      from = new Date(s); from.setHours(0, 0, 0, 0)
+      to = new Date(e); to.setHours(0, 0, 0, 0); to.setDate(to.getDate() + 1)
+      for (let c = new Date(from); c < to; c.setDate(c.getDate() + 1))
+        cols.push({ label: `${c.getDate()}` })
+      width = 24
+    }
+    return { columns: cols, tlStart: from.getTime(), tlSpan: Math.max(1, to.getTime() - from.getTime()), colWidth: width }
+  })()
   const pct = (d: string | number) => ((new Date(d).getTime() - tlStart) / tlSpan) * 100
   const now = new Date()
   const todayPct = ((now.getTime() - tlStart) / tlSpan) * 100
@@ -412,9 +438,9 @@ export default function ControlPage() {
               </div>
 
               {/* Gantt grid */}
-              <div className="flex border border-[#ECE9DA] rounded-[12px] overflow-hidden bg-white">
+              <div className="flex border border-[#ECE9DA] rounded-[12px] overflow-x-auto bg-white">
                 {/* Left: Etapas */}
-                <div className="w-[248px] shrink-0 flex flex-col border-r border-[#ECE9DA]">
+                <div className="w-[248px] shrink-0 flex flex-col border-r border-[#ECE9DA] sticky left-0 z-20 bg-white">
                   <div className="h-9.5 flex items-center pl-4 border-b border-[#ECE9DA]">
                     <span className="font-bold text-[#A8A29A] text-[10px] tracking-[0.05em] uppercase">
                       {cronograma === 'obra' ? 'Etapa · Proyecto' : cronograma === 'honorarios' ? 'Hito de cobro' : 'Trámite'}
@@ -449,13 +475,13 @@ export default function ControlPage() {
                 </div>
 
                 {/* Right: Timeline */}
-                <div className="grow flex flex-col relative min-w-0">
+                <div className="grow flex flex-col relative" style={{ minWidth: columns.length * colWidth }}>
                   {/* Gridlines */}
-                  {quarters.slice(1).map((_, i) => (
+                  {columns.slice(1).map((_, i) => (
                     <span
                       key={i}
                       className="absolute top-0 bottom-0 w-px bg-[#F2EFE2] pointer-events-none"
-                      style={{ left: `${((i + 1) / quarters.length) * 100}%` }}
+                      style={{ left: `${((i + 1) / columns.length) * 100}%` }}
                     />
                   ))}
                   {todayInRange && (
@@ -463,8 +489,8 @@ export default function ControlPage() {
                   )}
                   {/* Header */}
                   <div className="h-9.5 flex border-b border-[#ECE9DA]">
-                    {quarters.map((q, i) => (
-                      <div key={i} className="grow flex items-center justify-center font-semibold text-[#8A847B] text-[10px]">
+                    {columns.map((q, i) => (
+                      <div key={i} className="grow flex items-center justify-center font-semibold text-[#8A847B] text-[10px] whitespace-nowrap px-1">
                         {q.label}
                       </div>
                     ))}
