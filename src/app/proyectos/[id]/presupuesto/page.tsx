@@ -1,14 +1,14 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { mockProjects, mockMilestones, mockCertifications, mockFiles } from '@/lib/mock-data'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { IconPlus, IconFile, IconDownload, IconExternalLink } from '@tabler/icons-react'
+import { IconPlus, IconFile, IconDownload, IconExternalLink, IconLink } from '@tabler/icons-react'
 import type { PaymentMilestone, ProjectFile } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { PresupuestoModal } from '@/components/proyectos/PresupuestoModal'
 import { useToast } from '@/components/ui/Toast'
-import { saveBudget } from '@/lib/budget-store'
+import { saveBudget, getBudget, encodeBudget, type StoredBudget } from '@/lib/budget-store'
 import Link from 'next/link'
 
 const stageDots = ['#FF5738', '#7FB0E8', '#D5D25D', '#00846F', '#F5D242']
@@ -38,6 +38,20 @@ export default function PresupuestoPage() {
   const [budgets, setBudgets] = useState<ProjectFile[]>(
     (mockFiles[id] || []).filter(f => f.type === 'presupuesto')
   )
+  // Last budget armed for this project (drives the self-contained share link)
+  const [lastBudget, setLastBudget] = useState<StoredBudget | null>(null)
+  useEffect(() => { setLastBudget(getBudget(id)) }, [id])
+
+  const sharePath = lastBudget
+    ? `/presupuesto/${id}?d=${encodeBudget(lastBudget)}`
+    : `/presupuesto/${id}`
+
+  const copyShareLink = () => {
+    const url = `${window.location.origin}${sharePath}`
+    navigator.clipboard?.writeText(url)
+      .then(() => toast('Link del presupuesto copiado'))
+      .catch(() => toast('No se pudo copiar el link'))
+  }
 
   const total = project?.total_amount || milestones.reduce((a, m) => a + m.amount, 0)
   const cobrado = milestones.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
@@ -55,9 +69,16 @@ export default function PresupuestoPage() {
             <h2 className="font-serif text-[19px] text-[#130D10]">Presupuestos</h2>
             <p className="text-[12.5px] text-[#8A847B]">Con IVA y honorarios desglosados · compartibles con el cliente</p>
           </div>
-          <Button size="sm" variant="primary" onClick={() => setShowPresupuesto(true)}>
-            <IconPlus size={13} /> Nuevo presupuesto
-          </Button>
+          <div className="flex items-center gap-2">
+            {lastBudget && (
+              <Button size="sm" variant="secondary" onClick={copyShareLink}>
+                <IconLink size={13} /> Copiar link
+              </Button>
+            )}
+            <Button size="sm" variant="primary" onClick={() => setShowPresupuesto(true)}>
+              <IconPlus size={13} /> Nuevo presupuesto
+            </Button>
+          </div>
         </div>
         {budgets.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-8 text-center border-t border-[#F2EFE2]">
@@ -78,7 +99,7 @@ export default function PresupuestoPage() {
                   <p className="text-[11px] text-[#A8A29A]">{formatDate(f.uploaded_at)}{f.size && ` · ${f.size}`}</p>
                 </div>
                 <Link
-                  href={`/presupuesto/${id}`}
+                  href={sharePath}
                   target="_blank"
                   className="flex items-center gap-1.5 text-[12px] font-semibold text-[#3F6FA3] hover:text-[#173B5C] transition-colors"
                 >
@@ -205,7 +226,7 @@ export default function PresupuestoPage() {
             type: 'presupuesto', uploaded_at: new Date().toISOString(),
           }
           setBudgets(prev => [...prev, newFile])
-          saveBudget(id, {
+          const stored: StoredBudget = {
             name,
             notes,
             savedAt: new Date().toISOString(),
@@ -215,7 +236,9 @@ export default function PresupuestoPage() {
                 detail: i.description, qty: i.quantity, unit: i.unit,
                 price: i.unit_price, iva: i.iva, honorarios: i.honorarios,
               })),
-          })
+          }
+          saveBudget(id, stored)
+          setLastBudget(stored)
           toast(`Presupuesto "${name}" guardado`)
         }}
       />

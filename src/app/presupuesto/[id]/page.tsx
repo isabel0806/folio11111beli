@@ -1,7 +1,7 @@
 'use client'
 import { use, useEffect, useState } from 'react'
 import { mockProjects } from '@/lib/mock-data'
-import { getBudget, type StoredBudgetItem } from '@/lib/budget-store'
+import { getBudget, decodeBudget, type StoredBudgetItem } from '@/lib/budget-store'
 
 type BudgetItem = StoredBudgetItem
 
@@ -25,7 +25,9 @@ export default function PresupuestoPublicoPage({ params }: { params: Promise<{ i
   // example items when nothing has been saved for this project yet.
   const [items, setItems] = useState<BudgetItem[]>(exampleItems)
   useEffect(() => {
-    const stored = getBudget(id)
+    // 1) data embedded in the share link, 2) this browser's saved budget, 3) example
+    const d = new URLSearchParams(window.location.search).get('d')
+    const stored = (d && decodeBudget(d)) || getBudget(id)
     if (stored && stored.items.length) setItems(stored.items)
   }, [id])
 
