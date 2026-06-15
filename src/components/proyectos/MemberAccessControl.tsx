@@ -1,77 +1,106 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Modal } from '@/components/ui/Modal'
+import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
-import { IconChevronDown, IconCheck, IconLock } from '@tabler/icons-react'
-import { ACCESS_LEVELS, accessMeta, getAccess, setAccess, type AccessLevel } from '@/lib/project-access'
+import { IconCheck, IconLock, IconAdjustmentsHorizontal } from '@tabler/icons-react'
+import {
+  PROJECT_AREAS, ALL_AREAS, OPERATIVO_AREAS, getAreas, setAreas, summarize, TONE_STYLE,
+} from '@/lib/project-access'
 
 export function MemberAccessControl({
-  projectId, memberId, fallback, editable,
+  projectId, memberId, memberName, fallback, editable,
 }: {
   projectId: string
   memberId: string
-  fallback: AccessLevel
+  memberName: string
+  fallback: string[]
   editable: boolean
 }) {
-  const [level, setLevel] = useState<AccessLevel>(fallback)
+  const [areas, setAreasState] = useState<string[]>(fallback)
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [draft, setDraft] = useState<string[]>(fallback)
 
-  useEffect(() => { setLevel(getAccess(projectId, memberId, fallback)) }, [projectId, memberId, fallback])
-  useEffect(() => {
-    const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    if (open) document.addEventListener('mousedown', onClick)
-    return () => document.removeEventListener('mousedown', onClick)
-  }, [open])
+  useEffect(() => { setAreasState(getAreas(projectId, memberId, fallback)) }, [projectId, memberId, fallback])
 
-  const m = accessMeta(level)
+  const s = summarize(areas)
+  const tone = TONE_STYLE[s.tone]
 
-  const choose = (l: AccessLevel) => {
-    setLevel(l)
-    setAccess(projectId, memberId, l)
+  const openEditor = () => { setDraft(getAreas(projectId, memberId, fallback)); setOpen(true) }
+  const toggle = (id: string) => setDraft(d => d.includes(id) ? d.filter(x => x !== id) : [...d, id])
+  const save = () => {
+    const ordered = ALL_AREAS.filter(a => draft.includes(a))
+    setAreas(projectId, memberId, ordered)
+    setAreasState(ordered)
     setOpen(false)
   }
 
-  if (!editable) {
-    return (
-      <span className={cn('flex items-center self-start rounded-full py-1 px-2.5 gap-1.5', m.bg)}>
-        <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: m.dot }} />
-        <span className={cn('text-[11px] font-semibold', m.text)}>{m.label}</span>
-      </span>
-    )
-  }
+  const Badge = (
+    <span className={cn('flex items-center self-start rounded-full py-1 pl-2.5 pr-2.5 gap-1.5', tone.bg)}>
+      <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: tone.dot }} />
+      <span className={cn('text-[11px] font-semibold', tone.text)}>{s.label}</span>
+    </span>
+  )
+
+  if (!editable) return Badge
 
   return (
-    <div className="relative self-start" ref={ref}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        className={cn('flex items-center rounded-full py-1 pl-2.5 pr-2 gap-1.5 transition-colors hover:brightness-95', m.bg)}
-      >
-        <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: m.dot }} />
-        <span className={cn('text-[11px] font-semibold', m.text)}>{m.label}</span>
-        <IconChevronDown size={12} stroke={2} className={cn('opacity-60', m.text)} />
+    <>
+      <button onClick={openEditor} className={cn('flex items-center self-start rounded-full py-1 pl-2.5 pr-2 gap-1.5 transition-colors hover:brightness-95', tone.bg)}>
+        <span className="size-1.5 rounded-full shrink-0" style={{ backgroundColor: tone.dot }} />
+        <span className={cn('text-[11px] font-semibold', tone.text)}>{s.label}</span>
+        <IconAdjustmentsHorizontal size={12} stroke={2} className={cn('opacity-70', tone.text)} />
       </button>
 
-      {open && (
-        <div className="absolute left-0 top-full mt-1.5 z-30 w-60 rounded-[14px] border border-[#ECE8D6] bg-white shadow-[0_8px_24px_rgba(19,13,16,0.10)] p-1.5">
-          <p className="px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A] flex items-center gap-1.5">
-            <IconLock size={11} stroke={1.8} /> Acceso a este proyecto
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={`Permisos de ${memberName}`}
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button variant="primary" onClick={save}><IconCheck size={14} /> Guardar permisos</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-[13px] text-[#6B655C]">Elegí qué puede ver esta persona <span className="font-semibold text-[#130D10]">en este proyecto</span>.</p>
+
+          {/* Presets */}
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-[#A8A29A]">Atajos</span>
+            <button onClick={() => setDraft(ALL_AREAS)} className="rounded-full border border-[#ECE8D6] px-3 py-1 text-[12px] font-medium text-[#6B655C] hover:bg-[#FBFAF3] transition-colors">Todo</button>
+            <button onClick={() => setDraft(OPERATIVO_AREAS)} className="rounded-full border border-[#ECE8D6] px-3 py-1 text-[12px] font-medium text-[#6B655C] hover:bg-[#FBFAF3] transition-colors">Operativo</button>
+            <button onClick={() => setDraft([])} className="rounded-full border border-[#ECE8D6] px-3 py-1 text-[12px] font-medium text-[#6B655C] hover:bg-[#FBFAF3] transition-colors">Nada</button>
+          </div>
+
+          {/* Area toggles */}
+          <div className="flex flex-col rounded-[14px] border border-[#ECE8D6] overflow-hidden">
+            {PROJECT_AREAS.map((a, i) => {
+              const on = draft.includes(a.id)
+              return (
+                <button
+                  key={a.id}
+                  onClick={() => toggle(a.id)}
+                  className={cn('flex items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[#FBFAF3]', i > 0 && 'border-t border-[#F2EFE2]')}
+                >
+                  <span className="grow min-w-0">
+                    <span className="block text-[14px] font-medium text-[#130D10]">{a.label}</span>
+                    <span className="block text-[11.5px] text-[#A8A29A] leading-snug">{a.desc}</span>
+                  </span>
+                  <span className={cn('relative w-9 h-5 rounded-full shrink-0 transition-colors', on ? 'bg-[#00846F]' : 'bg-[#D8D2C2]')}>
+                    <span className={cn('absolute top-0.5 size-4 rounded-full bg-white transition-all', on ? 'left-[18px]' : 'left-0.5')} />
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
+          <p className="flex items-center gap-1.5 text-[11.5px] text-[#A8A29A]">
+            <IconLock size={12} stroke={1.8} /> Config. del proyecto queda siempre solo para administradores.
           </p>
-          {ACCESS_LEVELS.map(a => (
-            <button
-              key={a.id}
-              onClick={() => choose(a.id)}
-              className="flex items-start gap-2.5 w-full rounded-[10px] px-2.5 py-2 text-left hover:bg-[#FBFAF3] transition-colors"
-            >
-              <span className="size-2.5 rounded-full shrink-0 mt-1" style={{ backgroundColor: a.dot }} />
-              <span className="grow min-w-0">
-                <span className="block text-[13px] font-medium text-[#130D10]">{a.label}</span>
-                <span className="block text-[11px] text-[#A8A29A] leading-snug">{a.desc}</span>
-              </span>
-              {a.id === level && <IconCheck size={14} className="text-[#00846F] shrink-0 mt-0.5" stroke={2.4} />}
-            </button>
-          ))}
         </div>
-      )}
-    </div>
+      </Modal>
+    </>
   )
 }

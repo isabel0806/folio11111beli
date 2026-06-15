@@ -5,7 +5,7 @@ import { IconPlus, IconMail, IconPhone, IconShieldLock } from '@tabler/icons-rea
 import { cn } from '@/lib/cn'
 import { useRole } from '@/lib/use-role'
 import { MemberAccessControl } from '@/components/proyectos/MemberAccessControl'
-import type { AccessLevel } from '@/lib/project-access'
+import { ALL_AREAS, OPERATIVO_AREAS } from '@/lib/project-access'
 
 export default function EquipoPage() {
   const { id } = useParams() as { id: string }
@@ -13,8 +13,8 @@ export default function EquipoPage() {
   const isAdmin = role === 'admin'
   const team = mockTeam[id] || []
   const providers = mockProviders[id] || []
-  // Default access by their tag: the "Responsable" gets full, the rest operativo.
-  const defaultAccess = (tag: string): AccessLevel => (tag.toLowerCase().includes('responsable') ? 'full' : 'operativo')
+  // Default por tag: el "Responsable" ve todo; el resto, lo operativo (sin finanzas).
+  const defaultAreas = (tag: string): string[] => (tag.toLowerCase().includes('responsable') ? ALL_AREAS : OPERATIVO_AREAS)
 
   return (
     <div className="flex flex-col gap-7">
@@ -39,7 +39,7 @@ export default function EquipoPage() {
           <div className="flex items-start gap-2.5 mb-4 px-4 py-3 rounded-[14px] bg-[#EAF2FB] border border-[#CFE0F3]">
             <IconShieldLock size={16} className="text-[#3F6FA3] shrink-0 mt-0.5" stroke={1.8} />
             <p className="text-[12.5px] text-[#3F6FA3] leading-snug">
-              Como administrador podés definir el acceso de cada persona a <span className="font-semibold">este proyecto</span>: completo (con finanzas), operativo (sin finanzas) o sin acceso.
+              Como administrador definís, sección por sección, qué ve cada invitado en <span className="font-semibold">este proyecto</span> — archivos, presupuesto, finanzas, cronograma, bitácora, etc. Tocá el permiso de cada persona para editarlo.
             </p>
           </div>
         )}
@@ -55,7 +55,7 @@ export default function EquipoPage() {
                   <span className="text-[13px] text-[#8A847B] truncate">{m.role}</span>
                 </div>
               </div>
-              <MemberAccessControl projectId={id} memberId={m.id} fallback={defaultAccess(m.tag_label)} editable={isAdmin} />
+              <MemberAccessControl projectId={id} memberId={m.id} memberName={m.name} fallback={defaultAreas(m.tag_label)} editable={isAdmin} />
               <div className="h-px bg-[#F2EFE2]" />
               <div className="flex items-center gap-2">
                 {m.contact_type === 'email'
