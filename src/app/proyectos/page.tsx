@@ -15,6 +15,32 @@ import {
 import type { Project, ProjectStatus } from '@/lib/types'
 import Link from 'next/link'
 import { cn } from '@/lib/cn'
+import { useRole, ASSIGNED_PROJECT_IDS } from '@/lib/use-role'
+import { mockTeam } from '@/lib/mock-data'
+import { getAreas, ALL_AREAS, OPERATIVO_AREAS } from '@/lib/project-access'
+import { resolveState, STATE_COLORS } from '@/lib/project-states'
+
+type ColorMode = 'tipo' | 'estado' | 'salud'
+const TYPE_COVER: Record<string, string> = {
+  arquitectura: '#7FB0E8', diseño_grafico: '#FFABCF', event_planning: '#D5D25D', consultoria: '#00846F', otro: '#C4BFB4',
+}
+function coverFor(project: Project, mode: ColorMode, index: number): string {
+  if (mode === 'tipo') return TYPE_COVER[project.type] || coverColors[index % coverColors.length]
+  if (mode === 'estado') return STATE_COLORS[resolveState(project.status).color].dot
+  const ms = mockMilestones[project.id] || []
+  if (ms.some(m => m.status === 'vencido')) return '#FF5738'
+  if (ms.some(m => { const d = getDaysUntil(m.due_date); return m.status === 'pendiente' && d !== null && d <= 7 })) return '#F5D242'
+  return '#00846F'
+}
+
+// Si se impersona una persona: ¿ve finanzas de este proyecto? null = no aplica.
+function personFinanzas(projectId: string, person: string | null): boolean | null {
+  if (!person) return null
+  const m = (mockTeam[projectId] || []).find(x => x.name === person)
+  if (!m) return false
+  const def = m.tag_label.toLowerCase().includes('responsable') ? ALL_AREAS : OPERATIVO_AREAS
+  return getAreas(projectId, m.id, def).includes('finanzas')
+}
 
 type ViewMode = 'grid' | 'list'
 type FilterStatus = 'todos' | ProjectStatus
@@ -43,6 +69,8 @@ export default function ProyectosPage() {
   const [search, setSearch] = useState('')
   const [showNew, setShowNew] = useState(false)
   const [projects, setProjects] = useState(mockProjects)
+  const [colorMode, setColorMode] = useState<ColorMode>('tipo')
+  const { can, person } = useRole()
   const [form, setForm] = useState({
     name: '', client_name: '', type: 'arquitectura', currency: 'ARS',
     pricing_mode: 'proyecto', total_amount: '', hourly_rate: '', start_date: '',
@@ -56,7 +84,11 @@ export default function ProyectosPage() {
     { value: 'borrador', label: 'Borradores' },
   ]
 
-  const filtered = projects
+  const visibleProjects = person
+    ? projects.filter(p => (mockTeam[p.id] || []).some(m => m.name === person))
+    : can('allProjects') ? projects : projects.filter(p => ASSIGNED_PROJECT_IDS.includes(p.id))
+
+  const filtered = visibleProjects
     .filter(p => filter === 'todos' || p.status === filter)
     .filter(p => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.client_name.toLowerCase().includes(search.toLowerCase()))
 
@@ -78,7 +110,7 @@ export default function ProyectosPage() {
     setForm({ name: '', client_name: '', type: 'arquitectura', currency: 'ARS', pricing_mode: 'proyecto', total_amount: '', hourly_rate: '', start_date: '' })
   }
 
-  const activeCount = projects.filter(p => p.status === 'en_curso').length
+  const activeCount = visibleProjects.filter(p => p.status === 'en_curso').length
 
   return (
     <div className="px-12 py-10 max-w-[1200px]">
@@ -90,7 +122,7 @@ export default function ProyectosPage() {
             <Sparkle className="w-5 h-5 text-[#FF5738]" />
           </h1>
           <p className="text-[15px] text-[#6B655C] mt-2">
-            Tenés <span className="font-semibold text-[#130D10]">{activeCount} activo{activeCount !== 1 ? 's' : ''}</span> · {projects.length} en total.
+            Tenés <span className="font-semibold text-[#130D10]">{activeCount} activo{activeCount !== 1 ? 's' : ''}</span> · {visibleProjects.length} en total.
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -107,7 +139,7 @@ export default function ProyectosPage() {
       <div className="flex items-center justify-between gap-4 mb-7 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap">
           {filters.map(f => {
-            const count = f.value === 'todos' ? projects.length : projects.filter(p => p.status === f.value).length
+            const count = f.value === 'todos' ? visibleProjects.length : visibleProjects.filter(p => p.status === f.value).length
             const active = filter === f.value
             return (
               <button
@@ -128,12 +160,24 @@ export default function ProyectosPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Color mode */}
+          <div className="flex items-center gap-0.5 bg-white border border-[#ECE8D6] rounded-full p-1">
+            <span className="text-[11px] text-[#A8A29A] pl-2 pr-1">Color</span>
+            {([['tipo', 'Tipo'], ['estado', 'Estado'], ['salud', 'Salud']] as [ColorMode, string][]).map(([k, label]) => (
+              <button key={k} onClick={() => setColorMode(k)}
+                className={cn('px-2.5 py-1 text-[12px] rounded-full transition-colors',
+                  colorMode === k ? 'bg-[#130D10] text-white font-semibold' : 'text-[#8A847B] hover:text-[#130D10]'
+                )}>
+                {label}
+              </button>
+            ))}
+          </div>
           {/* Search */}
           <div className="relative">
             <IconSearch size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8A29A]" />
             <input
-              className="pl-10 pr-4 py-2.5 text-[13px] border border-[#ECE8D6] rounded-full bg-[#FBFAF3] w-56 placeholder:text-[#A8A29A] focus:outline-none focus:ring-1 focus:ring-[#FF5738] focus:border-[#FF5738]"
-              placeholder="Buscar proyecto..."
+              className="pl-10 pr-4 py-2.5 text-[13px] border border-[#ECE8D6] rounded-full bg-[#FBFAF3] w-44 placeholder:text-[#A8A29A] focus:outline-none focus:ring-1 focus:ring-[#FF5738] focus:border-[#FF5738]"
+              placeholder="Buscar..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -153,7 +197,7 @@ export default function ProyectosPage() {
       {/* Grid view */}
       {view === 'grid' && (
         <div className="grid grid-cols-3 gap-5">
-          {filtered.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)}
+          {filtered.map((p, i) => <ProjectCard key={p.id} project={p} index={i} colorMode={colorMode} />)}
           {filtered.length === 0 && <EmptyState onNew={() => setShowNew(true)} />}
         </div>
       )}
@@ -161,7 +205,7 @@ export default function ProyectosPage() {
       {/* List view */}
       {view === 'list' && (
         <div className="bg-white border border-[#ECE8D6] rounded-2xl overflow-hidden">
-          {filtered.map((p, i) => <ProjectListRow key={p.id} project={p} index={i} />)}
+          {filtered.map((p, i) => <ProjectListRow key={p.id} project={p} index={i} colorMode={colorMode} />)}
           {filtered.length === 0 && <div className="py-16"><EmptyState onNew={() => setShowNew(true)} /></div>}
         </div>
       )}
@@ -237,8 +281,11 @@ function StatusBadge({ project }: { project: Project }) {
   return <span className="bg-white text-[#6B655C] text-[11px] font-semibold px-2.5 py-1 rounded-full">{getProjectStatusLabel(project.status)}</span>
 }
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const cover = coverColors[index % coverColors.length]
+function ProjectCard({ project, index, colorMode }: { project: Project; index: number; colorMode: ColorMode }) {
+  const { can, person } = useRole()
+  const pf = personFinanzas(project.id, person)
+  const showMoney = pf === null ? can('projectFinanzas') : pf
+  const cover = coverFor(project, colorMode, index)
   const Icon = typeIcon[project.type] || IconFolder
   const ms = mockMilestones[project.id] || []
   const next = ms.find(m => m.status === 'pendiente')
@@ -247,6 +294,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   const cobradoPct = total > 0 ? Math.min(100, (cobrado / total) * 100) : (project.progress ?? 0)
   const done = project.status === 'completado'
   const etapa = done ? 'Entregado' : next?.name ?? 'En curso'
+  const progress = project.progress ?? 0
 
   return (
     <Link href={`/proyectos/${project.id}`}>
@@ -266,16 +314,25 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           <p className="text-[13px] text-[#8A847B] mb-3.5 truncate">{project.client_name}</p>
 
           <div className="flex items-baseline justify-between mb-2.5">
-            <p className="font-serif text-[27px] leading-none text-[#130D10]">{formatCurrency(cobrado, project.currency)}</p>
-            <span className="text-[12px] text-[#A8A29A]">{done ? 'cobrado' : `de ${formatCurrency(total, project.currency).replace(/^\D+/, '')}`}</span>
+            {showMoney ? (
+              <>
+                <p className="font-serif text-[27px] leading-none text-[#130D10]">{formatCurrency(cobrado, project.currency)}</p>
+                <span className="text-[12px] text-[#A8A29A]">{done ? 'cobrado' : `de ${formatCurrency(total, project.currency).replace(/^\D+/, '')}`}</span>
+              </>
+            ) : (
+              <>
+                <p className="font-serif text-[27px] leading-none text-[#130D10]">{progress}%</p>
+                <span className="text-[12px] text-[#A8A29A]">de avance</span>
+              </>
+            )}
           </div>
           <div className="h-2 bg-[#F0EDE0] rounded-full overflow-hidden mb-4">
-            <div className="h-full bg-[#00846F] rounded-full transition-all" style={{ width: `${cobradoPct}%` }} />
+            <div className="h-full bg-[#00846F] rounded-full transition-all" style={{ width: `${showMoney ? cobradoPct : progress}%` }} />
           </div>
 
           <div className="flex items-center justify-between pt-3.5 border-t border-[#F2EFE2]">
             <p className="text-[12px] text-[#6B655C] truncate">Etapa: <span className="font-medium text-[#130D10]">{etapa}</span></p>
-            <p className="font-serif text-[18px] text-[#130D10] shrink-0">{project.progress ?? 0}%</p>
+            <p className="font-serif text-[18px] text-[#130D10] shrink-0">{progress}%</p>
           </div>
         </div>
       </div>
@@ -283,13 +340,17 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   )
 }
 
-function ProjectListRow({ project, index }: { project: Project; index: number }) {
-  const cover = coverColors[index % coverColors.length]
+function ProjectListRow({ project, index, colorMode }: { project: Project; index: number; colorMode: ColorMode }) {
+  const { can, person } = useRole()
+  const pf = personFinanzas(project.id, person)
+  const showMoney = pf === null ? can('projectFinanzas') : pf
+  const cover = coverFor(project, colorMode, index)
   const Icon = typeIcon[project.type] || IconFolder
   const ms = mockMilestones[project.id] || []
   const cobrado = ms.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
   const total = project.total_amount || 0
   const cobradoPct = total > 0 ? Math.min(100, (cobrado / total) * 100) : (project.progress ?? 0)
+  const progress = project.progress ?? 0
 
   return (
     <Link href={`/proyectos/${project.id}`}>
@@ -303,10 +364,10 @@ function ProjectListRow({ project, index }: { project: Project; index: number })
         </div>
         <div className="flex-1 min-w-0">
           <div className="h-2 bg-[#F0EDE0] rounded-full overflow-hidden max-w-[220px]">
-            <div className="h-full bg-[#00846F] rounded-full" style={{ width: `${cobradoPct}%` }} />
+            <div className="h-full bg-[#00846F] rounded-full" style={{ width: `${showMoney ? cobradoPct : progress}%` }} />
           </div>
         </div>
-        <p className="text-[13px] font-medium text-[#130D10] w-[120px] text-right shrink-0">{formatCurrency(total || cobrado, project.currency)}</p>
+        <p className="text-[13px] font-medium text-[#130D10] w-[120px] text-right shrink-0">{showMoney ? formatCurrency(total || cobrado, project.currency) : `${progress}%`}</p>
         <div className="w-[110px] flex justify-end shrink-0"><StatusBadgeNeutral project={project} /></div>
         <IconChevronRight size={16} className="text-[#C4BFB4] shrink-0" />
       </div>

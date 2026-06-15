@@ -19,12 +19,15 @@ import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/cn'
 import Link from 'next/link'
 import { FacturarArcaModal, type Factura } from '@/components/finanzas/FacturarArcaModal'
+import { useRole } from '@/lib/use-role'
+import { AccessDenied } from '@/components/layout/AccessDenied'
 
 type TabKey = 'cobrar' | 'costos'
 type FilterKey = 'todos' | 'pendiente' | 'cobrado' | 'vencido'
 
 export default function FinanzasPage() {
   const { toast } = useToast()
+  const { can } = useRole()
   const [tab, setTab] = useState<TabKey>('cobrar')
   const [filter, setFilter] = useState<FilterKey>('todos')
   const [search, setSearch] = useState('')
@@ -36,6 +39,23 @@ export default function FinanzasPage() {
   const [facturas, setFacturas] = useState<Record<string, Factura>>({})
   const [facturando, setFacturando] = useState<typeof enrichedMilestones[0] | null>(null)
   const [priceSearch, setPriceSearch] = useState('')
+  const [period, setPeriod] = useState<'mes' | 'trim' | 'anio' | 'todo'>('todo')
+
+  const periodOptions: { k: typeof period; label: string }[] = [
+    { k: 'mes', label: 'Este mes' }, { k: 'trim', label: 'Últimos 3 meses' },
+    { k: 'anio', label: 'Este año' }, { k: 'todo', label: 'Todo' },
+  ]
+  const nowP = new Date()
+  const inPeriod = (dateStr?: string) => {
+    if (period === 'todo') return true
+    if (!dateStr) return false
+    const d = new Date(dateStr.length <= 10 ? dateStr + 'T12:00:00' : dateStr)
+    if (period === 'mes') return d.getFullYear() === nowP.getFullYear() && d.getMonth() === nowP.getMonth()
+    if (period === 'anio') return d.getFullYear() === nowP.getFullYear()
+    const start = new Date(nowP.getFullYear(), nowP.getMonth() - 2, 1)
+    const end = new Date(nowP.getFullYear(), nowP.getMonth() + 1, 0, 23, 59, 59)
+    return d >= start && d <= end
+  }
 
   const enrichedMilestones = Object.entries(mockMilestones).flatMap(([pid, ms]) => {
     const project = mockProjects.find(p => p.id === pid)!
@@ -48,11 +68,11 @@ export default function FinanzasPage() {
     return cs.map(c => ({ ...c, project_name: project?.name || '' }))
   })
 
-  // Summary numbers
-  const cobrado = milestones.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
-  const pendiente = milestones.filter(m => m.status === 'pendiente').reduce((a, m) => a + m.amount, 0)
-  const vencido = milestones.filter(m => m.status === 'vencido').reduce((a, m) => a + m.amount, 0)
-  const totalCostos = allCosts.reduce((a, c) => a + c.amount, 0)
+  // Summary numbers (scoped to the selected period)
+  const cobrado = milestones.filter(m => m.status === 'cobrado' && inPeriod(m.paid_at || m.due_date)).reduce((a, m) => a + m.amount, 0)
+  const pendiente = milestones.filter(m => m.status === 'pendiente' && inPeriod(m.due_date)).reduce((a, m) => a + m.amount, 0)
+  const vencido = milestones.filter(m => m.status === 'vencido' && inPeriod(m.due_date)).reduce((a, m) => a + m.amount, 0)
+  const totalCostos = allCosts.filter(c => inPeriod(c.created_at)).reduce((a, c) => a + c.amount, 0)
   const totalIngresos = cobrado
   const neto = totalIngresos - totalCostos
 
@@ -114,6 +134,7 @@ export default function FinanzasPage() {
   // Filtered milestones
   const filtered = milestones
     .filter(m => filter === 'todos' || m.status === filter)
+    .filter(m => inPeriod(m.status === 'cobrado' ? (m.paid_at || m.due_date) : m.due_date))
     .filter(m => !search || m.name.toLowerCase().includes(search.toLowerCase()) || m.project.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
 
@@ -124,10 +145,12 @@ export default function FinanzasPage() {
     setConfirmPaid(null)
   }
 
-  const filteredCosts = allCosts.filter(c =>
-    !search || c.description.toLowerCase().includes(search.toLowerCase()) ||
-    (c.provider_name || '').toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredCosts = allCosts
+    .filter(c => inPeriod(c.created_at))
+    .filter(c =>
+      !search || c.description.toLowerCase().includes(search.toLowerCase()) ||
+      (c.provider_name || '').toLowerCase().includes(search.toLowerCase())
+    )
 
   // Price history — benchmark a concept against costs across all projects
   const priceMatches = priceSearch.trim()
@@ -151,9 +174,24 @@ export default function FinanzasPage() {
     vencido: milestones.filter(m => m.status === 'vencido').length,
   }
 
+  if (!can('finanzasGlobal')) return <AccessDenied area="las finanzas del estudio" />
+
   return (
     <div className="p-8">
-      <PageHeader title="Finanzas" description="Resumen financiero de tu estudio" />
+      <PageHeader title="Finanzas" description="Resumen financiero de tu estudio"
+        actions={
+          <div className="flex items-center p-1 bg-white border border-[#ECE8D6] rounded-full gap-0.5">
+            {periodOptions.map(o => (
+              <button key={o.k} onClick={() => setPeriod(o.k)}
+                className={cn('px-3.5 py-1.5 text-[13px] rounded-full transition-colors',
+                  period === o.k ? 'bg-[#130D10] text-white font-semibold' : 'text-[#8A847B] hover:text-[#130D10] font-medium'
+                )}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {/* Summary cards */}
       <div className="grid grid-cols-4 gap-3 mb-7">
@@ -223,32 +261,38 @@ export default function FinanzasPage() {
         </div>
       )}
 
-      {/* Per-project breakdown */}
+      {/* Rentabilidad por proyecto (ROI) */}
       <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6 mb-7">
-        <h3 className="font-serif text-[19px] text-[#130D10] mb-4">Por proyecto</h3>
-        <div className="space-y-3">
+        <div className="flex items-end justify-between mb-4">
+          <h3 className="font-serif text-[19px] text-[#130D10]">Rentabilidad por proyecto</h3>
+          <span className="text-xs text-[#A8A29A]">Ingresos cobrados − costos · acumulado</span>
+        </div>
+        <div className="flex items-center px-3 pb-2.5 border-b border-[#ECE9DA]">
+          <span className="grow basis-0 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Proyecto</span>
+          <span className="w-32 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Ingresos</span>
+          <span className="w-32 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#B14E7C]">Costos</span>
+          <span className="w-32 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Margen</span>
+          <span className="w-16 shrink-0 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">%</span>
+        </div>
+        <div className="divide-y divide-[#F0EDE0]">
           {mockProjects.map(p => {
             const pMs = milestones.filter(m => m.project.id === p.id)
-            const pCobrado = pMs.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
-            const pPendiente = pMs.filter(m => m.status === 'pendiente' || m.status === 'vencido').reduce((a, m) => a + m.amount, 0)
-            const pTotal = pCobrado + pPendiente
-            if (pTotal === 0) return null
+            const pIngresos = pMs.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
+            const pCostos = (mockCosts[p.id] || []).reduce((a, c) => a + c.amount, 0)
+            if (pIngresos === 0 && pCostos === 0) return null
+            const margen = pIngresos - pCostos
+            const pct = pIngresos > 0 ? Math.round((margen / pIngresos) * 100) : null
             return (
-              <div key={p.id} className="flex items-center gap-4">
-                <Link href={`/proyectos/${p.id}/finanzas`} className="flex items-center gap-2 w-40 shrink-0 hover:text-[#FF5738] transition-colors">
-                  <div className="w-5 h-5 rounded-md shrink-0" style={{ backgroundColor: p.cover_color }} />
+              <Link key={p.id} href={`/proyectos/${p.id}/finanzas`} className="flex items-center px-3 py-3 hover:bg-white/60 transition-colors">
+                <span className="grow basis-0 flex items-center gap-2.5 min-w-0">
+                  <span className="w-4 h-4 rounded-md shrink-0" style={{ backgroundColor: p.cover_color }} />
                   <span className="text-sm text-[#130D10] truncate">{p.name}</span>
-                </Link>
-                <div className="flex-1">
-                  <div className="h-2 bg-[#ECE9DA] rounded-full overflow-hidden flex">
-                    <div className="h-full bg-[#00846F] transition-all" style={{ width: `${pTotal > 0 ? (pCobrado / pTotal) * 100 : 0}%` }} />
-                  </div>
-                </div>
-                <div className="text-right w-36 shrink-0">
-                  <span className="text-xs text-[#00846F] font-medium">{formatCurrency(pCobrado, p.currency)}</span>
-                  {pPendiente > 0 && <span className="text-xs text-[#A8A29A]"> / {formatCurrency(pPendiente, p.currency)}</span>}
-                </div>
-              </div>
+                </span>
+                <span className="w-32 shrink-0 text-right text-[13px] font-medium text-[#00846F]">{formatCurrency(pIngresos, p.currency)}</span>
+                <span className="w-32 shrink-0 text-right text-[13px] text-[#B14E7C]">{pCostos > 0 ? `– ${formatCurrency(pCostos, p.currency)}` : '—'}</span>
+                <span className={cn('w-32 shrink-0 text-right text-[14px] font-semibold', margen >= 0 ? 'text-[#130D10]' : 'text-[#C23A22]')}>{formatCurrency(margen, p.currency)}</span>
+                <span className={cn('w-16 shrink-0 text-right text-[12px] font-semibold', pct === null ? 'text-[#A8A29A]' : pct >= 0 ? 'text-[#00846F]' : 'text-[#C23A22]')}>{pct === null ? '—' : `${pct}%`}</span>
+              </Link>
             )
           })}
         </div>

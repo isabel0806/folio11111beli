@@ -7,7 +7,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Input, Select, Textarea } from '@/components/ui/Input'
 import {
   IconPlus, IconLayoutKanban, IconList, IconTimeline,
-  IconCalendar, IconUser, IconEye
+  IconCalendar, IconUser, IconEye, IconCornerDownRight, IconAlertTriangle
 } from '@tabler/icons-react'
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { cn } from '@/lib/cn'
@@ -176,6 +176,28 @@ export default function ControlPage() {
   const ganttGroups = cronograma === 'obra' ? buildObraGroups()
     : cronograma === 'honorarios' ? buildHonorariosGroups()
     : buildPermisosGroups()
+
+  // Dependencies (finish-to-start chain) + delay risk — only for the obra timeline.
+  // Geometry mirrors the render: header 38px, then per group strip 32px + tasks 40px each.
+  const phaseDeps = (() => {
+    if (cronograma !== 'obra' || datedPhases.length < 2) return null
+    const HEADER = 38, STRIP = 32, ROW = 40
+    let y = HEADER
+    const centerY: number[] = []
+    for (const g of ganttGroups) { centerY.push(y + STRIP / 2); y += STRIP + g.rows.length * ROW }
+    const conns = datedPhases.slice(1).map((cur, idx) => {
+      const prev = datedPhases[idx]
+      const prevTasks = visibleTasks.filter(t => t.phase_id === prev.id)
+      const prevDone = prevTasks.length > 0 && prevTasks.every(t => t.status === 'completado')
+      // Riesgo: la etapa previa ya venció (debía estar terminada) y sigue abierta.
+      const overdue = new Date(prev.end_date!) < now
+      const risk = !prevDone && overdue
+      return { x1: pct(prev.end_date!), y1: centerY[idx], x2: pct(cur.start_date!), y2: centerY[idx + 1], risk, prevName: prev.name, curName: cur.name }
+    })
+    return { conns, totalH: y, riskCount: conns.filter(c => c.risk).length }
+  })()
+  const depsByPhaseId: Record<string, { prevName: string; risk: boolean }> = {}
+  if (phaseDeps) datedPhases.slice(1).forEach((p, i) => { depsByPhaseId[p.id] = { prevName: phaseDeps.conns[i].prevName, risk: phaseDeps.conns[i].risk } })
 
   const cronogramaPills = [
     { k: 'obra' as const, label: 'Cronograma de obra', dot: '#FF5738' },
@@ -437,6 +459,21 @@ export default function ControlPage() {
                 )}
               </div>
 
+              {/* Dependency risk banner */}
+              {phaseDeps && phaseDeps.riskCount > 0 && (
+                <div className="flex items-start gap-2.5 mb-3 px-4 py-3 rounded-[14px] bg-[#FFF6F3] border border-[#FAD9D0]">
+                  <IconAlertTriangle size={16} className="text-[#C23A22] shrink-0 mt-0.5" stroke={1.8} />
+                  <div className="flex flex-col gap-0.5">
+                    <p className="text-[13px] font-semibold text-[#C23A22]">
+                      {phaseDeps.riskCount} etapa{phaseDeps.riskCount > 1 ? 's' : ''} en riesgo de atraso
+                    </p>
+                    <p className="text-[12px] text-[#9A6253] leading-snug">
+                      {phaseDeps.conns.filter(c => c.risk).map(c => `"${c.curName}" depende de "${c.prevName}", que ya debía estar terminada`).join(' · ')}. Conviene reestimar fechas.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Gantt grid */}
               <div className="flex border border-[#ECE9DA] rounded-[12px] overflow-x-auto bg-white">
                 {/* Left: Etapas */}
@@ -457,6 +494,11 @@ export default function ControlPage() {
                           <span className="font-bold text-[11px] tracking-[0.03em] truncate" style={{ color: darkText[g.color] || g.color }}>
                             {g.name}
                           </span>
+                          {depsByPhaseId[g.id] && (
+                            <span className="shrink-0 flex items-center" title={`Depende de: ${depsByPhaseId[g.id].prevName}${depsByPhaseId[g.id].risk ? ' · en riesgo de atraso' : ''}`}>
+                              <IconCornerDownRight size={12} stroke={2} style={{ color: depsByPhaseId[g.id].risk ? '#FF5738' : '#B7B1A4' }} />
+                            </span>
+                          )}
                         </div>
                         {g.rangeLabel && (
                           <span className="text-[10px] shrink-0" style={{ color: (darkText[g.color] || g.color) + 'B0' }}>
@@ -486,6 +528,30 @@ export default function ControlPage() {
                   ))}
                   {todayInRange && (
                     <span className="absolute top-0 bottom-0 w-0.5 bg-[#FF5738] pointer-events-none z-10" style={{ left: `${todayPct}%` }} />
+                  )}
+                  {/* Dependencies (finish-to-start connectors) */}
+                  {phaseDeps && (
+                    <>
+                      <svg className="absolute inset-0 w-full pointer-events-none z-10" height={phaseDeps.totalH}
+                        viewBox={`0 0 100 ${phaseDeps.totalH}`} preserveAspectRatio="none" aria-hidden>
+                        {phaseDeps.conns.map((c, i) => {
+                          const midY = (c.y1 + c.y2) / 2
+                          return (
+                            <path
+                              key={i}
+                              d={`M ${c.x1} ${c.y1} C ${c.x1} ${midY}, ${c.x2} ${midY}, ${c.x2} ${c.y2}`}
+                              fill="none" stroke={c.risk ? '#FF5738' : '#B7B1A4'} strokeWidth={1.5}
+                              strokeDasharray={c.risk ? '4 3' : undefined}
+                              vectorEffect="non-scaling-stroke"
+                            />
+                          )
+                        })}
+                      </svg>
+                      {phaseDeps.conns.map((c, i) => (
+                        <span key={i} className="absolute rounded-full pointer-events-none z-10"
+                          style={{ left: `${c.x2}%`, top: c.y2, width: 7, height: 7, marginLeft: -3.5, marginTop: -3.5, backgroundColor: c.risk ? '#FF5738' : '#B7B1A4' }} />
+                      ))}
+                    </>
                   )}
                   {/* Header */}
                   <div className="h-9.5 flex border-b border-[#ECE9DA]">

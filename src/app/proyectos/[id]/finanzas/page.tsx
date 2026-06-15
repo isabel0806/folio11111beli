@@ -116,6 +116,11 @@ export default function FinanzasProyectoPage() {
   }
 
   const currency = project?.currency || 'ARS'
+  // Proveedores ya cargados (del proyecto + directorio) para sugerir al cargar un costo.
+  const providerNames = Array.from(new Set([
+    ...contacts.filter(c => c.category !== 'cliente').map(c => c.name),
+    ...mockContacts.filter(c => c.category === 'proveedor' || c.category === 'industrial').map(c => c.name),
+  ])).sort()
 
   return (
     <div className="flex flex-col gap-6">
@@ -386,7 +391,13 @@ export default function FinanzasProyectoPage() {
       >
         <div className="space-y-4">
           <Input label="Descripción *" value={cForm.description} onChange={e => setCForm(f => ({ ...f, description: e.target.value }))} placeholder="Ej: Impresión planos" />
-          <Input label="Proveedor" value={cForm.provider_name} onChange={e => setCForm(f => ({ ...f, provider_name: e.target.value }))} placeholder="Nombre del proveedor" />
+          <div>
+            <Input label="Proveedor" list="proveedores-existentes" value={cForm.provider_name} onChange={e => setCForm(f => ({ ...f, provider_name: e.target.value }))} placeholder="Elegí uno cargado o escribí uno nuevo" />
+            <datalist id="proveedores-existentes">
+              {providerNames.map(n => <option key={n} value={n} />)}
+            </datalist>
+            <p className="text-[11px] text-[#A8A29A] mt-1">Aparecen los proveedores ya cargados · o escribí uno nuevo y queda creado.</p>
+          </div>
           <Select label="Categoría" value={cForm.category} onChange={e => setCForm(f => ({ ...f, category: e.target.value }))}
             options={[{ value: 'proveedor', label: 'Proveedor' }, { value: 'gasto', label: 'Gasto' }, { value: 'maquinaria', label: 'Maquinaria' }]}
           />

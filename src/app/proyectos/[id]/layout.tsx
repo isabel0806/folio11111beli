@@ -4,6 +4,10 @@ import Link from 'next/link'
 import { mockProjects, mockMilestones, mockTasks } from '@/lib/mock-data'
 import { getProjectTypeLabel, formatCurrency, formatDate } from '@/lib/utils'
 import { ProjectStatusBadge } from '@/components/proyectos/ProjectStatusBadge'
+import { useRole, type Capability } from '@/lib/use-role'
+import { mockTeam } from '@/lib/mock-data'
+import { getAreas, ALL_AREAS, OPERATIVO_AREAS } from '@/lib/project-access'
+import { AccessDenied } from '@/components/layout/AccessDenied'
 import { cn } from '@/lib/cn'
 import {
   IconFolder, IconLayoutKanban, IconCurrencyDollar,
@@ -33,6 +37,7 @@ const tabs = [
     href: 'presupuesto',
     label: 'Presupuesto',
     icon: IconReceipt2,
+    cap: 'projectFinanzas' as Capability,
     getBadge: () => null as { count: number; color: 'red' | 'yellow' | 'blue' } | null,
   },
   {
@@ -51,6 +56,7 @@ const tabs = [
     href: 'finanzas',
     label: 'Finanzas',
     icon: IconCurrencyDollar,
+    cap: 'projectFinanzas' as Capability,
     getBadge: (id: string) => {
       const ms = mockMilestones[id] || []
       const overdue = ms.filter(m => m.status === 'vencido').length
@@ -91,7 +97,23 @@ function Sparkle({ className }: { className?: string }) {
 export default function ProjectLayout({ children }: { children: React.ReactNode }) {
   const { id } = useParams() as { id: string }
   const pathname = usePathname()
+  const { can, person } = useRole()
   const project = mockProjects.find(p => p.id === id)
+
+  // Impersonating a specific person → gate tabs by their per-project permissions.
+  const member = person ? (mockTeam[id] || []).find(m => m.name === person) : undefined
+  const personAreas = member
+    ? getAreas(id, member.id, member.tag_label.toLowerCase().includes('responsable') ? ALL_AREAS : OPERATIVO_AREAS)
+    : []
+  const showMoney = person ? personAreas.includes('finanzas') : can('projectFinanzas')
+
+  const visibleTabs = tabs.filter(t => {
+    if (person) {
+      if (t.href === 'configuracion') return false // solo administradores
+      return personAreas.includes(t.href)
+    }
+    return !('cap' in t) || !t.cap || can(t.cap)
+  })
 
   if (!project) {
     return (
@@ -100,6 +122,9 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
       </div>
     )
   }
+
+  // Impersonando a alguien que no es parte del proyecto → sin acceso.
+  if (person && !member) return <AccessDenied area={`"${project.name}" — no estás asignado a este proyecto`} />
 
   const activeTab = tabs.find(t => pathname.includes(t.href))?.href || 'archivos'
   const milestones = mockMilestones[id] || []
@@ -135,7 +160,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
             </div>
 
             <div className="flex items-center gap-2.5">
-              {nextMilestone && (
+              {nextMilestone && showMoney && (
                 <Link
                   href={`/proyectos/${id}/finanzas`}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#130D10] text-white text-[13px] font-semibold hover:bg-[#2A2025] transition-colors"
@@ -180,7 +205,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
                 )}
               </p>
 
-              {total > 0 && (
+              {total > 0 && showMoney && (
                 <div>
                   <div className="flex items-center gap-3 mb-1.5">
                     <div className="flex-1 h-2 bg-[#ECE9DA] rounded-full overflow-hidden flex">
@@ -214,7 +239,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
 
           {/* Tabs */}
           <div className="flex items-center gap-1.5">
-            {tabs.map(tab => {
+            {visibleTabs.map(tab => {
               const isActive = activeTab === tab.href
               const badge = tab.getBadge(id)
               const Icon = tab.icon

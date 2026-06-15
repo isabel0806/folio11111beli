@@ -4,9 +4,9 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input, Select } from '@/components/ui/Input'
-import { IconPlus, IconChevronLeft, IconChevronRight, IconCalendar, IconClock } from '@tabler/icons-react'
-import { mockCalendarEvents, mockMilestones, mockTasks, mockProjects } from '@/lib/mock-data'
-import { formatDate } from '@/lib/utils'
+import { IconPlus, IconChevronLeft, IconChevronRight, IconCalendar, IconClock, IconBell, IconAlertTriangle } from '@tabler/icons-react'
+import { mockCalendarEvents, mockMilestones, mockProjects, mockTeam } from '@/lib/mock-data'
+import { formatDate, formatCurrency } from '@/lib/utils'
 import type { CalendarEvent, EventType } from '@/lib/types'
 import { cn } from '@/lib/cn'
 
@@ -229,36 +229,22 @@ export default function AgendaPage() {
   const [month, setMonth] = useState(now.getMonth())
   const [view, setView] = useState<'mes' | 'semana' | 'dia'>('mes')
   const [showNew, setShowNew] = useState(false)
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    ...mockCalendarEvents,
-    // Inject milestones as calendar events
-    ...Object.entries(mockMilestones).flatMap(([pid, ms]) =>
-      ms.filter(m => m.status !== 'cobrado').map(m => ({
-        id: `ev-m-${m.id}`,
-        studio_id: 's1',
-        project_id: pid,
-        project_name: mockProjects.find(p => p.id === pid)?.name || '',
-        title: m.name,
-        start: m.due_date + 'T09:00',
-        end: m.due_date + 'T09:30',
-        type: 'hito' as EventType,
-      }))
-    ),
-    // Tasks
-    ...Object.entries(mockTasks).flatMap(([pid, ts]) =>
-      ts.filter(t => t.due_date && t.status !== 'completado').map(t => ({
-        id: `ev-t-${t.id}`,
-        studio_id: 's1',
-        project_id: pid,
-        project_name: mockProjects.find(p => p.id === pid)?.name || '',
-        title: t.title,
-        start: t.due_date! + 'T10:00',
-        end: t.due_date! + 'T10:30',
-        type: 'entrega' as EventType,
-      }))
-    ),
-  ])
+  // La agenda es PERSONAL (estilo Google Calendar): solo tus eventos, no se
+  // llena con hitos/tareas de proyectos. Los vencimientos van como notificación.
+  const [events, setEvents] = useState<CalendarEvent[]>([...mockCalendarEvents])
   const [form, setForm] = useState({ title: '', start: '', end: '', type: 'custom', project_id: '' })
+
+  // Vencimientos de proyectos → notificaciones (no ocupan tiempo en la agenda).
+  const deadlines = Object.entries(mockMilestones)
+    .flatMap(([pid, ms]) => ms
+      .filter(m => m.status === 'pendiente' || m.status === 'vencido')
+      .map(m => {
+        const project = mockProjects.find(p => p.id === pid)
+        const responsable = (mockTeam[pid] || []).find(t => t.tag_label.toLowerCase().includes('responsable'))
+        return { id: m.id, name: m.name, due: m.due_date, amount: m.amount, currency: project?.currency, projectName: project?.name || '', overdue: m.status === 'vencido', responsable: responsable?.name }
+      }))
+    .sort((a, b) => new Date(a.due).getTime() - new Date(b.due).getTime())
+    .slice(0, 8)
 
   const daysInMonth = getDaysInMonth(year, month)
   const firstDay = getFirstDayOfMonth(year, month)
@@ -362,41 +348,57 @@ export default function AgendaPage() {
           {view === 'dia' && <DayView />}
         </div>
 
-        {/* Upcoming events sidebar */}
-        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-5">
-          <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] mb-3">Próximos eventos</h3>
-          <div className="space-y-3">
-            {upcomingEvents.map(ev => (
-              <div key={ev.id} className="flex items-start gap-2">
-                <div className={cn('w-1.5 h-1.5 rounded-full mt-1.5 shrink-0',
-                  ev.type === 'hito' ? 'bg-[#F5D242]' : ev.type === 'reunion' ? 'bg-[#7FB0E8]' : ev.type === 'entrega' ? 'bg-[#FFABCF]' : 'bg-[#D5D25D]'
-                )} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-[#130D10] truncate">{ev.title}</p>
-                  <p className="text-[10px] text-[#A8A29A]">
-                    {formatDate(ev.start.split('T')[0])}
-                    {ev.project_name && ` · ${ev.project_name}`}
-                  </p>
+        {/* Sidebar: tu agenda + vencimientos */}
+        <div className="flex flex-col gap-5">
+          {/* Próximos de TU agenda (eventos personales) */}
+          <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-5">
+            <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] mb-3">Tu agenda · próximos</h3>
+            <div className="space-y-3">
+              {upcomingEvents.map(ev => (
+                <div key={ev.id} className="flex items-start gap-2">
+                  <div className={cn('w-1.5 h-1.5 rounded-full mt-1.5 shrink-0',
+                    ev.type === 'reunion' ? 'bg-[#7FB0E8]' : ev.type === 'entrega' ? 'bg-[#FFABCF]' : 'bg-[#D5D25D]'
+                  )} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-[#130D10] truncate">{ev.title}</p>
+                    <p className="text-[10px] text-[#A8A29A]">
+                      {formatDate(ev.start.split('T')[0])}
+                      {ev.project_name && ` · ${ev.project_name}`}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {upcomingEvents.length === 0 && <p className="text-xs text-[#A8A29A]">Sin eventos próximos.</p>}
+              ))}
+              {upcomingEvents.length === 0 && <p className="text-xs text-[#A8A29A]">No tenés eventos próximos. Tu agenda es personal — sumá reuniones o bloques de tiempo.</p>}
+            </div>
           </div>
 
-          {/* Legend */}
-          <div className="mt-5 pt-4 border-t border-[#ECE8D6] space-y-1.5">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] mb-2">Referencias</p>
-            {[
-              { label: 'Hito de cobro', color: 'bg-[#F5D242]' },
-              { label: 'Reunión', color: 'bg-[#7FB0E8]' },
-              { label: 'Entrega', color: 'bg-[#FFABCF]' },
-              { label: 'Custom', color: 'bg-[#D5D25D]' },
-            ].map(l => (
-              <div key={l.label} className="flex items-center gap-2">
-                <span className={cn('w-2 h-2 rounded-full', l.color)} />
-                <span className="text-[10px] text-[#6B655C]">{l.label}</span>
-              </div>
-            ))}
+          {/* Vencimientos de proyectos → notificaciones (no ocupan tiempo) */}
+          <div className="bg-white border border-[#ECE8D6] rounded-[20px] p-5">
+            <div className="flex items-center gap-1.5 mb-1">
+              <IconBell size={13} className="text-[#FF5738]" stroke={1.8} />
+              <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A]">Vencimientos de proyectos</h3>
+            </div>
+            <p className="text-[10px] text-[#A8A29A] mb-3">Notificaciones — no ocupan tiempo en tu agenda</p>
+            <div className="flex flex-col gap-2">
+              {deadlines.map(d => (
+                <div key={d.id} className={cn('flex items-start gap-2.5 rounded-[12px] px-3 py-2.5 border', d.overdue ? 'bg-[#FFF6F3] border-[#FAD9D0]' : 'bg-[#FBFAF3] border-[#F2EFE2]')}>
+                  <span className={cn('flex items-center justify-center shrink-0 rounded-full size-6 mt-0.5', d.overdue ? 'bg-[#FFE3DC]' : 'bg-[#FBF3D6]')}>
+                    {d.overdue ? <IconAlertTriangle size={12} className="text-[#C23A22]" stroke={2} /> : <IconClock size={12} className="text-[#7A6410]" stroke={2} />}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-[#130D10] truncate">{d.name}</p>
+                      <span className="text-[11px] font-semibold text-[#130D10] shrink-0">{formatCurrency(d.amount, d.currency)}</span>
+                    </div>
+                    <p className="text-[10px] text-[#8A847B] truncate">{d.projectName}{d.responsable && ` · ${d.responsable}`}</p>
+                    <p className={cn('text-[10px] font-medium', d.overdue ? 'text-[#C23A22]' : 'text-[#A8A29A]')}>
+                      {d.overdue ? `Venció el ${formatDate(d.due)}` : `Vence ${formatDate(d.due)}`}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {deadlines.length === 0 && <p className="text-xs text-[#A8A29A]">Sin vencimientos pendientes.</p>}
+            </div>
           </div>
         </div>
       </div>
