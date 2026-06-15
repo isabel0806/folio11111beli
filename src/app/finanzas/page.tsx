@@ -39,6 +39,23 @@ export default function FinanzasPage() {
   const [facturas, setFacturas] = useState<Record<string, Factura>>({})
   const [facturando, setFacturando] = useState<typeof enrichedMilestones[0] | null>(null)
   const [priceSearch, setPriceSearch] = useState('')
+  const [period, setPeriod] = useState<'mes' | 'trim' | 'anio' | 'todo'>('todo')
+
+  const periodOptions: { k: typeof period; label: string }[] = [
+    { k: 'mes', label: 'Este mes' }, { k: 'trim', label: 'Últimos 3 meses' },
+    { k: 'anio', label: 'Este año' }, { k: 'todo', label: 'Todo' },
+  ]
+  const nowP = new Date()
+  const inPeriod = (dateStr?: string) => {
+    if (period === 'todo') return true
+    if (!dateStr) return false
+    const d = new Date(dateStr.length <= 10 ? dateStr + 'T12:00:00' : dateStr)
+    if (period === 'mes') return d.getFullYear() === nowP.getFullYear() && d.getMonth() === nowP.getMonth()
+    if (period === 'anio') return d.getFullYear() === nowP.getFullYear()
+    const start = new Date(nowP.getFullYear(), nowP.getMonth() - 2, 1)
+    const end = new Date(nowP.getFullYear(), nowP.getMonth() + 1, 0, 23, 59, 59)
+    return d >= start && d <= end
+  }
 
   const enrichedMilestones = Object.entries(mockMilestones).flatMap(([pid, ms]) => {
     const project = mockProjects.find(p => p.id === pid)!
@@ -51,11 +68,11 @@ export default function FinanzasPage() {
     return cs.map(c => ({ ...c, project_name: project?.name || '' }))
   })
 
-  // Summary numbers
-  const cobrado = milestones.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
-  const pendiente = milestones.filter(m => m.status === 'pendiente').reduce((a, m) => a + m.amount, 0)
-  const vencido = milestones.filter(m => m.status === 'vencido').reduce((a, m) => a + m.amount, 0)
-  const totalCostos = allCosts.reduce((a, c) => a + c.amount, 0)
+  // Summary numbers (scoped to the selected period)
+  const cobrado = milestones.filter(m => m.status === 'cobrado' && inPeriod(m.paid_at || m.due_date)).reduce((a, m) => a + m.amount, 0)
+  const pendiente = milestones.filter(m => m.status === 'pendiente' && inPeriod(m.due_date)).reduce((a, m) => a + m.amount, 0)
+  const vencido = milestones.filter(m => m.status === 'vencido' && inPeriod(m.due_date)).reduce((a, m) => a + m.amount, 0)
+  const totalCostos = allCosts.filter(c => inPeriod(c.created_at)).reduce((a, c) => a + c.amount, 0)
   const totalIngresos = cobrado
   const neto = totalIngresos - totalCostos
 
@@ -117,6 +134,7 @@ export default function FinanzasPage() {
   // Filtered milestones
   const filtered = milestones
     .filter(m => filter === 'todos' || m.status === filter)
+    .filter(m => inPeriod(m.status === 'cobrado' ? (m.paid_at || m.due_date) : m.due_date))
     .filter(m => !search || m.name.toLowerCase().includes(search.toLowerCase()) || m.project.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
 
@@ -127,10 +145,12 @@ export default function FinanzasPage() {
     setConfirmPaid(null)
   }
 
-  const filteredCosts = allCosts.filter(c =>
-    !search || c.description.toLowerCase().includes(search.toLowerCase()) ||
-    (c.provider_name || '').toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredCosts = allCosts
+    .filter(c => inPeriod(c.created_at))
+    .filter(c =>
+      !search || c.description.toLowerCase().includes(search.toLowerCase()) ||
+      (c.provider_name || '').toLowerCase().includes(search.toLowerCase())
+    )
 
   // Price history — benchmark a concept against costs across all projects
   const priceMatches = priceSearch.trim()
@@ -158,7 +178,20 @@ export default function FinanzasPage() {
 
   return (
     <div className="p-8">
-      <PageHeader title="Finanzas" description="Resumen financiero de tu estudio" />
+      <PageHeader title="Finanzas" description="Resumen financiero de tu estudio"
+        actions={
+          <div className="flex items-center p-1 bg-white border border-[#ECE8D6] rounded-full gap-0.5">
+            {periodOptions.map(o => (
+              <button key={o.k} onClick={() => setPeriod(o.k)}
+                className={cn('px-3.5 py-1.5 text-[13px] rounded-full transition-colors',
+                  period === o.k ? 'bg-[#130D10] text-white font-semibold' : 'text-[#8A847B] hover:text-[#130D10] font-medium'
+                )}>
+                {o.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {/* Summary cards */}
       <div className="grid grid-cols-4 gap-3 mb-7">
