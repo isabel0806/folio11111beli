@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Folio
 
-## Getting Started
+Sistema de gestión para estudios de arquitectura — proyectos, honorarios, cronograma de obra y portal del cliente, con la identidad editorial de la marca **Folio**.
 
-First, run the development server:
+Reinterpretación en código del diseño _Folio v2_ (Paper): 25 pantallas, un flujo completo de principio a fin.
+
+## Stack
+
+- **Next.js 16** (App Router, Turbopack) · **React 19** · **TypeScript**
+- **Tailwind CSS v4**
+- **@tabler/icons-react** · **date-fns**
+- Datos de ejemplo (`src/lib/mock-data.ts`) — sin backend ni base de datos
+
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrí [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build   # build de producción
+npm run start   # servir el build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Pantallas principales
 
-## Learn More
+- **Inicio** — resumen del estudio: alertas, proyectos activos, próximos eventos.
+- **Proyectos** — listado + detalle con sub-tabs: Archivos, Control (Kanban / Lista / **Gantt con zoom Día·Semana·Mes·Trimestre**), Presupuesto, Bitácora, Documentación, Finanzas, Equipo, Configuración.
+- **Finanzas** — flujo de fondos, historial mensual interactivo, historial de precios y **facturación electrónica con ARCA** (CAE simulado).
+- **Agenda** — vistas Mes / Semana / Día.
+- **Cronograma maestro** — Gantt multi-proyecto del estudio con zoom Mes·Trimestre·Semestre·Año.
+- **Estudio · Ajustes · Portada / índice**.
+- **Vistas públicas para el cliente** (sin login):
+  - **Portal del cliente** (`/portal/[id]`) — avance de obra, aprobación de planos, pago, descargas.
+  - **Presupuesto público** (`/presupuesto/[id]`) — presupuesto detallado con IVA y honorarios, compartible por link.
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy en Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+El proyecto es Next.js _zero-config_ y **no usa variables de entorno**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Entrá a [vercel.com/new](https://vercel.com/new) e ingresá con GitHub.
+2. **Import** del repositorio `isabel0806/folio11111beli`.
+3. Vercel detecta Next.js automáticamente → **Deploy**.
+4. Verificá que la _Production Branch_ sea **`main`** (GitHub → Settings → Branches, o Vercel → Settings → Git).
 
-## Deploy on Vercel
+Cada push a `main` genera un redeploy automático. Para trabajar sin afectar producción, usá otra branch y mergeá a `main` al publicar.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notas de la demo
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Esta versión funciona sin servidor, así que algunas piezas son simuladas:
+
+- **Compartir presupuesto / portal**: el dato viaja en `localStorage` y codificado en la URL — funciona online, pero es por navegador/dispositivo.
+- **ARCA**: genera el comprobante y el CAE localmente; no se conecta al web service real de facturación (WSFE).
+- **Pagos**: se informan manualmente (transferencia); no hay pasarela de pago.
+- **Sin autenticación ni persistencia real**: los datos se reinician al recargar.
+
+Para un producto multiusuario real haría falta backend (auth, base de datos, integración WSFE de ARCA y pasarela de pagos).
