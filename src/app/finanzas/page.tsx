@@ -113,49 +113,49 @@ export default function FinanzasPage() {
         {[
           {
             label: 'Cobrado', value: formatCurrency(cobrado), sub: `${milestones.filter(m => m.status === 'cobrado').length} hitos`,
-            color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100',
-            icon: <IconCheck size={14} stroke={2} className="text-green-600" />,
+            color: 'text-[#00846F]', bg: 'bg-[#FBFAF3]', border: 'border-[#ECE8D6]',
+            icon: <IconCheck size={14} stroke={2} className="text-[#00846F]" />,
           },
           {
             label: 'Por cobrar', value: formatCurrency(pendiente), sub: `${milestones.filter(m => m.status === 'pendiente').length} hitos`,
-            color: 'text-[#C9A800]', bg: 'bg-[#FFFBEB]', border: 'border-[#F5D242]/40',
-            icon: <IconClock size={14} stroke={1.5} className="text-[#C9A800]" />,
+            color: 'text-[#7A6410]', bg: 'bg-[#FBFAF3]', border: 'border-[#ECE8D6]',
+            icon: <IconClock size={14} stroke={1.5} className="text-[#7A6410]" />,
           },
           {
             label: 'Vencido', value: formatCurrency(vencido), sub: `${milestones.filter(m => m.status === 'vencido').length} hitos`,
-            color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100',
-            icon: <IconAlertTriangle size={14} stroke={1.5} className="text-red-600" />,
+            color: 'text-[#C23A22]', bg: 'bg-[#FBFAF3]', border: 'border-[#ECE8D6]',
+            icon: <IconAlertTriangle size={14} stroke={1.5} className="text-[#C23A22]" />,
           },
           {
             label: 'Neto (cobrado − costos)', value: formatCurrency(neto), sub: `${formatCurrency(totalCostos)} en costos`,
-            color: neto >= 0 ? 'text-[#130D10]' : 'text-red-600', bg: 'bg-white', border: 'border-[#E5E5E3]',
-            icon: neto >= 0 ? <IconTrendingUp size={14} stroke={1.5} className="text-[#130D10]" /> : <IconTrendingDown size={14} stroke={1.5} className="text-red-600" />,
+            color: neto >= 0 ? 'text-[#130D10]' : 'text-[#C23A22]', bg: 'bg-[#FBFAF3]', border: 'border-[#ECE8D6]',
+            icon: neto >= 0 ? <IconTrendingUp size={14} stroke={1.5} className="text-[#130D10]" /> : <IconTrendingDown size={14} stroke={1.5} className="text-[#C23A22]" />,
           },
         ].map(card => (
-          <div key={card.label} className={cn('border rounded-2xl p-4', card.bg, card.border)}>
+          <div key={card.label} className={cn('border rounded-[18px] p-5', card.bg, card.border)}>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-[#9B9B9B]">{card.label}</span>
-              <span className="p-1.5 bg-white/60 rounded-lg">{card.icon}</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A]">{card.label}</span>
+              <span className="p-1.5 bg-white rounded-full border border-[#ECE8D6]">{card.icon}</span>
             </div>
-            <p className={cn('text-xl font-bold mb-0.5', card.color)}>{card.value}</p>
-            <p className="text-[10px] text-[#9B9B9B]">{card.sub}</p>
+            <p className={cn('font-serif text-[27px] leading-none mb-1', card.color)}>{card.value}</p>
+            <p className="text-[10px] text-[#A8A29A]">{card.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Cash flow bar */}
       {(cobrado + pendiente + vencido) > 0 && (
-        <div className="bg-white border border-[#E5E5E3] rounded-2xl p-5 mb-7">
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6 mb-7">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold text-[#130D10]">Flujo de fondos</h3>
-            <span className="text-xs text-[#9B9B9B]">Total esperado: {formatCurrency(cobrado + pendiente + vencido)}</span>
+            <h3 className="font-serif text-[19px] text-[#130D10]">Flujo de fondos</h3>
+            <span className="text-xs text-[#A8A29A]">Total esperado: {formatCurrency(cobrado + pendiente + vencido)}</span>
           </div>
-          <div className="h-4 bg-[#F0F0EE] rounded-full overflow-hidden flex gap-0.5">
+          <div className="h-4 bg-[#ECE9DA] rounded-full overflow-hidden flex gap-0.5">
             {cobrado > 0 && (
-              <div className="h-full bg-green-400 rounded-l-full transition-all" style={{ width: `${(cobrado / (cobrado + pendiente + vencido)) * 100}%` }} />
+              <div className="h-full bg-[#00846F] rounded-l-full transition-all" style={{ width: `${(cobrado / (cobrado + pendiente + vencido)) * 100}%` }} />
             )}
             {vencido > 0 && (
-              <div className="h-full bg-red-400 transition-all" style={{ width: `${(vencido / (cobrado + pendiente + vencido)) * 100}%` }} />
+              <div className="h-full bg-[#FF5738] transition-all" style={{ width: `${(vencido / (cobrado + pendiente + vencido)) * 100}%` }} />
             )}
             {pendiente > 0 && (
               <div className="h-full bg-[#F5D242] rounded-r-full transition-all" style={{ width: `${(pendiente / (cobrado + pendiente + vencido)) * 100}%` }} />
@@ -163,12 +163,12 @@ export default function FinanzasPage() {
           </div>
           <div className="flex gap-5 mt-2">
             {[
-              { label: 'Cobrado', color: 'bg-green-400', value: cobrado },
-              { label: 'Vencido', color: 'bg-red-400', value: vencido },
+              { label: 'Cobrado', color: 'bg-[#00846F]', value: cobrado },
+              { label: 'Vencido', color: 'bg-[#FF5738]', value: vencido },
               { label: 'Por cobrar', color: 'bg-[#F5D242]', value: pendiente },
             ].filter(l => l.value > 0).map(l => (
-              <span key={l.label} className="flex items-center gap-1.5 text-xs text-[#6B6B6B]">
-                <span className={cn('w-2.5 h-2.5 rounded-sm', l.color)} />
+              <span key={l.label} className="flex items-center gap-1.5 text-xs text-[#6B655C]">
+                <span className={cn('w-2.5 h-2.5 rounded-full', l.color)} />
                 {l.label} · {formatCurrency(l.value)}
               </span>
             ))}
@@ -177,8 +177,8 @@ export default function FinanzasPage() {
       )}
 
       {/* Per-project breakdown */}
-      <div className="bg-white border border-[#E5E5E3] rounded-2xl p-5 mb-7">
-        <h3 className="text-sm font-semibold text-[#130D10] mb-4">Por proyecto</h3>
+      <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6 mb-7">
+        <h3 className="font-serif text-[19px] text-[#130D10] mb-4">Por proyecto</h3>
         <div className="space-y-3">
           {mockProjects.map(p => {
             const pMs = milestones.filter(m => m.project.id === p.id)
@@ -188,18 +188,18 @@ export default function FinanzasPage() {
             if (pTotal === 0) return null
             return (
               <div key={p.id} className="flex items-center gap-4">
-                <Link href={`/proyectos/${p.id}/finanzas`} className="flex items-center gap-2 w-40 shrink-0 hover:text-[#F5D242] transition-colors">
+                <Link href={`/proyectos/${p.id}/finanzas`} className="flex items-center gap-2 w-40 shrink-0 hover:text-[#FF5738] transition-colors">
                   <div className="w-5 h-5 rounded-md shrink-0" style={{ backgroundColor: p.cover_color }} />
                   <span className="text-sm text-[#130D10] truncate">{p.name}</span>
                 </Link>
                 <div className="flex-1">
-                  <div className="h-2 bg-[#F0F0EE] rounded-full overflow-hidden flex">
-                    <div className="h-full bg-green-400 transition-all" style={{ width: `${pTotal > 0 ? (pCobrado / pTotal) * 100 : 0}%` }} />
+                  <div className="h-2 bg-[#ECE9DA] rounded-full overflow-hidden flex">
+                    <div className="h-full bg-[#00846F] transition-all" style={{ width: `${pTotal > 0 ? (pCobrado / pTotal) * 100 : 0}%` }} />
                   </div>
                 </div>
                 <div className="text-right w-36 shrink-0">
-                  <span className="text-xs text-green-600 font-medium">{formatCurrency(pCobrado, p.currency)}</span>
-                  {pPendiente > 0 && <span className="text-xs text-[#9B9B9B]"> / {formatCurrency(pPendiente, p.currency)}</span>}
+                  <span className="text-xs text-[#00846F] font-medium">{formatCurrency(pCobrado, p.currency)}</span>
+                  {pPendiente > 0 && <span className="text-xs text-[#A8A29A]"> / {formatCurrency(pPendiente, p.currency)}</span>}
                 </div>
               </div>
             )
@@ -208,16 +208,16 @@ export default function FinanzasPage() {
       </div>
 
       {/* Monthly chart */}
-      <div className="bg-white border border-[#E5E5E3] rounded-2xl p-5 mb-7">
+      <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6 mb-7">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="text-sm font-semibold text-[#130D10]">Historial mensual</h3>
-            <p className="text-xs text-[#9B9B9B] mt-0.5">Últimos 8 meses + próximos 2</p>
+            <h3 className="font-serif text-[19px] text-[#130D10]">Historial mensual</h3>
+            <p className="text-xs text-[#A8A29A] mt-0.5">Últimos 8 meses + próximos 2</p>
           </div>
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-xs text-[#6B6B6B]"><span className="w-2.5 h-2.5 rounded-sm bg-green-400 inline-block" />Cobrado</span>
-            <span className="flex items-center gap-1.5 text-xs text-[#6B6B6B]"><span className="w-2.5 h-2.5 rounded-sm bg-[#F5D242] inline-block" />Por cobrar</span>
-            <span className="flex items-center gap-1.5 text-xs text-[#6B6B6B]"><span className="w-2.5 h-2.5 rounded-sm bg-[#F0A0A0] inline-block" />Costos</span>
+            <span className="flex items-center gap-1.5 text-xs text-[#6B655C]"><span className="w-2.5 h-2.5 rounded-full bg-[#00846F] inline-block" />Cobrado</span>
+            <span className="flex items-center gap-1.5 text-xs text-[#6B655C]"><span className="w-2.5 h-2.5 rounded-full bg-[#F5D242] inline-block" />Por cobrar</span>
+            <span className="flex items-center gap-1.5 text-xs text-[#6B655C]"><span className="w-2.5 h-2.5 rounded-full bg-[#FFABCF] inline-block" />Costos</span>
           </div>
         </div>
 
@@ -234,11 +234,11 @@ export default function FinanzasPage() {
               <div key={m.key} className="flex-1 flex flex-col items-center gap-1.5 group relative">
                 {/* Tooltip */}
                 {hasData && (
-                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#130D10] text-white text-[10px] rounded-lg px-2.5 py-2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
+                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-[#130D10] text-white text-[10px] rounded-[10px] px-2.5 py-2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
                     <p className="font-semibold mb-1">{m.label.toUpperCase()}</p>
-                    {m.cobrado > 0 && <p className="text-green-300">✓ {formatCurrency(m.cobrado)}</p>}
-                    {m.pendiente > 0 && <p className="text-yellow-300">○ {formatCurrency(m.pendiente)}</p>}
-                    {m.costos > 0 && <p className="text-red-300">↓ {formatCurrency(m.costos)}</p>}
+                    {m.cobrado > 0 && <p className="text-[#7FD9C5]">✓ {formatCurrency(m.cobrado)}</p>}
+                    {m.pendiente > 0 && <p className="text-[#F5D242]">○ {formatCurrency(m.pendiente)}</p>}
+                    {m.costos > 0 && <p className="text-[#FFABCF]">↓ {formatCurrency(m.costos)}</p>}
                   </div>
                 )}
 
@@ -263,7 +263,7 @@ export default function FinanzasPage() {
                       {/* Cobrado on bottom */}
                       {m.cobrado > 0 && (
                         <div
-                          className="w-full bg-green-400"
+                          className="w-full bg-[#00846F]"
                           style={{ height: `${totalH > 0 ? (cobradoH / totalH) * 100 : 0}%` }}
                         />
                       )}
@@ -272,7 +272,7 @@ export default function FinanzasPage() {
                   {/* Costos bar (separate, thinner) */}
                   {m.costos > 0 && (
                     <div
-                      className="w-1.5 rounded-t-sm bg-red-200 transition-all duration-500"
+                      className="w-1.5 rounded-t-sm bg-[#FFABCF] transition-all duration-500"
                       style={{ height: `${Math.max(costosH, 2)}%` }}
                     />
                   )}
@@ -281,12 +281,12 @@ export default function FinanzasPage() {
                 {/* Label */}
                 <span className={cn(
                   'text-[10px] capitalize',
-                  isCurrentMonth ? 'font-bold text-[#130D10]' : 'text-[#9B9B9B]'
+                  isCurrentMonth ? 'font-bold text-[#130D10]' : 'text-[#A8A29A]'
                 )}>
                   {m.label}
                 </span>
                 {isCurrentMonth && (
-                  <div className="w-1 h-1 rounded-full bg-[#F5D242]" />
+                  <div className="w-1 h-1 rounded-full bg-[#FF5738]" />
                 )}
               </div>
             )
@@ -295,19 +295,19 @@ export default function FinanzasPage() {
 
         {/* Axis reference */}
         <div className="flex justify-between mt-1 px-0.5">
-          <span className="text-[9px] text-[#9B9B9B]">0</span>
-          <span className="text-[9px] text-[#9B9B9B]">{formatCurrency(Math.round(maxMonthly / 2))}</span>
-          <span className="text-[9px] text-[#9B9B9B]">{formatCurrency(maxMonthly)}</span>
+          <span className="text-[9px] text-[#A8A29A]">0</span>
+          <span className="text-[9px] text-[#A8A29A]">{formatCurrency(Math.round(maxMonthly / 2))}</span>
+          <span className="text-[9px] text-[#A8A29A]">{formatCurrency(maxMonthly)}</span>
         </div>
       </div>
 
       {/* Tab switcher */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-1 bg-white border border-[#E5E5E3] rounded-xl p-1">
+        <div className="flex items-center gap-0.5 bg-white border border-[#ECE8D6] rounded-full p-1">
           {([['cobrar', 'Facturas a cobrar'], ['costos', 'Costos y gastos']] as const).map(([k, label]) => (
             <button key={k} onClick={() => setTab(k)}
-              className={cn('px-4 py-2 text-sm font-medium rounded-lg transition-colors',
-                tab === k ? 'bg-[#130D10] text-white' : 'text-[#6B6B6B] hover:text-[#130D10]'
+              className={cn('px-4 py-1.5 text-sm rounded-full transition-colors',
+                tab === k ? 'bg-[#130D10] text-white font-semibold' : 'text-[#8A847B] hover:text-[#130D10] font-medium'
               )}>
               {label}
             </button>
@@ -315,9 +315,9 @@ export default function FinanzasPage() {
         </div>
 
         <div className="relative">
-          <IconSearch size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9B9B9B]" />
+          <IconSearch size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8A29A]" />
           <input
-            className="pl-8 pr-3 py-2 text-sm border border-[#E5E5E3] rounded-lg bg-white w-48 focus:outline-none focus:ring-1 focus:ring-[#F5D242]"
+            className="pl-8 pr-3 py-2 text-sm border border-[#ECE8D6] rounded-full bg-white w-48 focus:outline-none focus:ring-1 focus:ring-[#F5D242]"
             placeholder="Buscar..."
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -330,15 +330,16 @@ export default function FinanzasPage() {
           {/* Filter pills */}
           <div className="flex gap-2 mb-4">
             {([
-              ['todos', 'Todos'], ['vencido', '🔴 Vencidos'], ['pendiente', '🟡 Pendientes'], ['cobrado', '🟢 Cobrados'],
-            ] as const).map(([k, label]) => (
+              ['todos', 'Todos', ''], ['vencido', 'Vencidos', 'bg-[#FF5738]'], ['pendiente', 'Pendientes', 'bg-[#F5D242]'], ['cobrado', 'Cobrados', 'bg-[#00846F]'],
+            ] as const).map(([k, label, dot]) => (
               <button key={k} onClick={() => setFilter(k)}
                 className={cn(
-                  'px-3 py-1.5 text-xs rounded-full border transition-colors',
-                  filter === k ? 'bg-[#130D10] text-white border-[#130D10]' : 'bg-white text-[#6B6B6B] border-[#E5E5E3] hover:border-[#130D10]'
+                  'flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full border transition-colors',
+                  filter === k ? 'bg-[#130D10] text-white border-[#130D10]' : 'bg-white text-[#6B655C] border-[#ECE8D6] hover:border-[#130D10]'
                 )}>
+                {dot && <span className={cn('w-2 h-2 rounded-full', dot)} />}
                 {label}
-                <span className="ml-1.5 opacity-60">{tabCounts[k]}</span>
+                <span className="ml-0.5 opacity-60">{tabCounts[k]}</span>
               </button>
             ))}
           </div>
@@ -350,10 +351,10 @@ export default function FinanzasPage() {
               const isUrgent = m.status === 'pendiente' && days !== null && days <= 7
               return (
                 <div key={m.id} className={cn(
-                  'flex items-center gap-4 bg-white border rounded-xl px-4 py-3.5 transition-all',
-                  isOverdue ? 'border-red-100 bg-red-50/50' :
-                  isUrgent ? 'border-[#F5D242]/40 bg-[#FFFBEB]/50' :
-                  'border-[#E5E5E3]'
+                  'flex items-center gap-4 bg-white border rounded-[14px] px-4 py-3.5 transition-all',
+                  isOverdue ? 'border-[#FAD9D0] bg-[#FFF6F3]' :
+                  isUrgent ? 'border-[#F0E2A0] bg-[#FFFCEF]' :
+                  'border-[#ECE8D6]'
                 )}>
                   {/* Project dot */}
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: m.project.cover_color }} />
@@ -366,17 +367,17 @@ export default function FinanzasPage() {
                         {getMilestoneStatusLabel(m.status)}
                       </span>
                     </div>
-                    <p className="text-xs text-[#9B9B9B]">
+                    <p className="text-xs text-[#A8A29A]">
                       {m.project.name} · {m.project.client_name}
                       <span className="mx-1">·</span>
                       {isOverdue
-                        ? <span className="text-red-600">Venció el {formatDate(m.due_date)}</span>
+                        ? <span className="text-[#C23A22]">Venció el {formatDate(m.due_date)}</span>
                         : `Vence ${formatDate(m.due_date)}`}
                     </p>
                   </div>
 
                   {/* Amount */}
-                  <span className="text-base font-bold text-[#130D10] shrink-0">
+                  <span className="font-serif text-[18px] text-[#130D10] shrink-0">
                     {formatCurrency(m.amount, m.project.currency)}
                   </span>
 
@@ -390,25 +391,25 @@ export default function FinanzasPage() {
                             m.project.client_name, m.name, m.due_date, m.amount,
                             m.project.currency, currentUser.cbu_alias || ''
                           ))}
-                          className="flex items-center gap-1.5 text-xs font-medium text-white bg-green-500 hover:bg-green-600 px-2.5 py-1.5 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 text-xs font-medium text-white bg-[#00846F] hover:bg-[#006e5c] px-2.5 py-1.5 rounded-full transition-colors"
                         >
                           <IconBrandWhatsapp size={13} /> WA
                         </button>
                         <button
                           title="Marcar cobrado"
                           onClick={() => setConfirmPaid(m)}
-                          className="flex items-center gap-1.5 text-xs font-medium text-[#130D10] bg-[#F5D242] hover:bg-[#f0ca30] px-2.5 py-1.5 rounded-lg transition-colors"
+                          className="flex items-center gap-1.5 text-xs font-medium text-[#130D10] bg-[#F5D242] hover:bg-[#f0ca30] px-2.5 py-1.5 rounded-full transition-colors"
                         >
                           <IconCheck size={13} /> Cobrar
                         </button>
                       </>
                     )}
                     {m.status === 'cobrado' && (
-                      <span className="flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2.5 py-1.5 rounded-lg">
+                      <span className="flex items-center gap-1 text-xs text-[#00846F] bg-[#E5F3EF] px-2.5 py-1.5 rounded-full">
                         <IconCheck size={13} /> Cobrado
                       </span>
                     )}
-                    <button disabled title="ARCA — Próximamente" className="p-1.5 rounded-lg text-[#D5D5D3] cursor-not-allowed">
+                    <button disabled title="ARCA — Próximamente" className="p-1.5 rounded-full text-[#D8D2C2] cursor-not-allowed">
                       <IconReceipt size={15} stroke={1.5} />
                     </button>
                   </div>
@@ -416,8 +417,8 @@ export default function FinanzasPage() {
               )
             })}
             {filtered.length === 0 && (
-              <div className="py-12 text-center bg-white border border-dashed border-[#E5E5E3] rounded-2xl">
-                <p className="text-sm text-[#9B9B9B]">No hay hitos con este estado.</p>
+              <div className="py-12 text-center bg-[#FBFAF3] border border-dashed border-[#ECE8D6] rounded-[20px]">
+                <p className="text-sm text-[#A8A29A]">No hay hitos con este estado.</p>
               </div>
             )}
           </div>
@@ -427,34 +428,34 @@ export default function FinanzasPage() {
       {tab === 'costos' && (
         <div className="space-y-2">
           {filteredCosts.map(c => (
-            <div key={c.id} className="flex items-center gap-4 bg-white border border-[#E5E5E3] rounded-xl px-4 py-3.5">
+            <div key={c.id} className="flex items-center gap-4 bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3.5">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-[#130D10]">{c.description}</p>
-                <p className="text-xs text-[#9B9B9B]">
+                <p className="text-xs text-[#A8A29A]">
                   {c.project_name}
                   {c.provider_name && <> · {c.provider_name}</>}
                 </p>
               </div>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-[#F0F0EE] text-[#6B6B6B]">
+              <span className="text-xs px-2 py-0.5 rounded-full bg-[#F2EFE2] text-[#6B655C]">
                 {getCostCategoryLabel(c.category)}
               </span>
-              <span className="text-sm font-bold text-[#130D10]">{formatCurrency(c.amount)}</span>
+              <span className="font-serif text-[16px] text-[#130D10]">{formatCurrency(c.amount)}</span>
             </div>
           ))}
           {filteredCosts.length === 0 && (
-            <div className="py-12 text-center bg-white border border-dashed border-[#E5E5E3] rounded-2xl">
-              <p className="text-sm text-[#9B9B9B]">No hay costos registrados.</p>
+            <div className="py-12 text-center bg-[#FBFAF3] border border-dashed border-[#ECE8D6] rounded-[20px]">
+              <p className="text-sm text-[#A8A29A]">No hay costos registrados.</p>
             </div>
           )}
 
           {/* Historial de precios placeholder */}
-          <div className="mt-4 bg-white border border-dashed border-[#E5E5E3] rounded-2xl p-5">
+          <div className="mt-4 bg-[#FBFAF3] border border-dashed border-[#ECE8D6] rounded-[20px] p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-[#130D10] mb-0.5">Historial de precios</h3>
-                <p className="text-xs text-[#9B9B9B]">¿Cuánto costó algo similar antes? Próximamente podrás buscar en proyectos pasados para benchmarkear tus presupuestos.</p>
+                <h3 className="font-serif text-[19px] text-[#130D10] mb-0.5">Historial de precios</h3>
+                <p className="text-xs text-[#A8A29A]">¿Cuánto costó algo similar antes? Próximamente podrás buscar en proyectos pasados para benchmarkear tus presupuestos.</p>
               </div>
-              <span className="shrink-0 text-xs bg-[#F0F0EE] text-[#9B9B9B] px-2.5 py-1 rounded-full">Próximamente</span>
+              <span className="shrink-0 text-xs bg-[#F2EFE2] text-[#A8A29A] px-2.5 py-1 rounded-full">Próximamente</span>
             </div>
           </div>
         </div>
@@ -472,7 +473,7 @@ export default function FinanzasPage() {
           </>
         }
       >
-        <div className="bg-[#F9F9F8] border border-[#E5E5E3] rounded-xl p-4">
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[14px] p-4">
           <p className="text-sm text-[#130D10] whitespace-pre-wrap">{whatsappMsg}</p>
         </div>
       </Modal>
@@ -487,12 +488,12 @@ export default function FinanzasPage() {
       >
         {confirmPaid && (
           <div className="space-y-3">
-            <p className="text-sm text-[#6B6B6B]">
+            <p className="text-sm text-[#6B655C]">
               Confirmás que recibiste el pago de <strong className="text-[#130D10]">"{confirmPaid.name}"</strong>{' '}
               ({confirmPaid.project.name}) por{' '}
               <strong className="text-[#130D10]">{formatCurrency(confirmPaid.amount, confirmPaid.project.currency)}</strong>?
             </p>
-            <p className="text-xs text-[#9B9B9B]">Se registrará la fecha de hoy como fecha de cobro.</p>
+            <p className="text-xs text-[#A8A29A]">Se registrará la fecha de hoy como fecha de cobro.</p>
           </div>
         )}
       </Modal>

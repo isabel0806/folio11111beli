@@ -57,43 +57,43 @@ export default function EstudioPage() {
   }
 
   const categoryColors: Record<ContactCategory, string> = {
-    industrial: 'bg-orange-100 text-orange-700',
-    proveedor: 'bg-blue-100 text-blue-700',
-    colaborador: 'bg-purple-100 text-purple-700',
-    cliente: 'bg-green-100 text-green-700',
+    industrial: 'bg-[#F6F5E2] text-[#7E7B2E]',
+    proveedor: 'bg-[#EAF2FB] text-[#3F6FA3]',
+    colaborador: 'bg-[#FDECF3] text-[#B14E7C]',
+    cliente: 'bg-[#E5F3EF] text-[#00846F]',
   }
 
   return (
     <div className="p-8">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold text-[#130D10]">Estudio</h1>
-          <p className="text-sm text-[#6B6B6B] mt-0.5">Visión global cross-proyecto</p>
-        </div>
-        <div className="flex items-center gap-1 p-1 bg-white border border-[#E5E5E3] rounded-lg">
-          {[{ k: 'control', label: 'Control' }, { k: 'directorio', label: 'Directorio' }, { k: 'equipo', label: 'Equipo' }].map(s => (
-            <button
-              key={s.k}
-              onClick={() => setSection(s.k as typeof section)}
-              className={cn(
-                'px-4 py-1.5 text-sm rounded-md transition-colors',
-                section === s.k ? 'bg-[#F5D242] text-[#130D10] font-medium' : 'text-[#6B6B6B] hover:text-[#130D10]'
-              )}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Estudio"
+        description="Visión global cross-proyecto"
+        actions={
+          <div className="flex items-center p-1 bg-white border border-[#ECE8D6] rounded-full gap-0.5">
+            {[{ k: 'control', label: 'Control' }, { k: 'directorio', label: 'Directorio' }, { k: 'equipo', label: 'Equipo' }].map(s => (
+              <button
+                key={s.k}
+                onClick={() => setSection(s.k as typeof section)}
+                className={cn(
+                  'px-3.5 py-1.5 text-sm rounded-full transition-colors',
+                  section === s.k ? 'bg-[#F5D242] text-[#130D10] font-semibold' : 'text-[#8A847B] hover:text-[#130D10]'
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {section === 'control' && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center p-1 bg-white border border-[#E5E5E3] rounded-lg gap-0.5">
+            <div className="flex items-center p-1 bg-white border border-[#ECE8D6] rounded-full gap-0.5">
               {[{ k: 'kanban', icon: IconLayoutKanban, label: 'Kanban' }, { k: 'lista', icon: IconList, label: 'Lista' }].map(({ k, icon: Icon, label }) => (
                 <button key={k} onClick={() => setView(k as typeof view)}
-                  className={cn('flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-colors',
-                    view === k ? 'bg-[#F5D242] text-[#130D10] font-medium' : 'text-[#6B6B6B] hover:text-[#130D10]'
+                  className={cn('flex items-center gap-1.5 px-3.5 py-1.5 text-xs rounded-full transition-colors',
+                    view === k ? 'bg-[#F5D242] text-[#130D10] font-semibold' : 'text-[#8A847B] hover:text-[#130D10]'
                   )}>
                   <Icon size={13} stroke={1.5} /> {label}
                 </button>
@@ -106,24 +106,24 @@ export default function EstudioPage() {
               {statusCols.map(col => {
                 const colTasks = allTasks.filter(t => t.status === col.status)
                 return (
-                  <div key={col.status} className="bg-white border border-[#E5E5E3] rounded-xl p-4">
+                  <div key={col.status} className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[18px] p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9B9B9B]">{col.label}</h3>
-                      <span className="text-xs bg-[#F0F0EE] text-[#6B6B6B] px-2 py-0.5 rounded-full">{colTasks.length}</span>
+                      <h3 className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">{col.label}</h3>
+                      <span className="text-xs bg-[#F2EFE2] text-[#6B655C] px-2 py-0.5 rounded-full">{colTasks.length}</span>
                     </div>
                     <div className="space-y-2">
                       {colTasks.map(task => {
                         const phase = getPhase(task.phase_id)
                         return (
-                          <div key={task.id} className="bg-[#F9F9F8] border border-[#E5E5E3] rounded-lg p-3">
+                          <div key={task.id} className="bg-white border border-[#ECE8D6] rounded-[14px] p-3">
                             {phase && (
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-md mb-1.5 inline-block" style={{ backgroundColor: phase.color + '20', color: phase.color }}>
+                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full mb-1.5 inline-block" style={{ backgroundColor: phase.color + '20', color: phase.color }}>
                                 {phase.name}
                               </span>
                             )}
                             <p className="text-sm text-[#130D10] font-medium">{task.title}</p>
-                            <p className="text-[10px] text-[#9B9B9B] mt-1">{(task as any).project_name}</p>
-                            <div className="flex items-center gap-2 text-[10px] text-[#9B9B9B] mt-1">
+                            <p className="text-[10px] text-[#A8A29A] mt-1">{(task as any).project_name}</p>
+                            <div className="flex items-center gap-2 text-[10px] text-[#A8A29A] mt-1">
                               {task.due_date && <span>{formatDate(task.due_date)}</span>}
                             </div>
                           </div>
@@ -137,30 +137,30 @@ export default function EstudioPage() {
           )}
 
           {view === 'lista' && (
-            <div className="bg-white border border-[#E5E5E3] rounded-xl overflow-hidden">
+            <div className="bg-white border border-[#ECE8D6] rounded-[18px] overflow-hidden">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-[#E5E5E3] bg-[#F9F9F8]">
+                  <tr className="border-b border-[#ECE8D6] bg-[#FBFAF3]">
                     {['Tarea', 'Proyecto', 'Fase', 'Asignado', 'Vencimiento', 'Estado'].map(h => (
-                      <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-wide text-[#9B9B9B] px-4 py-3">{h}</th>
+                      <th key={h} className="text-left text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] px-4 py-3">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F0F0EE]">
+                <tbody className="divide-y divide-[#F0EDE0]">
                   {allTasks.map(task => {
                     const phase = getPhase(task.phase_id)
-                    const statusColors: Record<TaskStatus, string> = { todo: 'bg-gray-100 text-gray-600', en_progreso: 'bg-blue-100 text-blue-700', completado: 'bg-green-100 text-green-700' }
+                    const statusColors: Record<TaskStatus, string> = { todo: 'bg-[#F2EFE2] text-[#6B655C]', en_progreso: 'bg-[#EAF2FB] text-[#3F6FA3]', completado: 'bg-[#E5F3EF] text-[#00846F]' }
                     const statusLabels: Record<TaskStatus, string> = { todo: 'Por hacer', en_progreso: 'En progreso', completado: 'Completado' }
                     return (
-                      <tr key={task.id} className="hover:bg-[#F9F9F8]">
+                      <tr key={task.id} className="hover:bg-[#FBFAF3]">
                         <td className="px-4 py-3 text-sm text-[#130D10]">{task.title}</td>
-                        <td className="px-4 py-3 text-xs text-[#6B6B6B]">{(task as any).project_name}</td>
+                        <td className="px-4 py-3 text-xs text-[#8A847B]">{(task as any).project_name}</td>
                         <td className="px-4 py-3">
-                          {phase && <span className="text-xs px-2 py-0.5 rounded-md" style={{ backgroundColor: phase.color + '20', color: phase.color }}>{phase.name}</span>}
+                          {phase && <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: phase.color + '20', color: phase.color }}>{phase.name}</span>}
                         </td>
-                        <td className="px-4 py-3 text-xs text-[#6B6B6B]">{task.assigned_name || '—'}</td>
-                        <td className="px-4 py-3 text-xs text-[#6B6B6B]">{task.due_date ? formatDate(task.due_date) : '—'}</td>
-                        <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-md ${statusColors[task.status]}`}>{statusLabels[task.status]}</span></td>
+                        <td className="px-4 py-3 text-xs text-[#8A847B]">{task.assigned_name || '—'}</td>
+                        <td className="px-4 py-3 text-xs text-[#8A847B]">{task.due_date ? formatDate(task.due_date) : '—'}</td>
+                        <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[task.status]}`}>{statusLabels[task.status]}</span></td>
                       </tr>
                     )
                   })}
@@ -176,8 +176,8 @@ export default function EstudioPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex gap-3">
               <div className="relative">
-                <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9B9B9B]" />
-                <input className="pl-8 pr-4 py-2 text-sm border border-[#E5E5E3] rounded-lg bg-white w-56 focus:outline-none focus:ring-1 focus:ring-[#F5D242]" placeholder="Buscar contacto..." value={search} onChange={e => setSearch(e.target.value)} />
+                <IconSearch size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#A8A29A]" />
+                <input className="pl-8 pr-4 py-2 text-sm border border-[#ECE8D6] rounded-full bg-white w-56 focus:outline-none focus:ring-1 focus:ring-[#F5D242]" placeholder="Buscar contacto..." value={search} onChange={e => setSearch(e.target.value)} />
               </div>
               <FilterTabs
                 tabs={[
@@ -196,34 +196,34 @@ export default function EstudioPage() {
             </Button>
           </div>
 
-          <div className="bg-white border border-[#E5E5E3] rounded-xl overflow-hidden">
-            <div className="divide-y divide-[#F0F0EE]">
+          <div className="bg-white border border-[#ECE8D6] rounded-[18px] overflow-hidden">
+            <div className="divide-y divide-[#F0EDE0]">
               {filteredContacts.map(c => (
-                <div key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-[#F9F9F8] cursor-pointer" onClick={() => setSelectedContact(c)}>
+                <div key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-[#FBFAF3] cursor-pointer" onClick={() => setSelectedContact(c)}>
                   <Avatar name={c.name} size="sm" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-[#130D10]">{c.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${categoryColors[c.category]}`}>{getContactCategoryLabel(c.category)}</span>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${categoryColors[c.category]}`}>{getContactCategoryLabel(c.category)}</span>
                     </div>
-                    <p className="text-[10px] text-[#9B9B9B] mt-0.5">{[c.phone, c.email].filter(Boolean).join(' · ')}</p>
+                    <p className="text-[10px] text-[#A8A29A] mt-0.5">{[c.phone, c.email].filter(Boolean).join(' · ')}</p>
                   </div>
                   {c.rating && (
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map(s => (
                         s <= (c.rating || 0)
                           ? <IconStarFilled key={s} size={11} className="text-[#F5D242]" />
-                          : <IconStar key={s} size={11} className="text-[#E5E5E3]" />
+                          : <IconStar key={s} size={11} className="text-[#D8D2C2]" />
                       ))}
                     </div>
                   )}
                   {c.projects && c.projects.length > 0 && (
-                    <span className="text-[10px] text-[#9B9B9B] shrink-0">{c.projects.length} proyecto{c.projects.length > 1 ? 's' : ''}</span>
+                    <span className="text-[10px] text-[#A8A29A] shrink-0">{c.projects.length} proyecto{c.projects.length > 1 ? 's' : ''}</span>
                   )}
                 </div>
               ))}
               {filteredContacts.length === 0 && (
-                <div className="px-4 py-8 text-center text-sm text-[#9B9B9B]">No se encontraron contactos.</div>
+                <div className="px-4 py-8 text-center text-sm text-[#A8A29A]">No se encontraron contactos.</div>
               )}
             </div>
           </div>
@@ -231,24 +231,24 @@ export default function EstudioPage() {
       )}
 
       {section === 'equipo' && (
-        <div className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-[#130D10]">Equipo del estudio</h2>
+            <h2 className="font-serif text-[19px] text-[#130D10]">Equipo del estudio</h2>
             <Button size="sm" variant="primary"><IconPlus size={13} /> Invitar colaborador</Button>
           </div>
-          <div className="divide-y divide-[#F0F0EE]">
+          <div className="flex flex-col gap-2">
             {[{ name: 'Isabel García', role: 'Propietario', projects: mockProjects.map(p => p.name) }].map(m => (
-              <div key={m.name} className="flex items-center gap-3 py-3">
+              <div key={m.name} className="flex items-center gap-3 py-2.5 px-3 rounded-[14px] bg-white border border-[#ECE8D6]">
                 <Avatar name={m.name} size="md" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[#130D10]">{m.name}</p>
-                  <p className="text-xs text-[#6B6B6B]">{m.role}</p>
+                  <p className="text-xs text-[#8A847B]">{m.role}</p>
                 </div>
                 <div className="flex gap-1 flex-wrap justify-end">
                   {m.projects.slice(0, 2).map(p => (
-                    <span key={p} className="text-[10px] bg-[#F0F0EE] text-[#6B6B6B] px-2 py-0.5 rounded-md">{p}</span>
+                    <span key={p} className="text-[10px] bg-[#F2EFE2] text-[#6B655C] px-2 py-0.5 rounded-full">{p}</span>
                   ))}
-                  {m.projects.length > 2 && <span className="text-[10px] bg-[#F0F0EE] text-[#6B6B6B] px-2 py-0.5 rounded-md">+{m.projects.length - 2}</span>}
+                  {m.projects.length > 2 && <span className="text-[10px] bg-[#F2EFE2] text-[#6B655C] px-2 py-0.5 rounded-full">+{m.projects.length - 2}</span>}
                 </div>
               </div>
             ))}
@@ -261,62 +261,62 @@ export default function EstudioPage() {
         <div className="fixed inset-0 z-40 flex" onClick={() => setSelectedContact(null)}>
           <div className="flex-1 bg-black/20" />
           <div className="w-96 bg-white shadow-2xl h-full overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="px-5 py-4 border-b border-[#E5E5E3] flex items-center justify-between">
-              <h3 className="text-base font-semibold text-[#130D10]">{selectedContact.name}</h3>
-              <button onClick={() => setSelectedContact(null)} className="text-[#6B6B6B] hover:text-[#130D10]"><IconX size={16} /></button>
+            <div className="px-5 py-4 border-b border-[#ECE8D6] flex items-center justify-between">
+              <h3 className="font-serif text-[19px] text-[#130D10]">{selectedContact.name}</h3>
+              <button onClick={() => setSelectedContact(null)} className="text-[#8A847B] hover:text-[#130D10] p-1 rounded-full hover:bg-[#FBFAF3]"><IconX size={16} /></button>
             </div>
             <div className="p-5 space-y-4">
               <div className="flex items-center gap-3">
                 <Avatar name={selectedContact.name} size="lg" />
-                <span className={`text-xs px-2 py-0.5 rounded-md ${categoryColors[selectedContact.category]}`}>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${categoryColors[selectedContact.category]}`}>
                   {getContactCategoryLabel(selectedContact.category)}
                 </span>
               </div>
               <div className="space-y-3">
                 {selectedContact.phone && (
                   <div className="flex items-center gap-2 text-sm text-[#130D10]">
-                    <IconPhone size={14} className="text-[#9B9B9B]" stroke={1.5} />
+                    <IconPhone size={14} className="text-[#A8A29A]" stroke={1.5} />
                     {selectedContact.phone}
                   </div>
                 )}
                 {selectedContact.email && (
                   <div className="flex items-center gap-2 text-sm text-[#130D10]">
-                    <IconMail size={14} className="text-[#9B9B9B]" stroke={1.5} />
+                    <IconMail size={14} className="text-[#A8A29A]" stroke={1.5} />
                     {selectedContact.email}
                   </div>
                 )}
                 {selectedContact.address && (
                   <div className="flex items-center gap-2 text-sm text-[#130D10]">
-                    <IconMapPin size={14} className="text-[#9B9B9B]" stroke={1.5} />
+                    <IconMapPin size={14} className="text-[#A8A29A]" stroke={1.5} />
                     {selectedContact.address}
                   </div>
                 )}
               </div>
               {selectedContact.rating && (
                 <div>
-                  <p className="text-xs text-[#9B9B9B] mb-1.5">Calificación</p>
+                  <p className="text-xs text-[#A8A29A] mb-1.5">Calificación</p>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map(s => (
                       s <= (selectedContact.rating || 0)
                         ? <IconStarFilled key={s} size={16} className="text-[#F5D242]" />
-                        : <IconStar key={s} size={16} className="text-[#E5E5E3]" />
+                        : <IconStar key={s} size={16} className="text-[#D8D2C2]" />
                     ))}
                   </div>
                 </div>
               )}
               {selectedContact.projects && selectedContact.projects.length > 0 && (
                 <div>
-                  <p className="text-xs text-[#9B9B9B] mb-1.5">Proyectos</p>
+                  <p className="text-xs text-[#A8A29A] mb-1.5">Proyectos</p>
                   <div className="flex flex-wrap gap-1">
                     {selectedContact.projects.map(p => (
-                      <span key={p} className="text-xs bg-[#F0F0EE] text-[#6B6B6B] px-2 py-1 rounded-lg">{p}</span>
+                      <span key={p} className="text-xs bg-[#F2EFE2] text-[#6B655C] px-2 py-1 rounded-full">{p}</span>
                     ))}
                   </div>
                 </div>
               )}
               {selectedContact.notes && (
                 <div>
-                  <p className="text-xs text-[#9B9B9B] mb-1.5">Notas</p>
+                  <p className="text-xs text-[#A8A29A] mb-1.5">Notas</p>
                   <p className="text-sm text-[#130D10]">{selectedContact.notes}</p>
                 </div>
               )}

@@ -21,10 +21,10 @@ function getFirstDayOfMonth(year: number, month: number) {
 }
 
 const eventColors: Record<EventType, string> = {
-  reunion: 'bg-blue-100 text-blue-800 border-blue-200',
-  entrega: 'bg-purple-100 text-purple-800 border-purple-200',
-  hito: 'bg-[#FFF9D6] text-[#C9A800] border-[#F5D242]',
-  custom: 'bg-gray-100 text-gray-700 border-gray-200',
+  reunion: 'bg-[#EAF2FB] text-[#3F6FA3] border-[#CFE0F3]',
+  entrega: 'bg-[#FDECF3] text-[#B14E7C] border-[#F6D3E2]',
+  hito: 'bg-[#FBF3D6] text-[#7A6410] border-[#F0E2A0]',
+  custom: 'bg-[#F6F5E2] text-[#7E7B2E] border-[#E6E3BE]',
 }
 
 export default function AgendaPage() {
@@ -42,7 +42,7 @@ export default function AgendaPage() {
         studio_id: 's1',
         project_id: pid,
         project_name: mockProjects.find(p => p.id === pid)?.name || '',
-        title: `💰 ${m.name}`,
+        title: m.name,
         start: m.due_date + 'T09:00',
         end: m.due_date + 'T09:30',
         type: 'hito' as EventType,
@@ -55,7 +55,7 @@ export default function AgendaPage() {
         studio_id: 's1',
         project_id: pid,
         project_name: mockProjects.find(p => p.id === pid)?.name || '',
-        title: `📋 ${t.title}`,
+        title: t.title,
         start: t.due_date! + 'T10:00',
         end: t.due_date! + 'T10:30',
         type: 'entrega' as EventType,
@@ -98,11 +98,11 @@ export default function AgendaPage() {
         title="Agenda"
         actions={
           <>
-            <div className="flex items-center p-1 bg-white border border-[#E5E5E3] rounded-lg gap-0.5">
+            <div className="flex items-center p-1 bg-white border border-[#ECE8D6] rounded-full gap-0.5">
               {(['mes', 'semana', 'dia'] as const).map(v => (
                 <button key={v} onClick={() => setView(v)}
-                  className={cn('px-3 py-1.5 text-sm rounded-md transition-colors capitalize',
-                    view === v ? 'bg-[#F5D242] text-[#130D10] font-medium' : 'text-[#6B6B6B] hover:text-[#130D10]'
+                  className={cn('px-3.5 py-1.5 text-sm rounded-full transition-colors capitalize',
+                    view === v ? 'bg-[#F5D242] text-[#130D10] font-semibold' : 'text-[#8A847B] hover:text-[#130D10]'
                   )}>
                   {v === 'dia' ? 'Día' : v === 'mes' ? 'Mes' : 'Semana'}
                 </button>
@@ -117,41 +117,41 @@ export default function AgendaPage() {
 
       <div className="grid grid-cols-4 gap-5">
         {/* Calendar */}
-        <div className="col-span-3 bg-white border border-[#E5E5E3] rounded-xl overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E5E3]">
-            <button onClick={prev} className="p-1.5 rounded-lg hover:bg-[#F9F9F8] text-[#6B6B6B]"><IconChevronLeft size={16} /></button>
-            <h2 className="text-sm font-semibold text-[#130D10]">{MONTHS[month]} {year}</h2>
-            <button onClick={next} className="p-1.5 rounded-lg hover:bg-[#F9F9F8] text-[#6B6B6B]"><IconChevronRight size={16} /></button>
+        <div className="col-span-3 bg-white border border-[#ECE8D6] rounded-[20px] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[#ECE8D6]">
+            <button onClick={prev} className="p-1.5 rounded-full hover:bg-[#FBFAF3] text-[#8A847B]"><IconChevronLeft size={16} /></button>
+            <h2 className="font-serif text-[18px] text-[#130D10]">{MONTHS[month]} {year}</h2>
+            <button onClick={next} className="p-1.5 rounded-full hover:bg-[#FBFAF3] text-[#8A847B]"><IconChevronRight size={16} /></button>
           </div>
           {/* Day headers */}
-          <div className="grid grid-cols-7 border-b border-[#E5E5E3]">
+          <div className="grid grid-cols-7 border-b border-[#ECE8D6]">
             {DAYS.map(d => (
-              <div key={d} className="text-center text-[11px] font-semibold uppercase text-[#9B9B9B] py-2.5">{d}</div>
+              <div key={d} className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A] py-2.5">{d}</div>
             ))}
           </div>
           {/* Days grid */}
           <div className="grid grid-cols-7">
             {Array.from({ length: firstDay }).map((_, i) => (
-              <div key={`empty-${i}`} className="h-24 border-b border-r border-[#F0F0EE]" />
+              <div key={`empty-${i}`} className="h-24 border-b border-r border-[#F0EDE0]" />
             ))}
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const day = i + 1
               const dayEvents = getEventsForDay(day)
               const isToday = day === now.getDate() && month === now.getMonth() && year === now.getFullYear()
               return (
-                <div key={day} className={cn('h-24 border-b border-r border-[#F0F0EE] p-1.5', isToday && 'bg-[#FFFEF5]')}>
+                <div key={day} className={cn('h-24 border-b border-r border-[#F0EDE0] p-1.5', isToday && 'bg-[#FFFCEF]')}>
                   <span className={cn(
-                    'text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full mb-1',
-                    isToday ? 'bg-[#F5D242] text-[#130D10]' : 'text-[#6B6B6B]'
+                    'text-xs font-semibold w-6 h-6 flex items-center justify-center rounded-full mb-1',
+                    isToday ? 'bg-[#FF5738] text-white' : 'text-[#6B655C]'
                   )}>{day}</span>
                   <div className="space-y-0.5">
                     {dayEvents.slice(0, 2).map(ev => (
-                      <div key={ev.id} className={cn('text-[9px] px-1.5 py-0.5 rounded truncate border', eventColors[ev.type])}>
+                      <div key={ev.id} className={cn('text-[9px] px-1.5 py-0.5 rounded-md truncate border', eventColors[ev.type])}>
                         {ev.title}
                       </div>
                     ))}
                     {dayEvents.length > 2 && (
-                      <div className="text-[9px] text-[#9B9B9B] px-1">+{dayEvents.length - 2} más</div>
+                      <div className="text-[9px] text-[#A8A29A] px-1">+{dayEvents.length - 2} más</div>
                     )}
                   </div>
                 </div>
@@ -161,38 +161,38 @@ export default function AgendaPage() {
         </div>
 
         {/* Upcoming events sidebar */}
-        <div className="bg-white border border-[#E5E5E3] rounded-xl p-4">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9B9B9B] mb-3">Próximos eventos</h3>
+        <div className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-5">
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] mb-3">Próximos eventos</h3>
           <div className="space-y-3">
             {upcomingEvents.map(ev => (
               <div key={ev.id} className="flex items-start gap-2">
                 <div className={cn('w-1.5 h-1.5 rounded-full mt-1.5 shrink-0',
-                  ev.type === 'hito' ? 'bg-[#F5D242]' : ev.type === 'reunion' ? 'bg-blue-400' : ev.type === 'entrega' ? 'bg-purple-400' : 'bg-gray-400'
+                  ev.type === 'hito' ? 'bg-[#F5D242]' : ev.type === 'reunion' ? 'bg-[#7FB0E8]' : ev.type === 'entrega' ? 'bg-[#FFABCF]' : 'bg-[#D5D25D]'
                 )} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-[#130D10] truncate">{ev.title}</p>
-                  <p className="text-[10px] text-[#9B9B9B]">
+                  <p className="text-[10px] text-[#A8A29A]">
                     {formatDate(ev.start.split('T')[0])}
                     {ev.project_name && ` · ${ev.project_name}`}
                   </p>
                 </div>
               </div>
             ))}
-            {upcomingEvents.length === 0 && <p className="text-xs text-[#9B9B9B]">Sin eventos próximos.</p>}
+            {upcomingEvents.length === 0 && <p className="text-xs text-[#A8A29A]">Sin eventos próximos.</p>}
           </div>
 
           {/* Legend */}
-          <div className="mt-5 pt-4 border-t border-[#E5E5E3] space-y-1.5">
-            <p className="text-[10px] font-semibold uppercase text-[#9B9B9B] mb-2">Referencias</p>
+          <div className="mt-5 pt-4 border-t border-[#ECE8D6] space-y-1.5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#A8A29A] mb-2">Referencias</p>
             {[
               { label: 'Hito de cobro', color: 'bg-[#F5D242]' },
-              { label: 'Reunión', color: 'bg-blue-400' },
-              { label: 'Entrega', color: 'bg-purple-400' },
-              { label: 'Custom', color: 'bg-gray-400' },
+              { label: 'Reunión', color: 'bg-[#7FB0E8]' },
+              { label: 'Entrega', color: 'bg-[#FFABCF]' },
+              { label: 'Custom', color: 'bg-[#D5D25D]' },
             ].map(l => (
               <div key={l.label} className="flex items-center gap-2">
                 <span className={cn('w-2 h-2 rounded-full', l.color)} />
-                <span className="text-[10px] text-[#6B6B6B]">{l.label}</span>
+                <span className="text-[10px] text-[#6B655C]">{l.label}</span>
               </div>
             ))}
           </div>
