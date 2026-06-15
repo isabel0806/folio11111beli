@@ -306,25 +306,68 @@ export default function PortalClientePage({ params }: { params: Promise<{ id: st
             </button>
           </div>
           <div className="flex items-center pt-3.25 pb-0.5 gap-3.5 border-t border-[#F2EFE2]">
-            <div className="flex items-center justify-center shrink-0 rounded-[11px] bg-[#F4F1E3] size-10">
-              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
-                <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="#BDB8AE" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M8 11V7a4 4 0 018 0v4" fill="none" stroke="#BDB8AE" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+            <div className={`flex items-center justify-center shrink-0 rounded-[11px] size-10 ${paid ? 'bg-[#E4F1EC]' : 'bg-[#F4F1E3]'}`}>
+              {paid ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M14 3v4a1 1 0 001 1h4" fill="none" stroke="#00846F" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" fill="none" stroke="#00846F" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden>
+                  <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="#BDB8AE" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M8 11V7a4 4 0 018 0v4" fill="none" stroke="#BDB8AE" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
             </div>
             <div className="flex flex-col grow basis-0 min-w-0 gap-0.5">
-              <span className="font-semibold text-[#A8A29A] text-[14.5px]">Planos ejecutivos</span>
-              <span className="text-[#BDB8AE] text-xs">Se desbloquean cuando abones el próximo pago</span>
+              <span className={`font-semibold text-[14.5px] ${paid ? 'text-[#130D10]' : 'text-[#A8A29A]'}`}>Planos ejecutivos</span>
+              <span className={`text-xs ${paid ? 'text-[#A8A29A]' : 'text-[#BDB8AE]'}`}>{paid ? 'PDF · 12.4 MB · recién desbloqueado' : 'Se desbloquean cuando abones el próximo pago'}</span>
             </div>
-            <div className="flex items-center shrink-0 rounded-full py-2.25 px-3.75 gap-1.5 bg-[#F4F1E3]">
-              <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden>
-                <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="#A8A29A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M8 11V7a4 4 0 018 0v4" fill="none" stroke="#A8A29A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span className="font-semibold text-[#8A847B] text-[13px]">Bloqueado</span>
-            </div>
+            {paid ? (
+              <button className="flex items-center shrink-0 rounded-full py-2.25 px-4 gap-1.75 bg-[#00846F] hover:bg-[#006B5A] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M12 3v12M7 11l5 4 5-4M5 21h14" fill="none" stroke="#FFFEF0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="font-semibold text-[#FFFEF0] text-[13px]">Descargar</span>
+              </button>
+            ) : (
+              <div className="flex items-center shrink-0 rounded-full py-2.25 px-3.75 gap-1.5 bg-[#F4F1E3]">
+                <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden>
+                  <rect x="5" y="11" width="14" height="10" rx="2" fill="none" stroke="#A8A29A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M8 11V7a4 4 0 018 0v4" fill="none" stroke="#A8A29A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span className="font-semibold text-[#8A847B] text-[13px]">Bloqueado</span>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Presupuesto */}
+        <a
+          href={`/presupuesto/${id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-between rounded-[20px] py-5.5 px-7 gap-5 bg-white border border-[#ECE9DA] hover:border-[#7FB0E8] transition-colors group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center shrink-0 rounded-[14px] bg-[#EAF2FC] size-12">
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden>
+                <path d="M14 3v4a1 1 0 001 1h4" fill="none" stroke="#3F6FA3" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M17 21H7a2 2 0 01-2-2V5a2 2 0 012-2h7l5 5v11a2 2 0 01-2 2z" fill="none" stroke="#3F6FA3" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M9 13h6M9 17h4" fill="none" stroke="#3F6FA3" strokeWidth="1.9" strokeLinecap="round" />
+              </svg>
+            </div>
+            <div className="flex flex-col gap-0.75">
+              <span className="tracking-[0.04em] uppercase font-semibold text-[#A8A29A] text-xs">Tu presupuesto</span>
+              <span className="font-serif font-bold text-[#130D10] text-[18px] leading-6">Ver el presupuesto detallado</span>
+              <span className="text-[#8A847B] text-[13px]">Materiales, honorarios e IVA, ítem por ítem.</span>
+            </div>
+          </div>
+          <span className="flex items-center shrink-0 gap-1.5 rounded-full py-2.5 px-4 bg-[#EAF2FC] text-[#3F6FA3] text-[13px] font-semibold group-hover:bg-[#DCEAF8] transition-colors">
+            Abrir
+            <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="#3F6FA3" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </span>
+        </a>
 
         {/* Contacto */}
         <div className="flex items-center justify-between rounded-[20px] py-6 px-7 gap-5 bg-[#130D10]">
