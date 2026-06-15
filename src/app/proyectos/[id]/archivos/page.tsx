@@ -185,9 +185,9 @@ export default function ArchivosPage() {
               ]}
             />
           )}
-          <div className="border-2 border-dashed border-[#E5E5E3] rounded-xl p-8 text-center">
-            <IconUpload size={24} className="mx-auto text-[#9B9B9B] mb-2" stroke={1.5} />
-            <p className="text-sm text-[#6B6B6B]">Arrastrá tu archivo acá o</p>
+          <div className="border-2 border-dashed border-[#ECE8D6] rounded-[14px] p-8 text-center">
+            <IconUpload size={24} className="mx-auto text-[#A8A29A] mb-2" stroke={1.5} />
+            <p className="text-sm text-[#6B655C]">Arrastrá tu archivo acá o</p>
             <Button variant="secondary" size="sm" className="mt-2">Seleccionar archivo</Button>
           </div>
         </div>

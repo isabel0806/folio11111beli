@@ -76,19 +76,19 @@ export function PresupuestoModal({ open, onClose, projectName, clientName, curre
               <label className="text-xs font-medium text-[#130D10]">Ítems</label>
               <Button size="sm" variant="ghost" onClick={addItem}><IconPlus size={12} /> Agregar ítem</Button>
             </div>
-            <div className="border border-[#E5E5E3] rounded-xl overflow-hidden">
+            <div className="border border-[#ECE8D6] rounded-[14px] overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-[#F9F9F8]">
+                <thead className="bg-[#FBFAF3]">
                   <tr>
-                    <th className="text-left text-[10px] font-semibold uppercase text-[#9B9B9B] px-3 py-2">Descripción</th>
-                    <th className="text-left text-[10px] font-semibold uppercase text-[#9B9B9B] px-2 py-2 w-16">Cant.</th>
-                    <th className="text-left text-[10px] font-semibold uppercase text-[#9B9B9B] px-2 py-2 w-16">Unidad</th>
-                    <th className="text-right text-[10px] font-semibold uppercase text-[#9B9B9B] px-2 py-2 w-28">Precio unit.</th>
-                    <th className="text-right text-[10px] font-semibold uppercase text-[#9B9B9B] px-3 py-2 w-28">Subtotal</th>
+                    <th className="text-left text-[10px] font-semibold uppercase text-[#A8A29A] px-3 py-2">Descripción</th>
+                    <th className="text-left text-[10px] font-semibold uppercase text-[#A8A29A] px-2 py-2 w-16">Cant.</th>
+                    <th className="text-left text-[10px] font-semibold uppercase text-[#A8A29A] px-2 py-2 w-16">Unidad</th>
+                    <th className="text-right text-[10px] font-semibold uppercase text-[#A8A29A] px-2 py-2 w-28">Precio unit.</th>
+                    <th className="text-right text-[10px] font-semibold uppercase text-[#A8A29A] px-3 py-2 w-28">Subtotal</th>
                     <th className="w-8" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#F0F0EE]">
+                <tbody className="divide-y divide-[#F0EDE0]">
                   {items.map(item => (
                     <tr key={item.id}>
                       <td className="px-2 py-1.5">
@@ -110,7 +110,7 @@ export function PresupuestoModal({ open, onClose, projectName, clientName, curre
                       </td>
                       <td className="px-1 py-1.5">
                         <select
-                          className="w-full text-xs text-[#6B6B6B] bg-transparent border-0 outline-none"
+                          className="w-full text-xs text-[#6B655C] bg-transparent border-0 outline-none"
                           value={item.unit}
                           onChange={e => updateItem(item.id, 'unit', e.target.value)}
                         >
@@ -131,7 +131,7 @@ export function PresupuestoModal({ open, onClose, projectName, clientName, curre
                       </td>
                       <td className="px-1 py-1.5">
                         {items.length > 1 && (
-                          <button onClick={() => removeItem(item.id)} className="text-[#9B9B9B] hover:text-red-500 p-0.5">
+                          <button onClick={() => removeItem(item.id)} className="text-[#A8A29A] hover:text-[#C23A22] p-0.5">
                             <IconTrash size={13} />
                           </button>
                         )}
@@ -139,10 +139,10 @@ export function PresupuestoModal({ open, onClose, projectName, clientName, curre
                     </tr>
                   ))}
                 </tbody>
-                <tfoot className="border-t border-[#E5E5E3] bg-[#FFFEF5]">
+                <tfoot className="border-t border-[#ECE8D6] bg-[#FFFCEF]">
                   <tr>
                     <td colSpan={4} className="px-3 py-2.5 text-sm font-semibold text-right text-[#130D10]">Total</td>
-                    <td className="px-3 py-2.5 text-right text-base font-bold text-[#130D10]">
+                    <td className="px-3 py-2.5 text-right font-serif text-[18px] text-[#130D10]">
                       {formatCurrency(total, currency)}
                     </td>
                     <td />
@@ -156,49 +156,46 @@ export function PresupuestoModal({ open, onClose, projectName, clientName, curre
         </div>
       ) : (
         /* Preview */
-        <div className="bg-white border border-[#E5E5E3] rounded-xl p-6 font-sans">
+        <div className="bg-white border border-[#ECE8D6] rounded-[14px] p-6 font-sans">
           <div className="flex items-start justify-between mb-6">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-6 h-6 bg-[#F5D242] rounded-md flex items-center justify-center">
-                  <span className="text-[9px] font-black text-[#130D10]">F</span>
-                </div>
-                <span className="text-sm font-bold text-[#130D10] tracking-tight">FOLIO</span>
+                <span className="font-poppins text-[18px] font-semibold text-[#130D10] tracking-tight">folio</span>
               </div>
-              <p className="text-xs text-[#9B9B9B]">Estudio García</p>
+              <p className="text-xs text-[#A8A29A]">Estudio García</p>
             </div>
             <div className="text-right">
-              <p className="text-xs text-[#9B9B9B]">Presupuesto N°</p>
+              <p className="text-xs text-[#A8A29A]">Presupuesto N°</p>
               <p className="text-sm font-bold text-[#130D10]">{String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}</p>
-              <p className="text-xs text-[#9B9B9B] mt-1">{new Date().toLocaleDateString('es-AR')}</p>
+              <p className="text-xs text-[#A8A29A] mt-1">{new Date().toLocaleDateString('es-AR')}</p>
             </div>
           </div>
 
-          <div className="border-t border-[#E5E5E3] pt-4 mb-4">
-            <p className="text-[10px] font-semibold uppercase text-[#9B9B9B] mb-1">Para</p>
+          <div className="border-t border-[#ECE8D6] pt-4 mb-4">
+            <p className="text-[10px] font-semibold uppercase text-[#A8A29A] mb-1">Para</p>
             <p className="text-sm font-semibold text-[#130D10]">{clientName}</p>
-            <p className="text-xs text-[#6B6B6B]">{projectName}</p>
+            <p className="text-xs text-[#6B655C]">{projectName}</p>
           </div>
 
           <p className="text-sm font-semibold text-[#130D10] mb-3">{name}</p>
 
           <table className="w-full text-xs mb-4">
             <thead>
-              <tr className="border-b border-[#E5E5E3]">
-                <th className="text-left text-[10px] uppercase text-[#9B9B9B] pb-2">Descripción</th>
-                <th className="text-center text-[10px] uppercase text-[#9B9B9B] pb-2 w-10">Cant.</th>
-                <th className="text-center text-[10px] uppercase text-[#9B9B9B] pb-2 w-10">Un.</th>
-                <th className="text-right text-[10px] uppercase text-[#9B9B9B] pb-2 w-20">P. Unit.</th>
-                <th className="text-right text-[10px] uppercase text-[#9B9B9B] pb-2 w-20">Subtotal</th>
+              <tr className="border-b border-[#ECE8D6]">
+                <th className="text-left text-[10px] uppercase text-[#A8A29A] pb-2">Descripción</th>
+                <th className="text-center text-[10px] uppercase text-[#A8A29A] pb-2 w-10">Cant.</th>
+                <th className="text-center text-[10px] uppercase text-[#A8A29A] pb-2 w-10">Un.</th>
+                <th className="text-right text-[10px] uppercase text-[#A8A29A] pb-2 w-20">P. Unit.</th>
+                <th className="text-right text-[10px] uppercase text-[#A8A29A] pb-2 w-20">Subtotal</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#F0F0EE]">
+            <tbody className="divide-y divide-[#F0EDE0]">
               {items.filter(i => i.description).map(item => (
                 <tr key={item.id}>
                   <td className="py-2 text-[#130D10]">{item.description}</td>
-                  <td className="py-2 text-center text-[#6B6B6B]">{item.quantity}</td>
-                  <td className="py-2 text-center text-[#6B6B6B]">{item.unit}</td>
-                  <td className="py-2 text-right text-[#6B6B6B]">{formatCurrency(item.unit_price, currency)}</td>
+                  <td className="py-2 text-center text-[#6B655C]">{item.quantity}</td>
+                  <td className="py-2 text-center text-[#6B655C]">{item.unit}</td>
+                  <td className="py-2 text-right text-[#6B655C]">{formatCurrency(item.unit_price, currency)}</td>
                   <td className="py-2 text-right text-[#130D10] font-medium">{formatCurrency(item.quantity * item.unit_price, currency)}</td>
                 </tr>
               ))}
@@ -206,16 +203,16 @@ export function PresupuestoModal({ open, onClose, projectName, clientName, curre
           </table>
 
           <div className="flex justify-end mb-4">
-            <div className="bg-[#FFF9D6] px-4 py-2 rounded-xl text-right">
-              <p className="text-[10px] text-[#9B9B9B] uppercase tracking-wide">Total</p>
-              <p className="text-lg font-bold text-[#130D10]">{formatCurrency(total, currency)}</p>
+            <div className="bg-[#FBF3D6] px-4 py-2 rounded-[14px] text-right">
+              <p className="text-[10px] text-[#7A6410] uppercase tracking-wide">Total</p>
+              <p className="font-serif text-[20px] text-[#130D10]">{formatCurrency(total, currency)}</p>
             </div>
           </div>
 
           {notes && (
-            <div className="border-t border-[#E5E5E3] pt-3">
-              <p className="text-[10px] font-semibold uppercase text-[#9B9B9B] mb-1">Notas y condiciones</p>
-              <p className="text-xs text-[#6B6B6B] whitespace-pre-wrap">{notes}</p>
+            <div className="border-t border-[#ECE8D6] pt-3">
+              <p className="text-[10px] font-semibold uppercase text-[#A8A29A] mb-1">Notas y condiciones</p>
+              <p className="text-xs text-[#6B655C] whitespace-pre-wrap">{notes}</p>
             </div>
           )}
         </div>
