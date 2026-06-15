@@ -165,7 +165,7 @@ export default function InicioPage() {
                 Ver todos <IconArrowRight size={13} />
               </Link>
             </div>
-            <div className="space-y-3.5">
+            <div className="flex flex-col gap-4">
               {activeProjects.map((p, i) => {
                 const tint = tints[i % tints.length]
                 const Icon = typeIcon[p.type] || IconBuildingSkyscraper
@@ -178,7 +178,7 @@ export default function InicioPage() {
                 return (
                   <Link key={p.id} href={`/proyectos/${p.id}`}>
                     <div
-                      className="flex items-center gap-4 rounded-[18px] px-4 py-3.5 transition-all hover:brightness-[0.98]"
+                      className="flex items-center gap-4 rounded-[18px] px-4 py-4 border border-black/[0.06] shadow-[0_1px_3px_rgba(19,13,16,0.05)] transition-all hover:shadow-[0_3px_10px_rgba(19,13,16,0.08)]"
                       style={{ backgroundColor: tint.soft }}
                     >
                       <div className="w-11 h-11 rounded-[13px] flex items-center justify-center shrink-0" style={{ backgroundColor: tint.solid }}>
