@@ -33,11 +33,13 @@ const nav = [
 ]
 
 function Isotipo() {
+  // Folio brand mark (brandbook p.12): stylized "F" — tall blue stem,
+  // olive semicircle top arm, smaller coral semicircle middle arm.
   return (
-    <svg width="24" height="34" viewBox="0 0 24 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <rect x="0" y="2" width="16" height="22" rx="4" fill="#7FB0E8" />
-      <rect x="4" y="8" width="16" height="22" rx="4" fill="#F5D242" />
-      <rect x="2" y="14" width="13" height="13" rx="4" fill="#FF5738" />
+    <svg width="22" height="29" viewBox="0 0 26 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <rect x="0" y="0" width="10" height="34" rx="5" fill="#7FB0E8" />
+      <path d="M10 0 A9 9 0 0 1 10 18 Z" fill="#D5D25D" />
+      <path d="M10 12 A6.5 6.5 0 0 1 10 25 Z" fill="#FF5738" />
     </svg>
   )
 }
@@ -60,9 +62,6 @@ export function Sidebar() {
             folio
           </span>
         </div>
-        <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#A8A29A] mt-2 ml-[34px]">
-          Project Sellers
-        </p>
       </div>
 
       {/* Nav */}
