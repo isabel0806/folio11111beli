@@ -52,25 +52,25 @@ export default function ArchivosPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       {/* Presupuestos */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Presupuestos</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Presupuestos</h2>
           <Button size="sm" variant="primary" onClick={() => setShowPresupuesto(true)}>
             <IconPlus size={13} /> Nuevo presupuesto
           </Button>
         </div>
         {budgets.length === 0 ? (
-          <p className="text-xs text-[#9B9B9B]">No hay presupuestos cargados.</p>
+          <p className="text-[13px] text-[#A8A29A]">No hay presupuestos cargados.</p>
         ) : (
-          <div className="divide-y divide-[#F0F0EE]">
+          <div className="flex flex-col gap-2">
             {budgets.map(f => (
-              <div key={f.id} className="flex items-center gap-3 py-2.5">
-                <IconFile size={16} className="text-[#6B6B6B]" stroke={1.5} />
+              <div key={f.id} className="flex items-center gap-3 bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+                <IconFile size={17} className="text-[#8A847B]" stroke={1.6} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#130D10]">{f.name}</p>
-                  <p className="text-[10px] text-[#9B9B9B]">{formatDate(f.uploaded_at)}{f.size && ` · ${f.size}`}</p>
+                  <p className="text-[14px] font-medium text-[#130D10]">{f.name}</p>
+                  <p className="text-[11px] text-[#A8A29A]">{formatDate(f.uploaded_at)}{f.size && ` · ${f.size}`}</p>
                 </div>
                 <Button size="sm" variant="ghost"><IconDownload size={13} /></Button>
               </div>
@@ -80,34 +80,34 @@ export default function ArchivosPage() {
       </section>
 
       {/* Entregas */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Entregas al cliente</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Entregas al cliente</h2>
           <Button size="sm" variant="secondary" onClick={() => { setUploadType('entrega'); setShowUpload(true) }}>
             <IconPlus size={13} /> Subir entrega
           </Button>
         </div>
-        <p className="text-xs text-[#9B9B9B] mb-3">Los archivos se desbloquean automáticamente al cobrar el hito vinculado.</p>
+        <p className="text-[12px] text-[#8A847B] mb-4">Los archivos se desbloquean automáticamente al cobrar el hito vinculado.</p>
         {deliveries.length === 0 ? (
-          <p className="text-xs text-[#9B9B9B]">No hay entregas cargadas.</p>
+          <p className="text-[13px] text-[#A8A29A]">No hay entregas cargadas.</p>
         ) : (
-          <div className="divide-y divide-[#F0F0EE]">
+          <div className="flex flex-col gap-2">
             {deliveries.map(f => {
               const linkedMilestone = milestones.find(m => m.id === f.linked_milestone_id)
               const isPaid = linkedMilestone?.status === 'cobrado'
               return (
-                <div key={f.id} className="flex items-center gap-3 py-2.5">
-                  <div className={`p-1.5 rounded-lg ${isPaid ? 'bg-green-50' : 'bg-yellow-50'}`}>
-                    {isPaid ? <IconLockOpen size={14} className="text-green-600" /> : <IconLock size={14} className="text-yellow-600" />}
+                <div key={f.id} className="flex items-center gap-3 bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+                  <div className={`p-1.5 rounded-[10px] ${isPaid ? 'bg-[#E5F3EF]' : 'bg-[#FBF3D6]'}`}>
+                    {isPaid ? <IconLockOpen size={14} className="text-[#00846F]" /> : <IconLock size={14} className="text-[#7A6410]" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-[#130D10]">{f.name}</p>
-                    <p className="text-[10px] text-[#9B9B9B]">
+                    <p className="text-[14px] font-medium text-[#130D10]">{f.name}</p>
+                    <p className="text-[11px] text-[#A8A29A]">
                       {formatDate(f.uploaded_at)}{f.size && ` · ${f.size}`}
                       {linkedMilestone && ` · Vinculado a "${linkedMilestone.name}"`}
                     </p>
                   </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-md ${isPaid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                  <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${isPaid ? 'bg-[#E5F3EF] text-[#00846F]' : 'bg-[#FBF3D6] text-[#7A6410]'}`}>
                     {isPaid ? 'Disponible' : 'Esperando pago'}
                   </span>
                   {isPaid && <Button size="sm" variant="ghost"><IconDownload size={13} /></Button>}
@@ -119,9 +119,9 @@ export default function ArchivosPage() {
       </section>
 
       {/* Archivos del proyecto */}
-      <section className="bg-white border border-[#E5E5E3] rounded-xl p-5">
+      <section className="bg-[#FBFAF3] border border-[#ECE8D6] rounded-[20px] p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-[#130D10]">Archivos del proyecto</h2>
+          <h2 className="font-serif text-[19px] text-[#130D10]">Archivos del proyecto</h2>
           <Button size="sm" variant="secondary" onClick={() => { setUploadType('general'); setShowUpload(true) }}>
             <IconUpload size={13} /> Subir archivo
           </Button>
@@ -131,7 +131,7 @@ export default function ArchivosPage() {
           {integrations.map(integ => (
             <button
               key={integ.id}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E5E3] text-xs text-[#6B6B6B] hover:border-[#F5D242] transition-colors bg-white"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#ECE8D6] text-[12px] font-medium text-[#6B655C] hover:border-[#FF5738] hover:text-[#130D10] transition-colors bg-white"
             >
               <integ.icon size={13} stroke={1.5} style={{ color: integ.color }} />
               Vincular {integ.label}
@@ -139,15 +139,15 @@ export default function ArchivosPage() {
           ))}
         </div>
         {general.length === 0 ? (
-          <p className="text-xs text-[#9B9B9B]">No hay archivos generales.</p>
+          <p className="text-[13px] text-[#A8A29A]">No hay archivos generales.</p>
         ) : (
-          <div className="divide-y divide-[#F0F0EE]">
+          <div className="flex flex-col gap-2">
             {general.map(f => (
-              <div key={f.id} className="flex items-center gap-3 py-2.5">
-                <IconFile size={16} className="text-[#6B6B6B]" stroke={1.5} />
+              <div key={f.id} className="flex items-center gap-3 bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+                <IconFile size={17} className="text-[#8A847B]" stroke={1.6} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[#130D10]">{f.name}</p>
-                  <p className="text-[10px] text-[#9B9B9B]">{formatDate(f.uploaded_at)}{f.size && ` · ${f.size}`}</p>
+                  <p className="text-[14px] font-medium text-[#130D10]">{f.name}</p>
+                  <p className="text-[11px] text-[#A8A29A]">{formatDate(f.uploaded_at)}{f.size && ` · ${f.size}`}</p>
                 </div>
                 <Button size="sm" variant="ghost"><IconDownload size={13} /></Button>
               </div>
