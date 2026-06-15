@@ -141,7 +141,7 @@ export default function FinanzasPage() {
   const handleMarkPaid = () => {
     if (!confirmPaid) return
     setMilestones(prev => prev.map(m => m.id === confirmPaid.id ? { ...m, status: 'cobrado' as MilestoneStatus, paid_at: new Date().toISOString() } : m))
-    toast(`✓ "${confirmPaid.name}" marcado como cobrado`)
+    toast(`✓ “${confirmPaid.name}” marcado como cobrado`)
     setConfirmPaid(null)
   }
 
@@ -313,18 +313,18 @@ export default function FinanzasPage() {
         </div>
 
         {/* Insight strip */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+        <div className="grid grid-cols-3 divide-x divide-[#ECE9DA] mb-6 pb-1">
+          <div className="pr-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Promedio cobrado / mes</p>
             <p className="font-serif text-[20px] text-[#130D10] mt-0.5">{formatCurrency(avgCobrado)}</p>
           </div>
-          <div className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+          <div className="px-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Mejor mes</p>
             <p className="font-serif text-[20px] text-[#130D10] mt-0.5 capitalize">
               {bestMonth && bestMonth.cobrado > 0 ? <>{bestMonth.label} <span className="text-[13px] text-[#00846F]">· {formatCurrency(bestMonth.cobrado)}</span></> : '—'}
             </p>
           </div>
-          <div className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+          <div className="pl-4">
             <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">
               Variación último mes{lastClosed && prevClosed ? <span className="capitalize normal-case"> · {lastClosed.label} vs {prevClosed.label}</span> : ''}
             </p>
@@ -425,14 +425,14 @@ export default function FinanzasPage() {
                 <span className="text-xs font-medium text-[#A8A29A]">{selMonth.isFuture ? 'Proyectado' : 'Mes en curso'}</span>
               )}
             </div>
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-4 divide-x divide-[#ECE9DA]">
               {[
                 { label: 'Cobrado', value: selMonth.cobrado, color: 'text-[#00846F]', dot: 'bg-[#00846F]' },
                 { label: 'Por cobrar', value: selMonth.pendiente, color: 'text-[#7A6410]', dot: 'bg-[#F5D242]' },
                 { label: 'Costos', value: selMonth.costos, color: 'text-[#B14E7C]', dot: 'bg-[#FFABCF]' },
                 { label: 'Neto', value: selMonth.neto, color: selMonth.neto >= 0 ? 'text-[#130D10]' : 'text-[#C23A22]', dot: 'bg-[#130D10]' },
-              ].map(s => (
-                <div key={s.label} className="bg-white border border-[#ECE8D6] rounded-[12px] px-3.5 py-3">
+              ].map((s, i) => (
+                <div key={s.label} className={cn(i === 0 ? 'pr-4' : i === 3 ? 'pl-4' : 'px-4')}>
                   <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-[#A8A29A]">
                     <span className={cn('w-2 h-2 rounded-full', s.dot)} />{s.label}
                   </span>
@@ -625,13 +625,13 @@ export default function FinanzasPage() {
               <p className="text-[13px] text-[#A8A29A] py-2">Sin coincidencias para "{priceSearch}".</p>
             ) : (
               <>
-                <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-3 divide-x divide-[#ECE9DA] mb-4">
                   {[
                     { label: 'Mínimo', value: priceStats!.min, color: 'text-[#00846F]' },
                     { label: 'Promedio', value: priceStats!.avg, color: 'text-[#130D10]' },
                     { label: 'Máximo', value: priceStats!.max, color: 'text-[#C23A22]' },
-                  ].map(s => (
-                    <div key={s.label} className="bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+                  ].map((s, i) => (
+                    <div key={s.label} className={cn(i === 0 ? 'pr-4' : i === 2 ? 'pl-4' : 'px-4')}>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">{s.label}</p>
                       <p className={cn('font-serif text-[19px] mt-0.5', s.color)}>{formatCurrency(s.value)}</p>
                     </div>

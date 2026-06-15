@@ -298,7 +298,7 @@ function ProjectCard({ project, index, colorMode }: { project: Project; index: n
 
   return (
     <Link href={`/proyectos/${project.id}`}>
-      <div className="bg-white border border-black/[0.06] rounded-[20px] overflow-hidden shadow-[0_1px_3px_rgba(19,13,16,0.05)] hover:shadow-[0_8px_24px_rgba(19,13,16,0.10)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
+      <div className="bg-white border border-black/[0.06] rounded-[20px] overflow-hidden shadow-[0_1px_3px_rgba(19,13,16,0.05)] hover:shadow-[0_8px_24px_rgba(19,13,16,0.10)] hover:-translate-y-0.5 transition-[transform,box-shadow] duration-200 cursor-pointer">
         {/* Cover */}
         <div className="h-[120px] relative flex items-start justify-between p-4" style={{ backgroundColor: cover }}>
           <span className="flex items-center gap-1.5 bg-white text-[#130D10] text-[11px] font-semibold pl-2 pr-2.5 py-1 rounded-full">

@@ -71,7 +71,7 @@ export default function AjustesPage() {
             <div className="bg-white border border-[#ECE8D6] rounded-[14px] p-4">
               <p className="text-xs text-[#A8A29A]">Vista previa del mensaje:</p>
               <p className="text-sm text-[#130D10] mt-1.5">
-                "Hola [Cliente], te recuerdo que el 30/04/2024 vence el pago de "Aprobación Básico" por $4.500. Podés transferir a: <strong>{user.cbu_alias || '[CBU/alias]'}</strong>. ¡Gracias!"
+                “Hola [Cliente], te recuerdo que el 30/04/2024 vence el pago de ‘Aprobación Básico’ por $4.500. Podés transferir a: <strong>{user.cbu_alias || '[CBU/alias]'}</strong>. ¡Gracias!”
               </p>
             </div>
           </div>

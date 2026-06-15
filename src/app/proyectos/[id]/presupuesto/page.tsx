@@ -240,7 +240,7 @@ export default function PresupuestoPage() {
           }
           saveBudget(id, stored)
           setLastBudget(stored)
-          toast(`Presupuesto "${name}" guardado`)
+          toast(`Presupuesto “${name}” guardado`)
         }}
       />
     </div>

@@ -73,7 +73,7 @@ export default function FinanzasProyectoPage() {
   const handleMarkPaid = () => {
     if (!confirmPaid) return
     setMilestones(prev => prev.map(m => m.id === confirmPaid.id ? { ...m, status: 'cobrado', paid_at: new Date().toISOString() } : m))
-    toast(`✓ "${confirmPaid.name}" marcado como cobrado`)
+    toast(`✓ “${confirmPaid.name}” marcado como cobrado`)
     setConfirmPaid(null)
   }
 
@@ -214,8 +214,8 @@ export default function FinanzasProyectoPage() {
         </div>
 
         {/* Rate + totals */}
-        <div className="flex flex-wrap gap-3 mb-5">
-          <div className="flex flex-col gap-1 rounded-[14px] bg-white border border-[#ECE8D6] px-4 py-3">
+        <div className="flex items-stretch gap-4 mb-5">
+          <div className="flex flex-col gap-1 pr-4 border-r border-[#ECE9DA]">
             <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Precio por hora</span>
             <div className="flex items-center gap-1.5">
               <span className="text-[13px] text-[#8A847B]">{currency}</span>
@@ -227,11 +227,11 @@ export default function FinanzasProyectoPage() {
               <span className="text-xs text-[#A8A29A]">/h</span>
             </div>
           </div>
-          <div className="flex flex-col gap-1 rounded-[14px] bg-white border border-[#ECE8D6] px-4 py-3">
+          <div className="flex flex-col gap-1 pr-4 border-r border-[#ECE9DA]">
             <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Horas totales</span>
             <span className="font-serif text-[20px] text-[#130D10]">{totalHours} h</span>
           </div>
-          <div className="flex flex-col gap-1 rounded-[14px] bg-[#FFEDE9] border border-[#FFD9D1] px-4 py-3 grow">
+          <div className="flex flex-col justify-center gap-1 rounded-[14px] bg-[#FFEDE9] px-4 py-2.5 ml-auto">
             <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[#C23A22]">Honorarios por horas</span>
             <span className="font-serif text-[20px] text-[#C23A22]">{formatCurrency(totalHonorarios, currency)}</span>
           </div>
