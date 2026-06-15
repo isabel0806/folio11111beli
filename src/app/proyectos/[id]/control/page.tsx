@@ -12,6 +12,9 @@ import {
 import { formatDate, formatCurrency } from '@/lib/utils'
 import { cn } from '@/lib/cn'
 import type { Task, TaskStatus } from '@/lib/types'
+import { PlantillasCronogramaModal } from '@/components/proyectos/PlantillasCronogramaModal'
+import { useToast } from '@/components/ui/Toast'
+import { IconLayoutGrid } from '@tabler/icons-react'
 
 const statusCols: { status: TaskStatus; label: string }[] = [
   { status: 'todo', label: 'Por hacer' },
@@ -31,6 +34,8 @@ export default function ControlPage() {
   const currency = project?.currency || 'ARS'
   const milestones = mockMilestones[id] || []
   const [showNew, setShowNew] = useState(false)
+  const [showPlantillas, setShowPlantillas] = useState(false)
+  const { toast } = useToast()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [form, setForm] = useState({ title: '', phase_id: '', status: 'todo' as TaskStatus, due_date: '', description: '' })
 
@@ -381,6 +386,9 @@ export default function ControlPage() {
                       </button>
                     ))}
                   </div>
+                  <button onClick={() => setShowPlantillas(true)} className="flex items-center gap-1.5 rounded-full py-2 px-3.5 bg-white border border-[#ECE8D6] hover:border-[#8A847B] text-[#6B655C] text-xs font-semibold transition-colors">
+                    <IconLayoutGrid size={13} stroke={1.7} /> Plantillas
+                  </button>
                   <button className="flex items-center gap-1.5 rounded-full py-2 px-3.5 bg-[#FF5738] hover:bg-[#C23A22] text-[#FFFEF0] text-xs font-semibold transition-colors">
                     <IconPlus size={13} stroke={2} /> Nueva etapa
                   </button>
@@ -582,6 +590,13 @@ export default function ControlPage() {
           </div>
         </Modal>
       )}
+
+      <PlantillasCronogramaModal
+        open={showPlantillas}
+        onClose={() => setShowPlantillas(false)}
+        projectName={project?.name || ''}
+        onApply={(name) => toast(`Plantilla "${name}" aplicada al cronograma`)}
+      />
     </div>
   )
 }
