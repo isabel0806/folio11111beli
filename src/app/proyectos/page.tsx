@@ -18,6 +18,20 @@ import { cn } from '@/lib/cn'
 import { useRole, ASSIGNED_PROJECT_IDS } from '@/lib/use-role'
 import { mockTeam } from '@/lib/mock-data'
 import { getAreas, ALL_AREAS, OPERATIVO_AREAS } from '@/lib/project-access'
+import { resolveState, STATE_COLORS } from '@/lib/project-states'
+
+type ColorMode = 'tipo' | 'estado' | 'salud'
+const TYPE_COVER: Record<string, string> = {
+  arquitectura: '#7FB0E8', diseño_grafico: '#FFABCF', event_planning: '#D5D25D', consultoria: '#00846F', otro: '#C4BFB4',
+}
+function coverFor(project: Project, mode: ColorMode, index: number): string {
+  if (mode === 'tipo') return TYPE_COVER[project.type] || coverColors[index % coverColors.length]
+  if (mode === 'estado') return STATE_COLORS[resolveState(project.status).color].dot
+  const ms = mockMilestones[project.id] || []
+  if (ms.some(m => m.status === 'vencido')) return '#FF5738'
+  if (ms.some(m => { const d = getDaysUntil(m.due_date); return m.status === 'pendiente' && d !== null && d <= 7 })) return '#F5D242'
+  return '#00846F'
+}
 
 // Si se impersona una persona: ¿ve finanzas de este proyecto? null = no aplica.
 function personFinanzas(projectId: string, person: string | null): boolean | null {
@@ -55,6 +69,7 @@ export default function ProyectosPage() {
   const [search, setSearch] = useState('')
   const [showNew, setShowNew] = useState(false)
   const [projects, setProjects] = useState(mockProjects)
+  const [colorMode, setColorMode] = useState<ColorMode>('tipo')
   const { can, person } = useRole()
   const [form, setForm] = useState({
     name: '', client_name: '', type: 'arquitectura', currency: 'ARS',
@@ -145,12 +160,24 @@ export default function ProyectosPage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Color mode */}
+          <div className="flex items-center gap-0.5 bg-white border border-[#ECE8D6] rounded-full p-1">
+            <span className="text-[11px] text-[#A8A29A] pl-2 pr-1">Color</span>
+            {([['tipo', 'Tipo'], ['estado', 'Estado'], ['salud', 'Salud']] as [ColorMode, string][]).map(([k, label]) => (
+              <button key={k} onClick={() => setColorMode(k)}
+                className={cn('px-2.5 py-1 text-[12px] rounded-full transition-colors',
+                  colorMode === k ? 'bg-[#130D10] text-white font-semibold' : 'text-[#8A847B] hover:text-[#130D10]'
+                )}>
+                {label}
+              </button>
+            ))}
+          </div>
           {/* Search */}
           <div className="relative">
             <IconSearch size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A8A29A]" />
             <input
-              className="pl-10 pr-4 py-2.5 text-[13px] border border-[#ECE8D6] rounded-full bg-[#FBFAF3] w-56 placeholder:text-[#A8A29A] focus:outline-none focus:ring-1 focus:ring-[#FF5738] focus:border-[#FF5738]"
-              placeholder="Buscar proyecto..."
+              className="pl-10 pr-4 py-2.5 text-[13px] border border-[#ECE8D6] rounded-full bg-[#FBFAF3] w-44 placeholder:text-[#A8A29A] focus:outline-none focus:ring-1 focus:ring-[#FF5738] focus:border-[#FF5738]"
+              placeholder="Buscar..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -170,7 +197,7 @@ export default function ProyectosPage() {
       {/* Grid view */}
       {view === 'grid' && (
         <div className="grid grid-cols-3 gap-5">
-          {filtered.map((p, i) => <ProjectCard key={p.id} project={p} index={i} />)}
+          {filtered.map((p, i) => <ProjectCard key={p.id} project={p} index={i} colorMode={colorMode} />)}
           {filtered.length === 0 && <EmptyState onNew={() => setShowNew(true)} />}
         </div>
       )}
@@ -178,7 +205,7 @@ export default function ProyectosPage() {
       {/* List view */}
       {view === 'list' && (
         <div className="bg-white border border-[#ECE8D6] rounded-2xl overflow-hidden">
-          {filtered.map((p, i) => <ProjectListRow key={p.id} project={p} index={i} />)}
+          {filtered.map((p, i) => <ProjectListRow key={p.id} project={p} index={i} colorMode={colorMode} />)}
           {filtered.length === 0 && <div className="py-16"><EmptyState onNew={() => setShowNew(true)} /></div>}
         </div>
       )}
@@ -254,11 +281,11 @@ function StatusBadge({ project }: { project: Project }) {
   return <span className="bg-white text-[#6B655C] text-[11px] font-semibold px-2.5 py-1 rounded-full">{getProjectStatusLabel(project.status)}</span>
 }
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+function ProjectCard({ project, index, colorMode }: { project: Project; index: number; colorMode: ColorMode }) {
   const { can, person } = useRole()
   const pf = personFinanzas(project.id, person)
   const showMoney = pf === null ? can('projectFinanzas') : pf
-  const cover = coverColors[index % coverColors.length]
+  const cover = coverFor(project, colorMode, index)
   const Icon = typeIcon[project.type] || IconFolder
   const ms = mockMilestones[project.id] || []
   const next = ms.find(m => m.status === 'pendiente')
@@ -313,11 +340,11 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   )
 }
 
-function ProjectListRow({ project, index }: { project: Project; index: number }) {
+function ProjectListRow({ project, index, colorMode }: { project: Project; index: number; colorMode: ColorMode }) {
   const { can, person } = useRole()
   const pf = personFinanzas(project.id, person)
   const showMoney = pf === null ? can('projectFinanzas') : pf
-  const cover = coverColors[index % coverColors.length]
+  const cover = coverFor(project, colorMode, index)
   const Icon = typeIcon[project.type] || IconFolder
   const ms = mockMilestones[project.id] || []
   const cobrado = ms.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
