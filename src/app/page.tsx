@@ -165,7 +165,7 @@ export default function InicioPage() {
                 Ver todos <IconArrowRight size={13} />
               </Link>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-3.5">
               {activeProjects.map((p, i) => {
                 const tint = tints[i % tints.length]
                 const Icon = typeIcon[p.type] || IconBuildingSkyscraper

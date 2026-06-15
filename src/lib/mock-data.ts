@@ -70,6 +70,36 @@ export const mockProjects: Project[] = [
     created_at: mo(-8),
     progress: 100,
   },
+  {
+    id: 'p5',
+    studio_id: 's1',
+    name: 'Loft Belgrano',
+    client_name: 'Estudio Vidal',
+    type: 'arquitectura',
+    status: 'en_curso',
+    currency: 'USD',
+    pricing_mode: 'proyecto',
+    total_amount: 9500,
+    cover_color: '#B7D5E8',
+    start_date: mo(-2),
+    created_at: mo(-2),
+    progress: 45,
+  },
+  {
+    id: 'p6',
+    studio_id: 's1',
+    name: 'Reforma Quincho',
+    client_name: 'Casa Méndez',
+    type: 'arquitectura',
+    status: 'en_curso',
+    currency: 'ARS',
+    pricing_mode: 'proyecto',
+    total_amount: 1500000,
+    cover_color: '#E8B7D5',
+    start_date: mo(-1),
+    created_at: mo(-1),
+    progress: 30,
+  },
 ]
 
 export const mockPhases: Record<string, ProjectPhase[]> = {
@@ -93,6 +123,8 @@ export const mockTasks: Record<string, Task[]> = {
     { id: 't3', project_id: 'p1', phase_id: 'ph2', title: 'Memoria descriptiva', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 25), is_client_visible: false, created_at: mo(-2) },
     { id: 't4', project_id: 'p1', phase_id: 'ph2', title: 'Planos de ejecución', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 10), is_client_visible: true, created_at: mo(-2) },
     { id: 't5', project_id: 'p1', phase_id: 'ph3', title: 'Cómputo y presupuesto', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(2, 5), is_client_visible: false, created_at: mo(-1) },
+    { id: 't20', project_id: 'p1', phase_id: 'ph2', title: 'Memoria descriptiva', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
+    { id: 't21', project_id: 'p1', phase_id: 'ph3', title: 'Revisar planilla de obra', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
   ],
   p2: [
     { id: 't6', project_id: 'p2', phase_id: 'ph5', title: 'Brief del cliente', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-5, 10), is_client_visible: false, created_at: mo(-5) },
@@ -100,6 +132,10 @@ export const mockTasks: Record<string, Task[]> = {
     { id: 't8', project_id: 'p2', phase_id: 'ph6', title: 'Propuestas de logo', status: 'completado', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(-3, 28), is_client_visible: true, created_at: mo(-4) },
     { id: 't9', project_id: 'p2', phase_id: 'ph6', title: 'Manual de marca', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(0, 20), is_client_visible: true, created_at: mo(-3) },
     { id: 't10', project_id: 'p2', phase_id: 'ph7', title: 'Presentación final al cliente', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: mo(1, 5), is_client_visible: true, created_at: mo(-1) },
+    { id: 't22', project_id: 'p2', phase_id: 'ph6', title: 'Enviar manual de marca v2', status: 'en_progreso', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: true, created_at: mo(0, 1) },
+  ],
+  p5: [
+    { id: 't23', project_id: 'p5', title: 'Coordinar visita de obra', status: 'todo', assigned_to: 'u1', assigned_name: 'Isabel García', due_date: today(), is_client_visible: false, created_at: mo(0, 1) },
   ],
 }
 
@@ -108,6 +144,11 @@ function mo(offset: number, day = 15) {
   const d = new Date()
   d.setMonth(d.getMonth() + offset, day)
   return d.toISOString().split('T')[0]
+}
+
+// Today, so "Tareas para hoy" always has data
+function today() {
+  return new Date().toISOString().split('T')[0]
 }
 
 export const mockMilestones: Record<string, PaymentMilestone[]> = {
@@ -131,6 +172,15 @@ export const mockMilestones: Record<string, PaymentMilestone[]> = {
   p4: [
     { id: 'm12', project_id: 'p4', name: 'Pago consultoría', due_date: mo(-6, 20), amount: 150000, status: 'cobrado', paid_at: mo(-6, 20), arca_flagged: false },
     { id: 'm13', project_id: 'p4', name: 'Cierre proyecto', due_date: mo(-5, 15), amount: 150000, status: 'cobrado', paid_at: mo(-5, 17), arca_flagged: false },
+  ],
+  p5: [
+    { id: 'm20', project_id: 'p5', name: 'Anticipo', due_date: mo(-2, 10), amount: 3000, status: 'cobrado', paid_at: mo(-2, 10), arca_flagged: false },
+    { id: 'm21', project_id: 'p5', name: 'Entrega Anteproyecto', due_date: mo(0, 28), amount: 3500, status: 'pendiente', arca_flagged: false },
+    { id: 'm22', project_id: 'p5', name: 'Saldo final', due_date: mo(2, 10), amount: 3000, status: 'futuro', arca_flagged: false },
+  ],
+  p6: [
+    { id: 'm23', project_id: 'p6', name: 'Anticipo 40%', due_date: mo(-1, 5), amount: 600000, status: 'cobrado', paid_at: mo(-1, 5), arca_flagged: false },
+    { id: 'm24', project_id: 'p6', name: 'Avance de obra', due_date: mo(1, 8), amount: 450000, status: 'pendiente', arca_flagged: false },
   ],
 }
 
