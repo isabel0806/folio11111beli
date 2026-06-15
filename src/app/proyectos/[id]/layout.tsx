@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn'
 import {
   IconFolder, IconLayoutKanban, IconCurrencyDollar,
   IconSettings, IconArrowLeft, IconAlertCircle, IconCalendarTime,
-  IconPlus, IconBolt, IconReceipt2, IconNotebook, IconUsersGroup,
+  IconPlus, IconBolt, IconReceipt2, IconNotebook, IconUsersGroup, IconFiles,
 } from '@tabler/icons-react'
 import { CompartirCliente } from '@/components/proyectos/CompartirCliente'
 
@@ -38,6 +38,12 @@ const tabs = [
     href: 'bitacora',
     label: 'Bitácora',
     icon: IconNotebook,
+    getBadge: () => null as { count: number; color: 'red' | 'yellow' | 'blue' } | null,
+  },
+  {
+    href: 'documentacion',
+    label: 'Documentación',
+    icon: IconFiles,
     getBadge: () => null as { count: number; color: 'red' | 'yellow' | 'blue' } | null,
   },
   {
