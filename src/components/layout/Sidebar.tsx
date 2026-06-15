@@ -33,13 +33,14 @@ const nav = [
 ]
 
 function Isotipo() {
-  // Folio brand mark (brandbook p.12): stylized "F" — tall blue stem,
-  // olive semicircle top arm, smaller coral semicircle middle arm.
+  // Folio brand mark (brandbook p.12): blue rounded vertical bar + olive
+  // half-disc (top) and smaller coral half-disc (middle), flat sides facing
+  // the bar with a small gap, evoking the "f" of folio.
   return (
-    <svg width="22" height="29" viewBox="0 0 26 34" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <rect x="0" y="0" width="10" height="34" rx="5" fill="#7FB0E8" />
-      <path d="M10 0 A9 9 0 0 1 10 18 Z" fill="#D5D25D" />
-      <path d="M10 12 A6.5 6.5 0 0 1 10 25 Z" fill="#FF5738" />
+    <svg width="25" height="30" viewBox="0 0 66 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+      <rect x="4" y="4" width="27" height="72" rx="3.5" fill="#7FB0E8" />
+      <path d="M36 4 A28 17.5 0 0 1 36 39 Z" fill="#D5D25D" />
+      <path d="M36 40.5 A15 11 0 0 1 36 62.5 Z" fill="#FF5738" />
     </svg>
   )
 }
