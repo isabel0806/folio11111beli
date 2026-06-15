@@ -9,7 +9,7 @@ import {
 } from '@tabler/icons-react'
 import { currentUser } from '@/lib/mock-data'
 import { cn } from '@/lib/cn'
-import { useRole, ROLES, type Capability } from '@/lib/use-role'
+import { useRole, ROLES, STUDIO_PEOPLE, type Capability } from '@/lib/use-role'
 
 const nav: { group: string; items: { href: string; label: string; icon: typeof IconHome; cap?: Capability }[] }[] = [
   {
@@ -50,10 +50,12 @@ function Isotipo() {
 
 export function Sidebar() {
   const pathname = usePathname()
-  const { role, setRole, can } = useRole()
+  const { role, person, setRole, setPerson, can } = useRole()
   const [roleMenu, setRoleMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const activeRole = ROLES.find(r => r.id === role) || ROLES[0]
+  const activeLabel = person || activeRole.label
+  const activeSub = person ? `Ver como · ${activeRole.label.split(' · ')[0]}` : 'Rol del estudio'
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) setRoleMenu(false) }
@@ -140,7 +142,22 @@ export function Sidebar() {
                     <span className="block text-[13px] font-medium text-[#130D10]">{r.label}</span>
                     <span className="block text-[11px] text-[#A8A29A] leading-snug">{r.desc}</span>
                   </span>
-                  {r.id === role && <IconCheck size={14} className="text-[#00846F] shrink-0 mt-0.5" stroke={2.4} />}
+                  {!person && r.id === role && <IconCheck size={14} className="text-[#00846F] shrink-0 mt-0.5" stroke={2.4} />}
+                </button>
+              ))}
+              <div className="my-1 mx-2.5 h-px bg-[#F2EFE2]" />
+              <p className="px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#A8A29A]">Una persona del equipo</p>
+              {STUDIO_PEOPLE.map(p => (
+                <button
+                  key={p.name}
+                  onClick={() => { setPerson(p); setRoleMenu(false) }}
+                  className="flex items-center gap-2.5 w-full rounded-[10px] px-2.5 py-2 text-left hover:bg-[#FBFAF3] transition-colors"
+                >
+                  <span className="grow min-w-0">
+                    <span className="block text-[13px] font-medium text-[#130D10]">{p.name}</span>
+                    <span className="block text-[11px] text-[#A8A29A] leading-snug">Aplica sus permisos por proyecto</span>
+                  </span>
+                  {person === p.name && <IconCheck size={14} className="text-[#00846F] shrink-0" stroke={2.4} />}
                 </button>
               ))}
             </div>
@@ -155,8 +172,8 @@ export function Sidebar() {
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-semibold text-[#130D10] truncate leading-tight">{currentUser.name}</p>
-              <p className="text-[11px] text-[#8A847B] truncate">{activeRole.label}</p>
+              <p className="text-[13px] font-semibold text-[#130D10] truncate leading-tight">{activeLabel}</p>
+              <p className="text-[11px] text-[#8A847B] truncate">{activeSub}</p>
             </div>
             <IconChevronRight size={14} className={cn('text-[#C4BFB4] shrink-0 transition-transform', roleMenu && '-rotate-90')} />
           </button>

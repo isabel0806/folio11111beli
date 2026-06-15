@@ -16,6 +16,17 @@ import type { Project, ProjectStatus } from '@/lib/types'
 import Link from 'next/link'
 import { cn } from '@/lib/cn'
 import { useRole, ASSIGNED_PROJECT_IDS } from '@/lib/use-role'
+import { mockTeam } from '@/lib/mock-data'
+import { getAreas, ALL_AREAS, OPERATIVO_AREAS } from '@/lib/project-access'
+
+// Si se impersona una persona: ¿ve finanzas de este proyecto? null = no aplica.
+function personFinanzas(projectId: string, person: string | null): boolean | null {
+  if (!person) return null
+  const m = (mockTeam[projectId] || []).find(x => x.name === person)
+  if (!m) return false
+  const def = m.tag_label.toLowerCase().includes('responsable') ? ALL_AREAS : OPERATIVO_AREAS
+  return getAreas(projectId, m.id, def).includes('finanzas')
+}
 
 type ViewMode = 'grid' | 'list'
 type FilterStatus = 'todos' | ProjectStatus
@@ -44,7 +55,7 @@ export default function ProyectosPage() {
   const [search, setSearch] = useState('')
   const [showNew, setShowNew] = useState(false)
   const [projects, setProjects] = useState(mockProjects)
-  const { can } = useRole()
+  const { can, person } = useRole()
   const [form, setForm] = useState({
     name: '', client_name: '', type: 'arquitectura', currency: 'ARS',
     pricing_mode: 'proyecto', total_amount: '', hourly_rate: '', start_date: '',
@@ -58,7 +69,9 @@ export default function ProyectosPage() {
     { value: 'borrador', label: 'Borradores' },
   ]
 
-  const visibleProjects = can('allProjects') ? projects : projects.filter(p => ASSIGNED_PROJECT_IDS.includes(p.id))
+  const visibleProjects = person
+    ? projects.filter(p => (mockTeam[p.id] || []).some(m => m.name === person))
+    : can('allProjects') ? projects : projects.filter(p => ASSIGNED_PROJECT_IDS.includes(p.id))
 
   const filtered = visibleProjects
     .filter(p => filter === 'todos' || p.status === filter)
@@ -242,8 +255,9 @@ function StatusBadge({ project }: { project: Project }) {
 }
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const { can } = useRole()
-  const showMoney = can('projectFinanzas')
+  const { can, person } = useRole()
+  const pf = personFinanzas(project.id, person)
+  const showMoney = pf === null ? can('projectFinanzas') : pf
   const cover = coverColors[index % coverColors.length]
   const Icon = typeIcon[project.type] || IconFolder
   const ms = mockMilestones[project.id] || []
@@ -300,8 +314,9 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 }
 
 function ProjectListRow({ project, index }: { project: Project; index: number }) {
-  const { can } = useRole()
-  const showMoney = can('projectFinanzas')
+  const { can, person } = useRole()
+  const pf = personFinanzas(project.id, person)
+  const showMoney = pf === null ? can('projectFinanzas') : pf
   const cover = coverColors[index % coverColors.length]
   const Icon = typeIcon[project.type] || IconFolder
   const ms = mockMilestones[project.id] || []

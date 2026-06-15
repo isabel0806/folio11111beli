@@ -5,6 +5,9 @@ import { mockProjects, mockMilestones, mockTasks } from '@/lib/mock-data'
 import { getProjectTypeLabel, formatCurrency, formatDate } from '@/lib/utils'
 import { ProjectStatusBadge } from '@/components/proyectos/ProjectStatusBadge'
 import { useRole, type Capability } from '@/lib/use-role'
+import { mockTeam } from '@/lib/mock-data'
+import { getAreas, ALL_AREAS, OPERATIVO_AREAS } from '@/lib/project-access'
+import { AccessDenied } from '@/components/layout/AccessDenied'
 import { cn } from '@/lib/cn'
 import {
   IconFolder, IconLayoutKanban, IconCurrencyDollar,
@@ -94,9 +97,23 @@ function Sparkle({ className }: { className?: string }) {
 export default function ProjectLayout({ children }: { children: React.ReactNode }) {
   const { id } = useParams() as { id: string }
   const pathname = usePathname()
-  const { can } = useRole()
+  const { can, person } = useRole()
   const project = mockProjects.find(p => p.id === id)
-  const visibleTabs = tabs.filter(t => !('cap' in t) || !t.cap || can(t.cap))
+
+  // Impersonating a specific person → gate tabs by their per-project permissions.
+  const member = person ? (mockTeam[id] || []).find(m => m.name === person) : undefined
+  const personAreas = member
+    ? getAreas(id, member.id, member.tag_label.toLowerCase().includes('responsable') ? ALL_AREAS : OPERATIVO_AREAS)
+    : []
+  const showMoney = person ? personAreas.includes('finanzas') : can('projectFinanzas')
+
+  const visibleTabs = tabs.filter(t => {
+    if (person) {
+      if (t.href === 'configuracion') return false // solo administradores
+      return personAreas.includes(t.href)
+    }
+    return !('cap' in t) || !t.cap || can(t.cap)
+  })
 
   if (!project) {
     return (
@@ -105,6 +122,9 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
       </div>
     )
   }
+
+  // Impersonando a alguien que no es parte del proyecto → sin acceso.
+  if (person && !member) return <AccessDenied area={`"${project.name}" — no estás asignado a este proyecto`} />
 
   const activeTab = tabs.find(t => pathname.includes(t.href))?.href || 'archivos'
   const milestones = mockMilestones[id] || []
@@ -140,7 +160,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
             </div>
 
             <div className="flex items-center gap-2.5">
-              {nextMilestone && can('projectFinanzas') && (
+              {nextMilestone && showMoney && (
                 <Link
                   href={`/proyectos/${id}/finanzas`}
                   className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#130D10] text-white text-[13px] font-semibold hover:bg-[#2A2025] transition-colors"
@@ -185,7 +205,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
                 )}
               </p>
 
-              {total > 0 && can('projectFinanzas') && (
+              {total > 0 && showMoney && (
                 <div>
                   <div className="flex items-center gap-3 mb-1.5">
                     <div className="flex-1 h-2 bg-[#ECE9DA] rounded-full overflow-hidden flex">

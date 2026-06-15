@@ -31,7 +31,18 @@ export const can = (role: Role, cap: Capability) => MATRIX[role][cap]
 // Projects a non-admin user "has assigned" (mock). Admins see everything.
 export const ASSIGNED_PROJECT_IDS = ['p1', 'p3', 'p4']
 
+// Specific people you can impersonate ("Ver como Lucía"). When impersonating,
+// the role drives capabilities and per-project visibility uses their granular
+// permissions (see project-access).
+export interface Person { name: string; role: Role }
+export const STUDIO_PEOPLE: Person[] = [
+  { name: 'Lucía Fernández', role: 'pm' },
+  { name: 'Martín Sosa', role: 'junior' },
+  { name: 'Diego Pérez', role: 'junior' },
+]
+
 const KEY = 'folio:role'
+const KEY_PERSON = 'folio:person'
 const EVT = 'folio-role-change'
 
 export function getRole(): Role {
@@ -44,20 +55,31 @@ export function getRole(): Role {
   }
 }
 
+export function getPerson(): string | null {
+  if (typeof window === 'undefined') return null
+  try { return window.localStorage.getItem(KEY_PERSON) || null } catch { return null }
+}
+
 export function useRole() {
   const [role, setRoleState] = useState<Role>('admin')
+  const [person, setPersonState] = useState<string | null>(null)
 
   useEffect(() => {
-    setRoleState(getRole())
-    const handler = () => setRoleState(getRole())
+    setRoleState(getRole()); setPersonState(getPerson())
+    const handler = () => { setRoleState(getRole()); setPersonState(getPerson()) }
     window.addEventListener(EVT, handler)
     return () => window.removeEventListener(EVT, handler)
   }, [])
 
   const setRole = useCallback((r: Role) => {
-    try { window.localStorage.setItem(KEY, r) } catch { /* ignore */ }
+    try { window.localStorage.setItem(KEY, r); window.localStorage.removeItem(KEY_PERSON) } catch { /* ignore */ }
     window.dispatchEvent(new Event(EVT))
   }, [])
 
-  return { role, setRole, can: (cap: Capability) => can(role, cap) }
+  const setPerson = useCallback((p: Person) => {
+    try { window.localStorage.setItem(KEY, p.role); window.localStorage.setItem(KEY_PERSON, p.name) } catch { /* ignore */ }
+    window.dispatchEvent(new Event(EVT))
+  }, [])
+
+  return { role, person, setRole, setPerson, can: (cap: Capability) => can(role, cap) }
 }
