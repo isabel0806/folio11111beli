@@ -1,9 +1,14 @@
 'use client'
+import { useState } from 'react'
 import { useParams } from 'next/navigation'
-import { mockProjects, mockMilestones, mockCertifications } from '@/lib/mock-data'
+import { mockProjects, mockMilestones, mockCertifications, mockFiles } from '@/lib/mock-data'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { IconPlus } from '@tabler/icons-react'
-import type { PaymentMilestone } from '@/lib/types'
+import { IconPlus, IconFile, IconDownload, IconExternalLink } from '@tabler/icons-react'
+import type { PaymentMilestone, ProjectFile } from '@/lib/types'
+import { Button } from '@/components/ui/Button'
+import { PresupuestoModal } from '@/components/proyectos/PresupuestoModal'
+import { useToast } from '@/components/ui/Toast'
+import Link from 'next/link'
 
 const stageDots = ['#FF5738', '#7FB0E8', '#D5D25D', '#00846F', '#F5D242']
 
@@ -22,10 +27,16 @@ const certStatus: Record<string, { label: string; cardBg: string; text: string; 
 
 export default function PresupuestoPage() {
   const { id } = useParams() as { id: string }
+  const { toast } = useToast()
   const project = mockProjects.find(p => p.id === id)
   const currency = project?.currency || 'ARS'
   const milestones = mockMilestones[id] || []
   const certifications = mockCertifications[id] || []
+
+  const [showPresupuesto, setShowPresupuesto] = useState(false)
+  const [budgets, setBudgets] = useState<ProjectFile[]>(
+    (mockFiles[id] || []).filter(f => f.type === 'presupuesto')
+  )
 
   const total = project?.total_amount || milestones.reduce((a, m) => a + m.amount, 0)
   const cobrado = milestones.filter(m => m.status === 'cobrado').reduce((a, m) => a + m.amount, 0)
@@ -36,6 +47,49 @@ export default function PresupuestoPage() {
 
   return (
     <div className="flex flex-col gap-5">
+      {/* Presupuestos */}
+      <div className="flex flex-col rounded-[18px] p-6 bg-[#FBFAF3] border border-[#ECE8D6]">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col gap-0.5">
+            <h2 className="font-serif text-[19px] text-[#130D10]">Presupuestos</h2>
+            <p className="text-[12.5px] text-[#8A847B]">Con IVA y honorarios desglosados · compartibles con el cliente</p>
+          </div>
+          <Button size="sm" variant="primary" onClick={() => setShowPresupuesto(true)}>
+            <IconPlus size={13} /> Nuevo presupuesto
+          </Button>
+        </div>
+        {budgets.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-8 text-center border-t border-[#F2EFE2]">
+            <p className="text-sm text-[#8A847B]">Todavía no armaste ningún presupuesto.</p>
+            <button onClick={() => setShowPresupuesto(true)} className="text-[13px] font-semibold text-[#FF5738] hover:text-[#C23A22] transition-colors">
+              Armar el primero
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {budgets.map(f => (
+              <div key={f.id} className="flex items-center gap-3 bg-white border border-[#ECE8D6] rounded-[14px] px-4 py-3">
+                <div className="p-1.5 rounded-[10px] bg-[#FFEDE9]">
+                  <IconFile size={16} className="text-[#C23A22]" stroke={1.7} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-medium text-[#130D10] truncate">{f.name}</p>
+                  <p className="text-[11px] text-[#A8A29A]">{formatDate(f.uploaded_at)}{f.size && ` · ${f.size}`}</p>
+                </div>
+                <Link
+                  href={`/presupuesto/${id}`}
+                  target="_blank"
+                  className="flex items-center gap-1.5 text-[12px] font-semibold text-[#3F6FA3] hover:text-[#173B5C] transition-colors"
+                >
+                  <IconExternalLink size={13} stroke={1.8} /> Vista cliente
+                </Link>
+                <Button size="sm" variant="ghost"><IconDownload size={13} /></Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* KPIs */}
       <div className="grid grid-cols-4 gap-4">
         <div className="flex flex-col gap-2 rounded-2xl py-5 px-5.5 bg-[#FBFAF3] border border-[#ECE8D6]">
@@ -137,6 +191,22 @@ export default function PresupuestoPage() {
           )}
         </div>
       </div>
+
+      <PresupuestoModal
+        open={showPresupuesto}
+        onClose={() => setShowPresupuesto(false)}
+        projectName={project?.name || ''}
+        clientName={project?.client_name || ''}
+        currency={currency}
+        onSave={({ name }) => {
+          const newFile: ProjectFile = {
+            id: `f${Date.now()}`, project_id: id, name: `${name}.pdf`,
+            type: 'presupuesto', uploaded_at: new Date().toISOString(),
+          }
+          setBudgets(prev => [...prev, newFile])
+          toast(`Presupuesto "${name}" guardado`)
+        }}
+      />
     </div>
   )
 }
