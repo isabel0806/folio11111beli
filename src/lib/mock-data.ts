@@ -209,6 +209,50 @@ export const mockCertifications: Record<string, Certification[]> = {
   ],
 }
 
+export type BitacoraType = 'visita' | 'parte' | 'observacion'
+
+export interface BitacoraEntry {
+  id: string
+  project_id: string
+  day: string
+  month: string
+  author: string
+  initials: string
+  avatar_color: string
+  avatar_text: string
+  role: string
+  time: string
+  type: BitacoraType
+  text: string
+  tags: string[]
+  photos?: number
+  attachment?: { name: string; size: string }
+  requires_response?: boolean
+}
+
+export const mockBitacora: Record<string, BitacoraEntry[]> = {
+  p1: [
+    {
+      id: 'b1', project_id: 'p1', day: '12', month: 'JUN', author: 'Isabel García', initials: 'IG',
+      avatar_color: '#00846F', avatar_text: '#FFFEF0', role: 'Arquitecta', time: '09:40', type: 'visita',
+      text: 'Se hormigonó la losa del primer piso. El encofrado quedó nivelado y el curado comienza mañana. La cuadrilla retomó la mampostería del lateral este. Pendiente: revisar la cota del paño de escalera con el ingeniero estructural.',
+      tags: ['Estructura', 'Avance de obra'], photos: 7,
+    },
+    {
+      id: 'b2', project_id: 'p1', day: '05', month: 'JUN', author: 'Martín Sosa', initials: 'MS',
+      avatar_color: '#7FB0E8', avatar_text: '#FFFEF0', role: 'Maestro mayor de obra', time: '17:20', type: 'parte',
+      text: 'Ingresó el acopio de hierro y cemento para la etapa de estructura. Trabajaron 6 operarios en jornada completa. Se solicita confirmar la entrega de áridos para el lunes. Sin novedades de seguridad.',
+      tags: ['Logística', 'Materiales'], attachment: { name: 'Parte_obra_07.pdf', size: '240 KB' },
+    },
+    {
+      id: 'b3', project_id: 'p1', day: '28', month: 'MAY', author: 'Familia Rodríguez', initials: 'FR',
+      avatar_color: '#FFABCF', avatar_text: '#130D10', role: 'Cliente', time: '11:05', type: 'observacion',
+      text: 'Nos gustaría revisar la posición del ventanal del living antes de avanzar con la mampostería. ¿Podemos coordinar una visita la próxima semana para verlo en obra?',
+      tags: ['Pedido del cliente'], requires_response: true,
+    },
+  ],
+}
+
 export const mockCosts: Record<string, CostItem[]> = {
   p1: [
     { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 15000, created_at: mo(-4, 10) },

@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn'
 import {
   IconFolder, IconLayoutKanban, IconCurrencyDollar,
   IconSettings, IconArrowLeft, IconAlertCircle, IconCalendarTime,
-  IconPlus, IconBolt, IconReceipt2,
+  IconPlus, IconBolt, IconReceipt2, IconNotebook,
 } from '@tabler/icons-react'
 
 const tabs = [
@@ -31,6 +31,12 @@ const tabs = [
     href: 'presupuesto',
     label: 'Presupuesto',
     icon: IconReceipt2,
+    getBadge: () => null as { count: number; color: 'red' | 'yellow' | 'blue' } | null,
+  },
+  {
+    href: 'bitacora',
+    label: 'Bitácora',
+    icon: IconNotebook,
     getBadge: () => null as { count: number; color: 'red' | 'yellow' | 'blue' } | null,
   },
   {
