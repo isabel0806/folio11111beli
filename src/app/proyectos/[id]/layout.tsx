@@ -9,6 +9,7 @@ import {
   IconSettings, IconArrowLeft, IconAlertCircle, IconCalendarTime,
   IconPlus, IconBolt, IconReceipt2, IconNotebook, IconUsersGroup,
 } from '@tabler/icons-react'
+import { CompartirCliente } from '@/components/proyectos/CompartirCliente'
 
 const tabs = [
   {
@@ -141,6 +142,7 @@ export default function ProjectLayout({ children }: { children: React.ReactNode 
               >
                 <IconPlus size={14} /> Nueva tarea
               </Link>
+              <CompartirCliente id={id} name={project.name} />
             </div>
           </div>
 

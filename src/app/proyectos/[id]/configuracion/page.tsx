@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Avatar'
 import { IconPlus, IconMail, IconToggleLeft, IconToggleRight, IconTrash } from '@tabler/icons-react'
 import type { ProjectMember, MemberRole } from '@/lib/types'
+import { CompartirCliente } from '@/components/proyectos/CompartirCliente'
 
 export default function ConfiguracionPage() {
   const { id } = useParams() as { id: string }
@@ -123,6 +124,7 @@ export default function ConfiguracionPage() {
               <Button variant="primary" size="sm">
                 <IconMail size={13} /> Enviar invitación
               </Button>
+              <CompartirCliente id={id} name={project?.name || ''} />
               <span className="text-xs text-[#A8A29A]">Último acceso: nunca</span>
             </div>
           </div>
