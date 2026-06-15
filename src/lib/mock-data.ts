@@ -188,6 +188,27 @@ export const mockMilestones: Record<string, PaymentMilestone[]> = {
   ],
 }
 
+export interface Certification {
+  id: string
+  project_id: string
+  label: string
+  advance: string
+  amount: number
+  status: 'aprobada' | 'enviada' | 'pendiente'
+}
+
+export const mockCertifications: Record<string, Certification[]> = {
+  p1: [
+    { id: 'cert1', project_id: 'p1', label: 'Certificación 01 · jun', advance: 'Avance 35%', amount: 2100, status: 'aprobada' },
+    { id: 'cert2', project_id: 'p1', label: 'Certificación 02 · jul', advance: 'Avance 58%', amount: 2100, status: 'enviada' },
+    { id: 'cert3', project_id: 'p1', label: 'Certificación 03 · ago', advance: 'Estimada', amount: 2100, status: 'pendiente' },
+  ],
+  p6: [
+    { id: 'cert4', project_id: 'p6', label: 'Certificación 01 · may', advance: 'Avance 30%', amount: 450000, status: 'aprobada' },
+    { id: 'cert5', project_id: 'p6', label: 'Certificación 02 · jun', advance: 'Estimada', amount: 450000, status: 'pendiente' },
+  ],
+}
+
 export const mockCosts: Record<string, CostItem[]> = {
   p1: [
     { id: 'c1', project_id: 'p1', description: 'Impresión planos A1', provider_name: 'Imprenta Palermo', category: 'proveedor', amount: 15000, created_at: mo(-4, 10) },
